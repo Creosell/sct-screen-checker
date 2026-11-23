@@ -5,10 +5,14 @@ using WPF_LCD_Test.Models;
 namespace WPF_LCD_Test.Converters
 {
     /// <summary>
-    /// Custom JSON converter for Measurement objects with precision-based rounding.
+    /// Custom JSON converter for Measurement objects: the values are written as the analyzer gave them, only cut at
+    /// <see cref="MaxDecimals"/> fractional digits, so nothing the analyzer measured is lost before the report is built.
     /// </summary>
     public class MeasurementJsonConverter : JsonConverter<Measurement>
     {
+        /// <summary>The most fractional digits of a written number.</summary>
+        public const int MaxDecimals = 10;
+
         /// <summary>
         /// Reads and converts JSON to Measurement. Not implemented as deserialization is not required.
         /// </summary>
@@ -23,8 +27,7 @@ namespace WPF_LCD_Test.Converters
         }
 
         /// <summary>
-        /// Writes Measurement value as JSON with appropriate precision for each field.
-        /// Black color measurements use 8 decimal places for Lv, others use 1 decimal place.
+        /// Writes Measurement value as JSON; every number keeps its digits up to <see cref="MaxDecimals"/> fractional ones.
         /// </summary>
         /// <param name="writer">The JSON writer.</param>
         /// <param name="value">The Measurement value to write.</param>
@@ -33,16 +36,14 @@ namespace WPF_LCD_Test.Converters
         {
             writer.WriteStartObject();
             writer.WriteString("Location", value.Location);
-            WriteRounded(writer, "x", value.x, 3);
-            WriteRounded(writer, "y", value.y, 3);
-
-            int LvPrecision = value.Location.Equals(MeasurementLocation.BlackColor.ToString()) ? 8 : 1;
-            WriteRounded(writer, "Lv", value.Lv, LvPrecision);
-            WriteRounded(writer, "T", value.T, 0);
+            WriteNumber(writer, "x", value.x);
+            WriteNumber(writer, "y", value.y);
+            WriteNumber(writer, "Lv", value.Lv);
+            WriteNumber(writer, "T", value.T);
 
             if (value.Attempts.Count > 1)
             {
-                WriteAttempts(writer, value, LvPrecision);
+                WriteAttempts(writer, value);
             }
 
             writer.WriteEndObject();
@@ -53,18 +54,17 @@ namespace WPF_LCD_Test.Converters
         /// </summary>
         /// <param name="writer">The JSON writer.</param>
         /// <param name="value">The measurement with the attempts.</param>
-        /// <param name="lvPrecision">Number of fractional digits of the luminance.</param>
-        private static void WriteAttempts(Utf8JsonWriter writer, Measurement value, int lvPrecision)
+        private static void WriteAttempts(Utf8JsonWriter writer, Measurement value)
         {
             writer.WriteStartArray("Attempts");
             for (int i = 0; i < value.Attempts.Count; i++)
             {
                 var attempt = value.Attempts[i];
                 writer.WriteStartObject();
-                WriteRounded(writer, "x", attempt.x, 3);
-                WriteRounded(writer, "y", attempt.y, 3);
-                WriteRounded(writer, "Lv", attempt.Lv, lvPrecision);
-                WriteRounded(writer, "T", attempt.T, 0);
+                WriteNumber(writer, "x", attempt.x);
+                WriteNumber(writer, "y", attempt.y);
+                WriteNumber(writer, "Lv", attempt.Lv);
+                WriteNumber(writer, "T", attempt.T);
                 writer.WriteBoolean("Best", i == value.BestAttemptIndex);
                 writer.WriteEndObject();
             }
@@ -72,16 +72,15 @@ namespace WPF_LCD_Test.Converters
         }
 
         /// <summary>
-        /// Writes a rounded number property; non-finite values (e.g. undefined color temperature reported as Infinity) are written as null, as JSON cannot represent them.
+        /// Writes a number property cut at <see cref="MaxDecimals"/> fractional digits; non-finite values (e.g. undefined color temperature reported as Infinity) are written as null, as JSON cannot represent them.
         /// </summary>
         /// <param name="writer">The JSON writer.</param>
         /// <param name="name">Property name.</param>
         /// <param name="value">Value to write.</param>
-        /// <param name="digits">Number of fractional digits to round to.</param>
-        private static void WriteRounded(Utf8JsonWriter writer, string name, double value, int digits)
+        private static void WriteNumber(Utf8JsonWriter writer, string name, double value)
         {
             if (double.IsFinite(value))
-                writer.WriteNumber(name, Math.Round(value, digits, MidpointRounding.AwayFromZero));
+                writer.WriteNumber(name, Math.Round(value, MaxDecimals, MidpointRounding.AwayFromZero));
             else
                 writer.WriteNull(name);
         }
