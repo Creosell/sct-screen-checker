@@ -130,6 +130,23 @@ namespace WPF_LCD_Test.UnitTests.ServicesTests
             }
 
         [Test]
+        public async Task UniformityScenario_MakesTheTopRightPointBrighterWithEveryAttempt()
+            {
+            var service = await CalibratedServiceAsync(SimulationScenario.Uniformity);
+            var values = new List<double>();
+
+            for (int attempt = 0; attempt < 3; attempt++)
+                {
+                StartMeasuring(MeasurementLocation.TopRight);
+                values.Add((await service.MeasureAsync(1)).Lv);
+                }
+
+            Assert.That(values, Is.Ordered.Ascending);
+            Assert.That(values[0] / 341.0, Is.LessThan(0.65));  // below the minimum uniformity of the CH32 TVs against the center
+            Assert.That(values[2] / 341.0, Is.GreaterThan(0.75));
+            }
+
+        [Test]
         public async Task Disconnect_ResetsTheState()
             {
             var service = await CalibratedServiceAsync();

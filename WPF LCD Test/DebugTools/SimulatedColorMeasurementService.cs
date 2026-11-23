@@ -209,6 +209,7 @@ namespace WPF_LCD_Test.DebugTools
                     (SimulationScenario.Retry, nameof(MeasurementLocation.WhiteColor)) => (new[] { 0.86, 0.93, 1.0 }[step], 0),
                     (SimulationScenario.Retry, nameof(MeasurementLocation.BlackColor)) => (new[] { 1.45, 1.12, 1.0 }[step], 0),
                     (SimulationScenario.Retry, nameof(MeasurementLocation.RedColor)) => (1, new[] { 0.025, 0.012, 0.0 }[step]),
+                    (SimulationScenario.Uniformity, nameof(MeasurementLocation.TopRight)) => (new[] { 0.82, 0.857, 1.0 }[step], 0),
                     (SimulationScenario.Fail, nameof(MeasurementLocation.WhiteColor)) => (0.84, 0),
                     (SimulationScenario.Fail, nameof(MeasurementLocation.BlackColor)) => (2.2, 0),
                     (SimulationScenario.Fail, nameof(MeasurementLocation.RedColor)) => (1, 0.03),

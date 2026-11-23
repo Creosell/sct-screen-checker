@@ -17,13 +17,16 @@ namespace WPF_LCD_Test.DebugTools
         /// <summary>White, black and red stay outside the specification at every attempt (the contrast fails with them).</summary>
         Fail,
 
+        /// <summary>The top right point is too dim for the brightness uniformity at the first attempt and gets brighter with every repeat.</summary>
+        Uniformity,
+
         /// <summary>The first attempt of every point is rejected by the validation (the probe is not on the screen); the repeat is good.</summary>
         Reject
         }
 
     /// <summary>
     /// Options of the simulated color analyzer, read from the command line of a Debug build:
-    /// <c>--simulate[=ca410|ca310] [--scenario=ok|retry|fail|reject] [--probe-sn=NUMBER]</c>.
+    /// <c>--simulate[=ca410|ca310] [--scenario=ok|retry|fail|reject|uniformity] [--probe-sn=NUMBER]</c>.
     /// </summary>
     /// <param name="Model">Analyzer family the simulator reports.</param>
     /// <param name="Scenario">Values the simulator measures.</param>
