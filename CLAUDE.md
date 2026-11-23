@@ -70,6 +70,8 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 
 **Debug trace:** in the Debug configuration only (`#if DEBUG`, nothing of it is in a Release build) `DebugTools/` writes one timestamped line per event to `logs/debug_yyyyMMdd_HHmmss.log` next to the exe (the last 10 runs are kept) and to the debugger output: user input and interface events (`UiEventTracer`: mouse, keys, clicks, selections, typed text, opened lists and menus, windows, failed bindings, unhandled exceptions), every `RelayCommand` run (`RelayCommandTrace`), every call of a service interface with arguments, result and time (`TracingProxy`, wrapped in `App.AddService`) and every property change of a view model (`ViewModelTracer`, in `App.AddViewModel`). New code needs no log calls of its own; register services through `AddService` and view models through `AddViewModel`.
 
+**Simulated analyzer:** in the Debug configuration only, `Screen Checker.exe --simulate[=ca410|ca310] [--scenario=ok|retry|fail] [--probe-sn=NUMBER]` replaces the color analyzer with `DebugTools/SimulatedColorMeasurementService`: it connects, calibrates and measures with the delays, statuses and events of the real one, the point being measured is read from the measurement button that is in the measuring state, and the values are those of a real TV batch (`retry`: white, black and red are bad at the first attempt and better at every repeat; `fail`: they stay bad). It writes `appsettings.json`, `analyzers.json` and the data folder like the real one does.
+
 **Commands:** ViewModels use `RelayCommand` (in `Commands/`) for ICommand implementation binding to UI actions.
 
 ## Project Map (graphify)

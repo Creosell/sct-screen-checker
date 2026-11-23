@@ -18,6 +18,9 @@ namespace WPF_LCD_Test
     public partial class App : Application
         {
         private IServiceProvider _serviceProvider;
+#if DEBUG
+        private SimulationOptions? _simulation;
+#endif
 
         /// <summary>
         /// Configures dependency injection container with all application services.
@@ -42,7 +45,15 @@ namespace WPF_LCD_Test
             AddService<IAnalyzerRegistryService, AnalyzerRegistryService>(services);
 
             // Application services
-            AddService<IColorMeasurementService, ColorMeasurementService>(services);
+#if DEBUG
+            if (_simulation is not null)
+                {
+                services.AddSingleton(_simulation);
+                AddService<IColorMeasurementService, SimulatedColorMeasurementService>(services);
+                }
+            else
+#endif
+                AddService<IColorMeasurementService, ColorMeasurementService>(services);
             AddService<IFileService, FileService>(services);
             AddService<IDialogService, DialogService>(services);
             AddService<IUploadService, UploadService>(services);
@@ -114,6 +125,9 @@ namespace WPF_LCD_Test
 #if DEBUG
             DebugTrace.Start();
             UiEventTracer.Install();
+            _simulation = SimulationOptions.Parse(e.Args);
+            if (_simulation is not null)
+                DebugTrace.Write("app", $"Simulated color analyzer: {_simulation}");
             DebugTrace.Write("app", $"Screen Checker {typeof(App).Assembly.GetName().Version}, {Environment.OSVersion}, {Environment.ProcessorCount} cores, base directory {AppContext.BaseDirectory}");
 #endif
             HideFocusVisuals();
