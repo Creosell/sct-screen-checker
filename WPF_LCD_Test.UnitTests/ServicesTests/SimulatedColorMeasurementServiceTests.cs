@@ -117,6 +117,19 @@ namespace WPF_LCD_Test.UnitTests.ServicesTests
             }
 
         [Test]
+        public async Task RejectScenario_RefusesTheFirstAttemptAndGivesAGoodRepeat()
+            {
+            var service = await CalibratedServiceAsync(SimulationScenario.Reject);
+            StartMeasuring(MeasurementLocation.Center);
+            var first = await service.MeasureAsync(1);
+            StartMeasuring(MeasurementLocation.Center);
+            var repeat = await service.MeasureAsync(1);
+
+            Assert.That(first.Lv, Is.LessThan(5));  // the validation of the measurement view model refuses it
+            Assert.That(repeat.Lv, Is.GreaterThan(100));
+            }
+
+        [Test]
         public async Task Disconnect_ResetsTheState()
             {
             var service = await CalibratedServiceAsync();

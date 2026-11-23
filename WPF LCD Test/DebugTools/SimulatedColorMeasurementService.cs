@@ -201,13 +201,16 @@ namespace WPF_LCD_Test.DebugTools
         private (double LvFactor, double Drift) Bend(string location, int attempt)
             {
             int step = Math.Min(attempt, 2);
+            if (_options.Scenario == SimulationScenario.Reject && attempt == 0)
+                return (location == nameof(MeasurementLocation.BlackColor) ? 240 : 0.003, 0);  // luminance the validation refuses: too high for black, too low for the rest
+
             return (_options.Scenario, location) switch
                 {
                     (SimulationScenario.Retry, nameof(MeasurementLocation.WhiteColor)) => (new[] { 0.86, 0.93, 1.0 }[step], 0),
                     (SimulationScenario.Retry, nameof(MeasurementLocation.BlackColor)) => (new[] { 1.45, 1.12, 1.0 }[step], 0),
                     (SimulationScenario.Retry, nameof(MeasurementLocation.RedColor)) => (1, new[] { 0.025, 0.012, 0.0 }[step]),
                     (SimulationScenario.Fail, nameof(MeasurementLocation.WhiteColor)) => (0.84, 0),
-                    (SimulationScenario.Fail, nameof(MeasurementLocation.BlackColor)) => (1.7, 0),
+                    (SimulationScenario.Fail, nameof(MeasurementLocation.BlackColor)) => (2.2, 0),
                     (SimulationScenario.Fail, nameof(MeasurementLocation.RedColor)) => (1, 0.03),
                     _ => (1, 0)
                     };
