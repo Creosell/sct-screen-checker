@@ -1184,14 +1184,21 @@ namespace WPF_LCD_Test.ViewModels
             _hasUnsavedMeasurements = true;
             }
 
+        /// <summary>
+        /// Formats a measurement for the Results table and the tooltips with the precision the report verdict is made at
+        /// (coordinates 3 decimals, luminance 0, the luminance of the black point 4, temperature 0), so the number on the screen
+        /// is the number the point is accepted by.
+        /// </summary>
+        /// <param name="measurement">The measurement to format.</param>
+        /// <returns>The coordinates, luminance and temperature as text.</returns>
         internal static (string x, string y, string Lv, string T) FormatMeasurement(Measurement measurement)
             {
             return (
                 measurement.x.ToString("F3", CultureInfo.InvariantCulture),
                 measurement.y.ToString("F3", CultureInfo.InvariantCulture),
                 measurement.Location == MeasurementLocation.BlackColor.ToString()
-                    ? measurement.Lv.ToString("F6", CultureInfo.InvariantCulture)
-                    : measurement.Lv.ToString("F1", CultureInfo.InvariantCulture),
+                    ? measurement.Lv.ToString("F4", CultureInfo.InvariantCulture)
+                    : measurement.Lv.ToString("F0", CultureInfo.InvariantCulture),
                 double.IsFinite(measurement.T) ? measurement.T.ToString("F0", CultureInfo.InvariantCulture) : NotAvailable
             );
             }

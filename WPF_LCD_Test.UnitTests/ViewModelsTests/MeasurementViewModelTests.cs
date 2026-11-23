@@ -715,6 +715,17 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
             }
 
         [Test]
+        public void FormatMeasurement_UsesThePrecisionOfTheReportVerdict()
+            {
+            var white = MeasurementViewModel.FormatMeasurement(new Measurement("WhiteColor", 0.27664, 0.28024, 319.6, 10834.4));
+            var black = MeasurementViewModel.FormatMeasurement(new Measurement("BlackColor", 0.276, 0.28, 0.0503124, double.PositiveInfinity));
+
+            Assert.That(white, Is.EqualTo(("0.277", "0.280", "320", "10834")));
+            Assert.That(black.Lv, Is.EqualTo("0.0503"));
+            Assert.That(black.T, Is.EqualTo(NotAvailable));
+            }
+
+        [Test]
         public async Task ExecuteSaveResultsAsync_SetsDeviceConfiguration_BeforeSave()
             {
             // Arrange
@@ -879,7 +890,7 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
             await ((RelayCommand)_viewModel.MeasureCommand).ExecuteAsync(location);
 
             var row = _viewModel.Results.Single(r => r.Location == location);
-            Assert.That((row.X, row.Y, row.Lv, row.T), Is.EqualTo(("0.313", "0.329", "100.0", "6500")));
+            Assert.That((row.X, row.Y, row.Lv, row.T), Is.EqualTo(("0.313", "0.329", "100", "6500")));
             Assert.That(_viewModel.LogText, Does.Not.Contain("x=0.313"));
             }
 
@@ -898,7 +909,7 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
             await ((RelayCommand)_viewModel.MeasureCommand).ExecuteAsync(location);
 
             var row = _viewModel.Results.Single(r => r.Location == location);
-            Assert.That(row.Lv, Is.EqualTo("100.0"), "the previous accepted attempt stays");
+            Assert.That(row.Lv, Is.EqualTo("100"), "the previous accepted attempt stays");
             Assert.That(row.Status.IsPassed, Is.False, "only the status of the last measurement is red");
             Assert.That(_viewModel.LogEntries.Last().Severity, Is.EqualTo(LogSeverity.Warning));
             }
@@ -1176,7 +1187,7 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
             var device = _viewModel.CurrentDevice;
             Assert.That(device.AttemptCount(location), Is.EqualTo(3));
             Assert.That(device.Measurements.Single().Lv, Is.EqualTo(170), "until the generator chooses, the latest attempt is shown");
-            Assert.That(_viewModel.Results.Single(r => r.Location == location).Lv, Is.EqualTo("170.0"));
+            Assert.That(_viewModel.Results.Single(r => r.Location == location).Lv, Is.EqualTo("170"));
             }
 
         [Test]
@@ -1205,7 +1216,7 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
 
             var row = _viewModel.Results.Single(r => r.Location == location);
             Assert.That(_viewModel.CurrentDevice.Measurements.Single().BestAttemptIndex, Is.EqualTo(0), "the check chose the first attempt");
-            Assert.That(row.Lv, Is.EqualTo("150.0"));
+            Assert.That(row.Lv, Is.EqualTo("150"));
             Assert.That((row.Tries, row.TriesLevel), Is.EqualTo(("2/3", TriesLevel.Few)));
             }
 
@@ -1269,7 +1280,7 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
 
             var row = _viewModel.Results.Single(r => r.Location == location);
             Assert.That(_viewModel.CurrentDevice.Measurements.Single().BestAttemptIndex, Is.EqualTo(0), "the check chose the first attempt");
-            Assert.That(row.Lv, Is.EqualTo("150.0"));
+            Assert.That(row.Lv, Is.EqualTo("150"));
             Assert.That((row.Tries, row.TriesLevel), Is.EqualTo(("2/3", TriesLevel.Enough)));
             }
 
