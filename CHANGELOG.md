@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.1] - 2026-11-23
+
+### Added
+- **Simulated color analyzer** for the Debug build (`Screen Checker.exe --simulate[=ca410|ca310] [--scenario=ok|retry|fail|reject|uniformity] [--probe-sn=NUMBER]`): the real interface can be driven without a device, with the delays, statuses and events of the real analyzer and the values of a real TV batch. The scenarios show a point that is bad at the first attempt and better at every repeat, points that stay bad, a measurement refused by the validation and a point too dim for the brightness uniformity. The code is in the Debug configuration only
+
+### Changed
+- The measurement JSON keeps the values as the analyzer gave them, cut at ten fractional digits, instead of rounding x and y to 3 decimals, the luminance to 1 (black: 8) and the temperature to 0. The rounding of the coordinates changed the gamut coverage computed by the report generator by 0.05-0.2 percentage points on average (up to 0.5) on a real batch
+- The Results table and the tooltips show the values with the precision of the report verdict (luminance 0 decimals, luminance of the black point 4, coordinates 3, temperature 0), so the number on the screen is the number the point is accepted by
+
 ## [1.4.0] - 2026-11-17
 
 ### Added
