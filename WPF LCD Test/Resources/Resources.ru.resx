@@ -420,9 +420,6 @@
   <data name="ErrorInBackgroundTask" xml:space="preserve">
     <value>Ошибка в фоновой задаче: {0}</value>
   </data>
-  <data name="CantStartUpload" xml:space="preserve">
-    <value>Не удаётся начать выгрузку: неизвестно устройство</value>
-  </data>
   <data name="ReportGenerationCanceled" xml:space="preserve">
     <value>Создание отчёта отменено</value>
   </data>

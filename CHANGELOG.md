@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.2] - 2026-11-24
+
+### Fixed
+- The Upload reports button no longer refuses to start when no device configuration is selected: the device name, the order and the date come from the archived report names, so the check was a leftover
+
 ## [1.4.1] - 2026-11-23
 
 ### Added

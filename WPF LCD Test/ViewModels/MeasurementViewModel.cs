@@ -1082,13 +1082,6 @@ namespace WPF_LCD_Test.ViewModels
                 return;
                 }
 
-            if (string.IsNullOrEmpty(_selectedDeviceConfiguration))
-                {
-                _dialogService.ShowMessage($"{CantStartUpload}", $"{Err}");
-                Flash(UploadFeedback, false);
-                return;
-                }
-
             Log(StartingReportUploading);
             IsUploadingReports = true;
 

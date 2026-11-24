@@ -196,15 +196,6 @@ namespace WPF_LCD_Test.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot start upload: Device name is unknown.
-        /// </summary>
-        public static string CantStartUpload {
-            get {
-                return ResourceManager.GetString("CantStartUpload", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to 5. Center.
         /// </summary>
         public static string CenterPoint {

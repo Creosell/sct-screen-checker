@@ -456,9 +456,6 @@
   <data name="ErrorInBackgroundTask" xml:space="preserve">
     <value>Error in background task: {0}</value>
   </data>
-  <data name="CantStartUpload" xml:space="preserve">
-    <value>Cannot start upload: Device name is unknown</value>
-  </data>
   <data name="ReportGenerationCanceled" xml:space="preserve">
     <value>Report generation canceled</value>
   </data>

@@ -420,9 +420,6 @@
   <data name="ErrorInBackgroundTask" xml:space="preserve">
     <value>后台任务出错: {0}</value>
   </data>
-  <data name="CantStartUpload" xml:space="preserve">
-    <value>无法开始上传：设备名称未知</value>
-  </data>
   <data name="ReportGenerationCanceled" xml:space="preserve">
     <value>已取消创建报告</value>
   </data>

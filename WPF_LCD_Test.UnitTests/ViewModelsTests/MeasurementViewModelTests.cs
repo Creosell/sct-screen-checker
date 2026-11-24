@@ -750,17 +750,18 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
         // --- Тесты для ExecuteUploadReportsAsync ---
 
         [Test]
-        public async Task ExecuteUploadReportsAsync_NoConfiguration_ShowsError()
+        public async Task ExecuteUploadReportsAsync_NoConfiguration_StillUploads()
             {
             // Arrange
             _viewModel.SelectedDeviceConfiguration = string.Empty;
+            _mockUploadService.Setup(u => u.UploadReportsAsync()).ReturnsAsync(true);
 
             // Act
             await ((RelayCommand)_viewModel.UploadReportsCommand).ExecuteAsync(null);
 
             // Assert
-            _mockDialogService.Verify(d => d.ShowMessage(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-            _mockUploadService.Verify(u => u.UploadReportsAsync(), Times.Never);
+            _mockDialogService.Verify(d => d.ShowMessage(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockUploadService.Verify(u => u.UploadReportsAsync(), Times.Once);
             }
 
         [Test]
