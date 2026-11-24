@@ -3,3 +3,4 @@ id = "screen_checker"
 project = "WPF LCD Test/Screen Checker.csproj"
 exe = "Screen Checker.exe"
 publish_profile = "FolderProfile"
+obsolete = ["WPF LCD Test.exe"]

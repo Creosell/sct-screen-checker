@@ -106,7 +106,7 @@ Supports English (default), Chinese Simplified and Russian. Resources in `WPF LC
 
 ## Release
 
-Released with the shared tool in the SCT Updater repository (`tools/release/app_release.py app <this repo> --upload`); `sct_app.toml` here describes the project (`kind = "dotnet"`, `FolderProfile` publish profile). The tool builds with MSBuild (the COM reference of the analyzer needs it, `dotnet` cannot build this project), takes the version from the built `Screen Checker.exe` (`AssemblyVersion` in `Screen Checker.csproj`) and ships only the build output (never `appsettings.json`, `analyzers.json` or `data`, which the application writes itself). The former `tools/release/release_manager.py` is removed. Full process: `docs/module-release.md` in the SCT Updater repository.
+Released with the shared tool in the SCT Updater repository (`tools/release/app_release.py app <this repo> --upload`); `sct_app.toml` here describes the project (`kind = "dotnet"`, `FolderProfile` publish profile, `obsolete = ["WPF LCD Test.exe"]`: old exe names the Updater deletes on install; add the old name there whenever the exe is renamed). The tool builds with MSBuild (the COM reference of the analyzer needs it, `dotnet` cannot build this project), takes the version from the built `Screen Checker.exe` (`AssemblyVersion` in `Screen Checker.csproj`) and ships only the build output (never `appsettings.json`, `analyzers.json` or `data`, which the application writes itself). The former `tools/release/release_manager.py` is removed. Full process: `docs/module-release.md` in the SCT Updater repository.
 
 ## Communication Style & Code Standards
 
