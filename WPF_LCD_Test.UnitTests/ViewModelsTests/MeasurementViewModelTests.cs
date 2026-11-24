@@ -165,7 +165,7 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
             _viewModel.ExecuteClearLog();
 
             var appDir = AppDomain.CurrentDomain.BaseDirectory;
-            var exeName = "ReportGenerator.exe";
+            var exeName = "Report Generator.exe";
             var expectedExePath = Path.Combine(appDir, exeName);
 
             if (File.Exists(expectedExePath))
@@ -949,7 +949,7 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
             _viewModel.ReportGenerateCommand.Execute(null);
 
             Assert.That(_viewModel.LogEntries.Count, Is.EqualTo(before), "the bound collection must not change on a foreign thread");
-            Assert.That(_viewModel.LogText, Does.Contain("ReportGenerator.exe"), "the text of the log is updated at once");
+            Assert.That(_viewModel.LogText, Does.Contain("Report Generator.exe"), "the text of the log is updated at once");
 
             queued.ForEach(action => action());
             Assert.That(_viewModel.LogEntries.Count, Is.GreaterThan(before));

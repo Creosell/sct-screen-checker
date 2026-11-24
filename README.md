@@ -336,41 +336,19 @@ Change language at runtime in Settings. Localization resources are in:
 
 ## Releasing
 
-The release script is located at `tools/release/release_manager.py`. It packages the published build and uploads it to Nextcloud. Requires [uv](https://docs.astral.sh/uv/) — all Python dependencies are installed automatically on first run.
+Screen Checker is released with the shared tool `tools/release/app_release.py` of the SCT Updater repository. `sct_app.toml` in this repository describes the project (`kind = "dotnet"`, the project file, the exe name and the publish profile). The tool builds the application itself, so no manual publish step is needed.
 
-### 1. Configure credentials
+Requirements: [uv](https://docs.astral.sh/uv/), **MSBuild** (Visual Studio or the free Visual Studio Build Tools with the ".NET desktop build tools" workload; the tool takes it from the `MSBUILD` environment variable, then from `PATH`, then finds it with vswhere) and the credentials in `tools/release/.env` of the SCT Updater repository.
 
-Create `tools/release/.env` based on `tools/release/.env.example` and fill in your Nextcloud credentials.
-
-### 2. Publish the application
-
-In Visual Studio: right-click the **Screen Checker** project → **Publish** → use the **Folder** profile with output path set to `Release\` in the repo root.
-
-Or via MSBuild:
+From the SCT Updater repository:
 
 ```bash
-msbuild "Screen Checker.sln" /p:Configuration=Release /p:PublishDir=Release\ /t:Publish
+uv run tools/release/app_release.py app <path of this repository> --upload
 ```
 
-### 3. Run the release manager
+Without `--upload` it is a dry run (nothing is sent). The tool publishes the project with MSBuild (Release, the `FolderProfile` publish profile) into a clean folder, reads the version from the built `Screen Checker.exe` (`AssemblyVersion` in `Screen Checker.csproj`; a version given on the command line must match it), zips the result, uploads it to `SCT/Updater/versions/screen_checker/<version>/` and publishes the manifest last. The package holds only the build output: files that the application writes itself (`appsettings.json`, `analyzers.json`, `data`) are never shipped. Then put the version into the `dev` list of `suite_manifest.json` by hand (into `products` when it is verified).
 
-From the repo root:
-
-```bash
-uv run .\tools\release\release_manager.py --upload zip .\Release screen_checker 1.2.3
-```
-
-Replace `1.2.3` with the actual version being released (must match `AssemblyVersion` in `Screen Checker.csproj`).
-
-| Argument | Description |
-|----------|-------------|
-| `zip` | Package mode — produces a single zip archive |
-| `.\Release` | Path to the published build folder |
-| `screen_checker` | Product identifier on Nextcloud |
-| `1.2.3` | Version string |
-| `--upload` | Skip the confirmation prompt and upload immediately |
-
-The script creates a `release_artifacts/` folder locally (gitignored) with the zip and manifest, then uploads both to Nextcloud under `SCT/Updater/versions/screen_checker/1.2.3/`.
+Full process: `docs/module-release.md` in the SCT Updater repository.
 
 ## Roadmap
 

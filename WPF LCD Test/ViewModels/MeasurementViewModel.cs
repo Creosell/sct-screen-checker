@@ -10,6 +10,7 @@ using System.Windows.Input;
 using WPF_LCD_Test.Commands;
 using WPF_LCD_Test.Interfaces;
 using WPF_LCD_Test.Models;
+using WPF_LCD_Test.Services;
 using static WPF_LCD_Test.Resources.Resources;
 
 namespace WPF_LCD_Test.ViewModels
@@ -993,7 +994,7 @@ namespace WPF_LCD_Test.ViewModels
             try
                 {
                 var appDir = AppDomain.CurrentDomain.BaseDirectory;
-                var exePath = Path.Combine(appDir, "ReportGenerator.exe");
+                var exePath = Path.Combine(appDir, ExternalApps.ReportGenerator);
 
                 if (!File.Exists(exePath))
                     {

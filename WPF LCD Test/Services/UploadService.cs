@@ -18,7 +18,7 @@ namespace WPF_LCD_Test.Services
         private readonly IPathProvider _pathProvider;
         private readonly LogHandler _logHandler;
 
-        private const string UploadCliName = "Nextcloud_CLI.exe";
+        private const string UploadCliName = ExternalApps.NextcloudCli;
         private const string ArchiveFolderName = "report_archive";
         private const string ResultsFolderName = "results";
         private const string UploadedReportsFolderName = "uploaded_reports";

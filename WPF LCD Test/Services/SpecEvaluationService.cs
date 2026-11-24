@@ -6,11 +6,11 @@ using WPF_LCD_Test.Models;
 namespace WPF_LCD_Test.Services
     {
     /// <summary>
-    /// Runs <c>ReportGenerator.exe --evaluate -</c> and parses its answer.
+    /// Runs <c>Report Generator.exe --evaluate -</c> and parses its answer.
     /// </summary>
     public class SpecEvaluationService : ISpecEvaluationService
         {
-        private const string GeneratorFileName = "ReportGenerator.exe";
+        private const string GeneratorFileName = ExternalApps.ReportGenerator;
         private static readonly TimeSpan _timeout = TimeSpan.FromSeconds(5);
 
         private readonly IFileSystem _fileSystem;

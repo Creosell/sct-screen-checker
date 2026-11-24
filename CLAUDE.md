@@ -104,6 +104,10 @@ Supports English (default), Chinese Simplified and Russian. Resources in `WPF LC
 - Coverage: ViewModels, all Services (including COM lifecycle), Models, Converters, Commands
 - Do **not** use `dotnet build` to build before running tests — use MSBuild due to COM interop
 
+## Release
+
+Released with the shared tool in the SCT Updater repository (`tools/release/app_release.py app <this repo> --upload`); `sct_app.toml` here describes the project (`kind = "dotnet"`, `FolderProfile` publish profile). The tool builds with MSBuild (the COM reference of the analyzer needs it, `dotnet` cannot build this project), takes the version from the built `Screen Checker.exe` (`AssemblyVersion` in `Screen Checker.csproj`) and ships only the build output (never `appsettings.json`, `analyzers.json` or `data`, which the application writes itself). The former `tools/release/release_manager.py` is removed. Full process: `docs/module-release.md` in the SCT Updater repository.
+
 ## Communication Style & Code Standards
 
 **Response Format:**

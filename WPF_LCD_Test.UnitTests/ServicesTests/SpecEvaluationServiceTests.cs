@@ -10,7 +10,7 @@ namespace WPF_LCD_Test.UnitTests.ServicesTests
     public class SpecEvaluationServiceTests
         {
         private const string BaseDirectory = @"C:\App";
-        private const string GeneratorPath = @"C:\App\ReportGenerator.exe";
+        private const string GeneratorPath = @"C:\App\Report Generator.exe";
         private const string Result = """{"schema": 1, "device": "PASS", "complete": true, "checks": []}""";
 
         private MockFileSystem _fileSystem;
@@ -53,7 +53,7 @@ namespace WPF_LCD_Test.UnitTests.ServicesTests
             var outcome = await _service.EvaluateAsync("{}", CancellationToken.None);
 
             Assert.That(outcome.Evaluation, Is.Null);
-            Assert.That(outcome.Error, Does.Contain("ReportGenerator.exe"));
+            Assert.That(outcome.Error, Does.Contain("Report Generator.exe"));
             _runner.VerifyNoOtherCalls();
             }
 
@@ -93,7 +93,7 @@ namespace WPF_LCD_Test.UnitTests.ServicesTests
         public async Task EvaluateAsync_Timeout_ReturnsAnErrorInsteadOfThrowing()
             {
             _runner.Setup(r => r.RunAsync(It.IsAny<string>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new TimeoutException("ReportGenerator.exe did not finish within 5 s."));
+                .ThrowsAsync(new TimeoutException("Report Generator.exe did not finish within 5 s."));
 
             var outcome = await _service.EvaluateAsync("{}", CancellationToken.None);
 

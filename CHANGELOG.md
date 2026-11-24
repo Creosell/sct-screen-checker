@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.2] - 2026-11-24
 
+### Changed
+- The companion programs are started under their new names `Report Generator.exe` and `Nextcloud CLI.exe` (they were `ReportGenerator.exe` and `Nextcloud_CLI.exe`); the names live in one place, `Services/ExternalApps.cs`. Needs the Report Generator and the Nextcloud CLI delivered by the SCT Updater as `app` packages (the launcher of the new package carries the new name)
+
 ### Fixed
 - The Upload reports button no longer refuses to start when no device configuration is selected: the device name, the order and the date come from the archived report names, so the check was a leftover
 

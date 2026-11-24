@@ -30,7 +30,6 @@
         <KeyBinding
             Key="R"
             Command="{Binding ReportGenerateCommand}"
-            CommandParameter="ReportGenerator.exe"
             Modifiers="Control" />
     </UserControl.InputBindings>
     <UserControl.Resources>
@@ -1401,7 +1400,6 @@
                     behaviors:ActionFeedbackBehavior.SuccessText="FeedbackDone"
                     HorizontalAlignment="Left"
                     Command="{Binding DataContext.ReportGenerateCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                    CommandParameter="ReportGenerator.exe"
                     Style="{StaticResource CreateReportButtonStyle}" />
                 <Button
                     x:Name="UploadReportsButton"
