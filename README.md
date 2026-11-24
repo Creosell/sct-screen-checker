@@ -81,7 +81,7 @@ Desktop application for automated testing of LCD display color characteristics u
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd WPF-LCD-Test
+cd sct-screen-checker
 ```
 
 2. Ensure .NET 8.0 SDK is installed:
