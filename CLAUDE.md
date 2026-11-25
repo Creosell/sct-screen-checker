@@ -76,7 +76,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 
 ## Project Map (graphify)
 
-Knowledge graph of the codebase is stored in `graphify-out/` (`graph.json`, `graph.html`, `GRAPH_REPORT.md`). Use it to navigate before broad grep searches.
+Knowledge graph of the codebase is in `graphify-out/`. Only `graph.json` is tracked in git (rebuilt and added to the commit by the `pre-commit` hook, merged by the `graphify` merge driver); `GRAPH_REPORT.md`, `graph.html` and the rest are untracked and rebuilt locally. Use it to navigate before broad grep searches.
 
 - Start with `graphify-out/GRAPH_REPORT.md` (community hubs, most connected nodes).
 - CLI: `C:\Users\Pavel\.claude\tools\graphify\venv\Scripts\graphify.exe` (not in PATH):
