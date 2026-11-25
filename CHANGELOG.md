@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - The user-defined channel name stored in the analyzer (`ChannelID`, CA-310 and CA-410) is shown on the device card after the channel number (`Channel 2 (Lab TV)`) and saved as `ChannelName` in the `Colorimeter` object of the measurement JSON; omitted when the name is empty.
+- Errors of the analyzer SDKs are shown as a localized text (English, Russian, Chinese) that names the cause and the action, followed by the model and the code (`[CA-410 · 523]`), instead of the English string of the SDK. Every error code of CA-SDK2 (CA-410) and CA-SDK (CA-310) has a text (`Services/AnalyzerErrorMessages.cs`); the wording follows the connection of the analyzer (CA-310: probe, body, USB to the PC; CA-410: the probe on USB), for example the zero calibration of the CA-310 asks to turn the probe ring to 0-CAL. The CA-310 code is read from the low word of the HRESULT of the COM error object (not yet checked on a real CA-310); a code without a text shows the text of the SDK.
+
+### Fixed
+- The Chinese interface texts were reviewed: wrong translations are corrected (green `G.格林`, "Clear results", the Save button, "fields", "culture"), the terms and the punctuation are unified.
 
 ## [1.4.2] - 2026-11-24
 
