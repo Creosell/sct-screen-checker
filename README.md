@@ -120,8 +120,8 @@ msbuild "Screen Checker.sln" /p:Configuration=Release
 ### Build Output
 
 Executable and dependencies will be located in:
-- Debug: `WPF LCD Test\bin\Debug\net8.0-windows\`
-- Release: `WPF LCD Test\bin\Release\net8.0-windows\`
+- Debug: `Screen Checker\bin\Debug\net8.0-windows\`
+- Release: `Screen Checker\bin\Release\net8.0-windows\`
 
 **Note:** Building with `dotnet build` may fail due to ResolveComReference tasks. Always use MSBuild or Visual Studio for building.
 
@@ -129,7 +129,7 @@ Executable and dependencies will be located in:
 
 ### From Build Output
 ```bash
-cd "WPF LCD Test\bin\Debug\net8.0-windows"
+cd "Screen Checker\bin\Debug\net8.0-windows"
 .\"Screen Checker.exe"
 ```
 
@@ -248,7 +248,7 @@ Abstractions over system dependencies for testability:
 ### Project Structure
 
 ```
-WPF LCD Test/
+Screen Checker/
 ├── Commands/           # RelayCommand implementation
 ├── Converters/         # WPF value converters
 ├── Interfaces/         # Service contracts
@@ -260,7 +260,7 @@ WPF LCD Test/
 ├── Resources/          # Localization resources
 └── config/             # Device configurations
 
-WPF_LCD_Test.UnitTests/
+Screen Checker.UnitTests/
 ├── Models/             # Model tests
 ├── Services/           # Service tests
 └── ViewModels/         # ViewModel tests
@@ -288,7 +288,7 @@ WPF_LCD_Test.UnitTests/
 Build the solution first (MSBuild required due to COM interop), then:
 
 ```bash
-dotnet test "WPF_LCD_Test.UnitTests\Screen Checker.UnitTests.csproj" --no-build
+dotnet test "Screen Checker.UnitTests\Screen Checker.UnitTests.csproj" --no-build
 ```
 
 ### Running Specific Test Class

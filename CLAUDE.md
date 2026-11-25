@@ -10,12 +10,12 @@ WPF desktop application for LCD color measurement testing using Konica Minolta C
 
 **Build (Visual Studio required due to COM interop):**
 ```
-msbuild "WPF LCD Test.sln" /p:Configuration=Debug
+msbuild "Screen Checker.sln" /p:Configuration=Debug
 ```
 
 **Run Tests:**
 ```
-dotnet test "WPF_LCD_Test.UnitTests\WPF_LCD_Test.UnitTests.csproj"
+dotnet test "Screen Checker.UnitTests\Screen Checker.UnitTests.csproj"
 ```
 
 **Run Single Test:**
@@ -87,20 +87,20 @@ Knowledge graph of the codebase is stored in `graphify-out/` (`graph.json`, `gra
 
 ## Configuration
 
-Device test specifications are YAML files in `WPF LCD Test/config/device_configs/` defining min/max/typical values for brightness, contrast, color gamut (RGB/NTSC area), RGB primaries (x/y coordinates), white point, and color temperature. Each config specifies acceptable ranges under `main_tests`.
+Device test specifications are YAML files in `Screen Checker/config/device_configs/` defining min/max/typical values for brightness, contrast, color gamut (RGB/NTSC area), RGB primaries (x/y coordinates), white point, and color temperature. Each config specifies acceptable ranges under `main_tests`.
 
 ## Version
 
-Current version: **1.4.3** (set in `WPF LCD Test\Screen Checker.csproj` — `AssemblyVersion` / `FileVersion`). See [CHANGELOG.md](CHANGELOG.md) for history.
+Current version: **1.4.3** (set in `Screen Checker\Screen Checker.csproj` — `AssemblyVersion` / `FileVersion`). See [CHANGELOG.md](CHANGELOG.md) for history.
 
 ## Localization
 
-Supports English (default), Chinese Simplified and Russian. Resources in `WPF LCD Test/Resources/StringResources.xaml` and `StringResources.zh-Hans.xaml`. Language can be switched at runtime.
+Supports English (default), Chinese Simplified and Russian. Resources in `Screen Checker/Resources/StringResources.xaml` and `StringResources.zh-Hans.xaml`. Language can be switched at runtime.
 
 ## Testing
 
 - Framework: NUnit 3.14 with Moq 4.20, `System.IO.Abstractions.TestingHelpers` for file system mocking
-- Tests mirror source structure in `WPF_LCD_Test.UnitTests/`
+- Tests mirror source structure in `Screen Checker.UnitTests/`
 - Coverage: ViewModels, all Services (including COM lifecycle), Models, Converters, Commands
 - Do **not** use `dotnet build` to build before running tests — use MSBuild due to COM interop
 

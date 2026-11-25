@@ -1,0 +1,66 @@
+﻿using System.Windows;
+using ScreenChecker.Interfaces;
+using ScreenChecker.Views;
+using ScreenChecker.Wrappers;
+
+namespace ScreenChecker.Services
+    {
+    /// <summary>
+    /// Service for displaying message dialogs and user prompts using MessageBox wrapper.
+    /// </summary>
+    public class DialogService : IDialogService
+        {
+        private readonly IMessageBox _messageBox;
+
+        /// <summary>
+        /// Initializes a new instance of DialogService with default MessageBox wrapper.
+        /// </summary>
+        public DialogService() : this(new MessageBoxWrapper()) { }
+
+        /// <summary>
+        /// Initializes a new instance of DialogService with dependency injection.
+        /// </summary>
+        /// <param name="messageBox">MessageBox wrapper for displaying dialogs.</param>
+        public DialogService(IMessageBox messageBox)
+            {
+            _messageBox = messageBox;
+            }
+
+        /// <summary>
+        /// Displays Yes/No question dialog and returns user's choice.
+        /// </summary>
+        /// <param name="message">Question message text.</param>
+        /// <param name="caption">Dialog window caption.</param>
+        /// <returns>True if user clicked Yes, false if user clicked No.</returns>
+        public bool ShowQuestion(string message, string caption) =>
+            _messageBox.Show(message, caption, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+
+        /// <summary>
+        /// Displays information message dialog with OK button.
+        /// </summary>
+        /// <param name="message">Information message text.</param>
+        /// <param name="caption">Dialog window caption.</param>
+        public void ShowMessage(string message, string caption) =>
+            _messageBox.Show(message, caption, MessageBoxButton.OK, MessageBoxImage.Information);
+
+        /// <summary>
+        /// Displays a modal dialog with two custom-labelled buttons.
+        /// </summary>
+        /// <param name="message">Message text.</param>
+        /// <param name="caption">Dialog window caption.</param>
+        /// <param name="firstOption">Caption of the first button.</param>
+        /// <param name="secondOption">Caption of the second button.</param>
+        /// <returns>0 or 1 for the chosen button; null if the dialog was closed without a choice.</returns>
+        public int? ShowChoice(string message, string caption, string firstOption, string secondOption)
+            {
+            var dialog = new ChoiceDialogWindow(message, caption, firstOption, secondOption);
+            if (Application.Current?.MainWindow is { IsVisible: true } owner)
+                {
+                dialog.Owner = owner;
+                }
+
+            dialog.ShowDialog();
+            return dialog.SelectedOption;
+            }
+        }
+    }
