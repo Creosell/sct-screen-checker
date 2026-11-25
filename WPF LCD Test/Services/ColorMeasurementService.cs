@@ -169,13 +169,13 @@ namespace WPF_LCD_Test.Services
                     }
                 catch (COMException ex)
                     {
-                    StatusMessage?.Invoke(this, $"{ConnectionError}: {ex.Message}");
+                    StatusMessage?.Invoke(this, $"{ConnectionError}: {Describe(ex)}");
                     _isDeviceConnected = false;
                     ConnectionStatusChanged?.Invoke(this, _isDeviceConnected);
                     }
                 catch (Exception ex)
                     {
-                    StatusMessage?.Invoke(this, $"{ConnectionError}: {ex.Message}");
+                    StatusMessage?.Invoke(this, $"{ConnectionError}: {Describe(ex)}");
                     _isDeviceConnected = false;
                     ConnectionStatusChanged?.Invoke(this, _isDeviceConnected);
                     }
@@ -209,13 +209,21 @@ namespace WPF_LCD_Test.Services
                     }
                 catch (Exception ex)
                     {
-                    errors.Add(ex.Message);
+                    errors.Add(AnalyzerErrorMessages.Describe(ex, candidate?.Model ?? ColorAnalyzerModel.Unknown));
                     candidate?.Dispose();
                     }
                 }
 
             throw new InvalidOperationException(string.Join(" | ", errors));
             }
+
+        /// <summary>
+        /// Describes a failed analyzer call for the status message: the localized text with the model and the code when the SDK gave a code,
+        /// otherwise the message of the exception.
+        /// </summary>
+        /// <param name="exception">Exception thrown by the analyzer call.</param>
+        private string Describe(Exception exception) =>
+            AnalyzerErrorMessages.Describe(exception, _objCa200?.Model ?? ColorAnalyzerModel.Unknown);
 
         /// <summary>
         /// Returns the sync setting from the settings when the connected analyzer supports it;
@@ -281,13 +289,13 @@ namespace WPF_LCD_Test.Services
                     }
                 catch (COMException ex)
                     {
-                    StatusMessage?.Invoke(this, $"{CheckConnectionCA}: {ex.Message}");
+                    StatusMessage?.Invoke(this, $"{CheckConnectionCA}: {Describe(ex)}");
                     _isDeviceCalibrated = false;
                     CalibrationStatusChanged?.Invoke(this, _isDeviceCalibrated);
                     }
                 catch (Exception ex)
                     {
-                    StatusMessage?.Invoke(this, $"{ErrAtCalibration}: {ex.Message}");
+                    StatusMessage?.Invoke(this, $"{ErrAtCalibration}: {Describe(ex)}");
                     _isDeviceCalibrated = false;
                     CalibrationStatusChanged?.Invoke(this, _isDeviceCalibrated);
                     }
@@ -318,7 +326,7 @@ namespace WPF_LCD_Test.Services
                 }
             catch (Exception ex)
                 {
-                StatusMessage?.Invoke(this, string.Format(ErrAtChangeChannel, ex.Message));
+                StatusMessage?.Invoke(this, string.Format(ErrAtChangeChannel, Describe(ex)));
                 }
             }
 
@@ -378,12 +386,12 @@ namespace WPF_LCD_Test.Services
                             }
                         catch (COMException measureEx)
                             {
-                            StatusMessage?.Invoke(this, $"{ErrorAtMeasuringIteration}{i}: {measureEx.Message}");
+                            StatusMessage?.Invoke(this, $"{ErrorAtMeasuringIteration}{i}: {Describe(measureEx)}");
                             continue;
                             }
                         catch (Exception measureEx)
                             {
-                            StatusMessage?.Invoke(this, $"{ErrorAtMeasuringIteration}{i}: {measureEx.Message}");
+                            StatusMessage?.Invoke(this, $"{ErrorAtMeasuringIteration}{i}: {Describe(measureEx)}");
                             continue;
                             }
 

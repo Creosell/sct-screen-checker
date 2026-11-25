@@ -10,7 +10,7 @@ namespace WPF_LCD_Test.Wrappers
     internal static class Ca410Sdk
         {
         /// <summary>
-        /// Throws an <see cref="InvalidOperationException"/> carrying the localized SDK message when the call failed.
+        /// Throws an <see cref="AnalyzerException"/> carrying the code and the localized SDK message when the call failed.
         /// </summary>
         /// <param name="code">Status code returned by an SDK call (0 means success).</param>
         /// <param name="operation">Name of the SDK operation, used in the exception message.</param>
@@ -20,7 +20,7 @@ namespace WPF_LCD_Test.Wrappers
 
             string message = string.Empty;
             GlobalFunctions.CASDK2_GetLocalizedErrorMsgFromErrorCode(0, code, ref message);
-            throw new InvalidOperationException($"CA-SDK2 {operation} failed ({code}): {message}");
+            throw new AnalyzerException(code, operation, message);
             }
         }
 

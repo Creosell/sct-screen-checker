@@ -713,4 +713,256 @@ Close the application anyway?</value>
   <data name="UnitMs" xml:space="preserve">
     <value>ms</value>
   </data>
+  <data name="AnalyzerUsbCable" xml:space="preserve">
+    <value>the analyzer's USB cable</value>
+  </data>
+  <data name="AnalyzerUsbCable_CA310" xml:space="preserve">
+    <value>the USB cable of the analyzer body</value>
+  </data>
+  <data name="AnalyzerUsbCable_CA410" xml:space="preserve">
+    <value>the USB cable of the probe</value>
+  </data>
+  <data name="AnalyzerErrorUnknownText" xml:space="preserve">
+    <value>unknown error</value>
+  </data>
+  <data name="AnalyzerError_DeviceNotFound" xml:space="preserve">
+    <value>Analyzer not found. Check the USB cable and the power.</value>
+  </data>
+  <data name="AnalyzerError_DeviceNotSupported" xml:space="preserve">
+    <value>This device is not supported. Connect a CA-310 or CA-410.</value>
+  </data>
+  <data name="AnalyzerError_ProbeNotConnected" xml:space="preserve">
+    <value>The measuring probe is not connected. Check the probe connection.</value>
+  </data>
+  <data name="AnalyzerError_ProbeNotConnected_CA310" xml:space="preserve">
+    <value>The measuring probe is not connected to the body. Check the probe cable and the P1 connector.</value>
+  </data>
+  <data name="AnalyzerError_ProbeNotConnected_CA410" xml:space="preserve">
+    <value>The measuring probe is not connected. Check the USB cable of the probe.</value>
+  </data>
+  <data name="AnalyzerError_PortInUse" xml:space="preserve">
+    <value>The analyzer port is used by another program. Close other applications that work with the analyzer.</value>
+  </data>
+  <data name="AnalyzerError_MeasurementInProgress" xml:space="preserve">
+    <value>A measurement is still in progress. Wait for it to finish.</value>
+  </data>
+  <data name="AnalyzerError_HardwareSetup" xml:space="preserve">
+    <value>Incorrect hardware setup. Check the connection of the analyzer body and the measuring probe.</value>
+  </data>
+  <data name="AnalyzerError_HardwareSetup_CA410" xml:space="preserve">
+    <value>Incorrect hardware setup. Check the connection of the probe.</value>
+  </data>
+  <data name="AnalyzerError_FirmwareIncompatible" xml:space="preserve">
+    <value>Incompatible analyzer firmware. Update the firmware.</value>
+  </data>
+  <data name="AnalyzerError_ConnectionMismatch" xml:space="preserve">
+    <value>The connection settings do not match the analyzer. Reconnect the analyzer.</value>
+  </data>
+  <data name="AnalyzerError_SystemError" xml:space="preserve">
+    <value>Communication with the analyzer failed. Restart the application and the analyzer.</value>
+  </data>
+  <data name="AnalyzerError_MemoryAccess" xml:space="preserve">
+    <value>Could not access the analyzer memory. Reconnect the measuring probe.</value>
+  </data>
+  <data name="AnalyzerError_MemoryAccess_CA310" xml:space="preserve">
+    <value>Could not access the memory of the body. Reconnect the probe cable.</value>
+  </data>
+  <data name="AnalyzerError_MemoryAccess_CA410" xml:space="preserve">
+    <value>Could not access the memory of the probe. Reconnect the probe to the USB port.</value>
+  </data>
+  <data name="AnalyzerError_DataNotFound" xml:space="preserve">
+    <value>The data was not found in the analyzer. Repeat the calibration.</value>
+  </data>
+  <data name="AnalyzerError_CalChannelZero" xml:space="preserve">
+    <value>Channel 0 cannot be calibrated. Select another channel.</value>
+  </data>
+  <data name="AnalyzerError_ZeroCalLight" xml:space="preserve">
+    <value>Zero calibration failed: light reaches the probe. Shield the probe from light and repeat.</value>
+  </data>
+  <data name="AnalyzerError_ZeroCalLight_CA310" xml:space="preserve">
+    <value>Zero calibration failed: light reaches the probe. Turn the ring of the probe to the 0-CAL position and repeat.</value>
+  </data>
+  <data name="AnalyzerError_ZeroCalLight_CA410" xml:space="preserve">
+    <value>Zero calibration failed: light reaches the probe. Move the probe away from the screen and light sources and repeat.</value>
+  </data>
+  <data name="AnalyzerError_ZeroCalRequired" xml:space="preserve">
+    <value>Zero calibration is required. Perform it and repeat the measurement.</value>
+  </data>
+  <data name="AnalyzerError_OutOfRange" xml:space="preserve">
+    <value>The value is out of the measurement range. Check the probe position and the screen brightness.</value>
+  </data>
+  <data name="AnalyzerError_MeasurementFailed" xml:space="preserve">
+    <value>The measurement failed. Check the position of the measuring probe and the test color on the screen.</value>
+  </data>
+  <data name="AnalyzerError_NoSync" xml:space="preserve">
+    <value>No synchronization signal. Check the synchronization mode and the connection to the screen.</value>
+  </data>
+  <data name="AnalyzerError_ColorTempFailed" xml:space="preserve">
+    <value>Could not calculate the color temperature: the value is out of the measurement range. Repeat the measurement.</value>
+  </data>
+  <data name="AnalyzerError_FrequencyOutOfRange" xml:space="preserve">
+    <value>The refresh frequency of the screen is out of the analyzer range. Check the synchronization mode.</value>
+  </data>
+  <data name="AnalyzerError_ChannelNumber" xml:space="preserve">
+    <value>Invalid channel number. The allowed range is 0 to 99.</value>
+  </data>
+  <data name="AnalyzerError_ChannelId" xml:space="preserve">
+    <value>Invalid channel ID.</value>
+  </data>
+  <data name="AnalyzerError_ChannelIdTooLong" xml:space="preserve">
+    <value>The channel ID is too long: 10 characters at most.</value>
+  </data>
+  <data name="AnalyzerError_ChannelComment" xml:space="preserve">
+    <value>Invalid channel comment. Check the allowed length.</value>
+  </data>
+  <data name="AnalyzerError_SavingCancelled" xml:space="preserve">
+    <value>Saving was cancelled by the user.</value>
+  </data>
+  <data name="AnalyzerError_NotNow" xml:space="preserve">
+    <value>The operation is not available now. Wait for the current one to finish and repeat.</value>
+  </data>
+  <data name="AnalyzerError_BodyOnly" xml:space="preserve">
+    <value>The command is supported by the analyzer body only.</value>
+  </data>
+  <data name="AnalyzerError_ProbeOnly" xml:space="preserve">
+    <value>The command is supported by the measuring probe only.</value>
+  </data>
+  <data name="AnalyzerError_SettingsMismatch" xml:space="preserve">
+    <value>The parameter does not suit the current settings of the analyzer or the probe. Check the settings.</value>
+  </data>
+  <data name="AnalyzerError_ConfigType" xml:space="preserve">
+    <value>Invalid configuration type or combination of types. Check the settings.</value>
+  </data>
+  <data name="AnalyzerError_UserDataNotSet" xml:space="preserve">
+    <value>The user calibration data is not set.</value>
+  </data>
+  <data name="AnalyzerError_Ca500Only" xml:space="preserve">
+    <value>The function is available for the CA-500 only.</value>
+  </data>
+  <data name="AnalyzerError_CalTypeMismatch" xml:space="preserve">
+    <value>The calibration type does not match the type of the ND filter.</value>
+  </data>
+  <data name="AnalyzerError_SamplingCombination" xml:space="preserve">
+    <value>Invalid combination of the sampling frequency and the number of samples.</value>
+  </data>
+  <data name="AnalyzerError_SyncValueOutOfRange" xml:space="preserve">
+    <value>The synchronization frequency or the integration time is out of the allowed range. Check the settings.</value>
+  </data>
+  <data name="AnalyzerError_ColorValue" xml:space="preserve">
+    <value>Invalid color or luminance value (x, y, Lv).</value>
+  </data>
+  <data name="AnalyzerError_SdkInternal" xml:space="preserve">
+    <value>Internal error of the analyzer SDK. Restart the application and the analyzer.</value>
+  </data>
+  <data name="AnalyzerError_CalFileOpen" xml:space="preserve">
+    <value>Could not open the calibration data file. Check the file name.</value>
+  </data>
+  <data name="AnalyzerError_InvalidArgument" xml:space="preserve">
+    <value>Internal error: invalid argument of the analyzer command.</value>
+  </data>
+  <data name="AnalyzerError_Duplicate" xml:space="preserve">
+    <value>Internal error: the name or ID already exists.</value>
+  </data>
+  <data name="AnalyzerError_InvalidAnalyzerNumber" xml:space="preserve">
+    <value>Invalid analyzer number. Check the connection.</value>
+  </data>
+  <data name="AnalyzerError_InvalidPortId" xml:space="preserve">
+    <value>Invalid port identifier (RS/USB). Check the analyzer port.</value>
+  </data>
+  <data name="AnalyzerError_InvalidBaudRate" xml:space="preserve">
+    <value>Invalid baud rate of the port. Check the port settings.</value>
+  </data>
+  <data name="AnalyzerError_NullPointer" xml:space="preserve">
+    <value>Internal error: empty pointer in an SDK call.</value>
+  </data>
+  <data name="AnalyzerError_InvalidIndex" xml:space="preserve">
+    <value>Internal error: invalid index.</value>
+  </data>
+  <data name="AnalyzerError_InvalidAnalyzerId" xml:space="preserve">
+    <value>Invalid analyzer ID.</value>
+  </data>
+  <data name="AnalyzerError_InvalidProbeNumber" xml:space="preserve">
+    <value>Invalid number of the measuring probe.</value>
+  </data>
+  <data name="AnalyzerError_InvalidProbeId" xml:space="preserve">
+    <value>Invalid ID of the measuring probe.</value>
+  </data>
+  <data name="AnalyzerError_NoObject" xml:space="preserve">
+    <value>Internal error: a nonexistent SDK object was requested.</value>
+  </data>
+  <data name="AnalyzerError_NoOutputProbe" xml:space="preserve">
+    <value>No output measuring probe is selected.</value>
+  </data>
+  <data name="AnalyzerError_BufferTooSmall" xml:space="preserve">
+    <value>Internal error: the buffer is too small.</value>
+  </data>
+  <data name="AnalyzerError_InvalidTimeout" xml:space="preserve">
+    <value>Invalid timeout of the communication port. Check the settings.</value>
+  </data>
+  <data name="AnalyzerError_UsbOpen" xml:space="preserve">
+    <value>Could not open the USB connection. Check {0} and reconnect the analyzer.</value>
+  </data>
+  <data name="AnalyzerError_ComOpen" xml:space="preserve">
+    <value>Could not open the COM port. Check the cable and the port number.</value>
+  </data>
+  <data name="AnalyzerError_PortState" xml:space="preserve">
+    <value>The communication port of the analyzer failed. Check {0} and reconnect the analyzer.</value>
+  </data>
+  <data name="AnalyzerError_SendFailed" xml:space="preserve">
+    <value>Could not send data to the analyzer. Check {0}.</value>
+  </data>
+  <data name="AnalyzerError_ReceiveFailed" xml:space="preserve">
+    <value>Could not receive data from the analyzer. Check {0}.</value>
+  </data>
+  <data name="AnalyzerError_NoResponse" xml:space="preserve">
+    <value>The analyzer does not respond. Check {0} and the power, then repeat.</value>
+  </data>
+  <data name="AnalyzerError_ConnectionClosed" xml:space="preserve">
+    <value>The connection to the analyzer is closed. Check {0} and reconnect the analyzer.</value>
+  </data>
+  <data name="AnalyzerError_NetworkConnect" xml:space="preserve">
+    <value>Could not establish the network connection to the analyzer. Check the network address and the cable.</value>
+  </data>
+  <data name="AnalyzerError_NetworkLost" xml:space="preserve">
+    <value>The network connection to the analyzer was interrupted. Check the network and repeat.</value>
+  </data>
+  <data name="AnalyzerError_CalData" xml:space="preserve">
+    <value>Unacceptable calibration data. Check the values.</value>
+  </data>
+  <data name="AnalyzerError_AnalogRange" xml:space="preserve">
+    <value>Unacceptable range of the analog output. Check the settings.</value>
+  </data>
+  <data name="AnalyzerError_InputShortage" xml:space="preserve">
+    <value>Not enough input data. Repeat the setup.</value>
+  </data>
+  <data name="AnalyzerError_MatrixCal" xml:space="preserve">
+    <value>RGB+W matrix calibration error. Check the calibration data.</value>
+  </data>
+  <data name="AnalyzerError_CommandUnsupported" xml:space="preserve">
+    <value>The analyzer does not support this command. Check the model and the mode.</value>
+  </data>
+  <data name="AnalyzerError_HoldError" xml:space="preserve">
+    <value>Hold mode error. Reset the hold mode.</value>
+  </data>
+  <data name="AnalyzerError_MemoryData" xml:space="preserve">
+    <value>Invalid data in the analyzer memory. Check the data file.</value>
+  </data>
+  <data name="AnalyzerError_FlickerRange" xml:space="preserve">
+    <value>The flicker value is out of the allowed range.</value>
+  </data>
+  <data name="AnalyzerError_FlickerSync" xml:space="preserve">
+    <value>Invalid synchronization frequency for the flicker measurement. Check the settings.</value>
+  </data>
+  <data name="AnalyzerError_FlickerDark" xml:space="preserve">
+    <value>The brightness is too low for the flicker measurement.</value>
+  </data>
+  <data name="AnalyzerError_FlickerProbe" xml:space="preserve">
+    <value>This probe cannot measure flicker. Check the probe type.</value>
+  </data>
+  <data name="AnalyzerError_CommandFailed" xml:space="preserve">
+    <value>Analyzer error. Repeat the operation; if it repeats, restart the analyzer.</value>
+  </data>
+  <data name="AnalyzerError_Unknown" xml:space="preserve">
+    <value>Analyzer error: {1}</value>
+  </data>
 </root>

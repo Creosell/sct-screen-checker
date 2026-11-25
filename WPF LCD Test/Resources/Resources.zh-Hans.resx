@@ -118,13 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BadConnection" xml:space="preserve">
-    <value>连接不成功。尝试重启色彩分析仪</value>
+    <value>连接失败。请尝试重启色彩分析仪</value>
   </data>
   <data name="CalibratingZeroCA" xml:space="preserve">
-    <value>校准零点...</value>
+    <value>正在校准零点...</value>
   </data>
   <data name="CheckConnectionCA" xml:space="preserve">
-    <value>检查彩色分析仪的连接。尝试重新启动并再次运行零点校准</value>
+    <value>请检查色彩分析仪的连接。尝试重新启动，然后再次进行零点校准</value>
   </data>
   <data name="CheckProbe" xml:space="preserve">
     <value>检查探头！可能需要将模式从 0-CAL 更改为 MEAS</value>
@@ -133,13 +133,13 @@
     <value>您确定要清除所有字段？</value>
   </data>
   <data name="CleanFieldWarningAfterSave" xml:space="preserve">
-    <value>结果已保存。 清除所有字段？</value>
+    <value>结果已保存。清除所有字段？</value>
   </data>
   <data name="ConnectedCA" xml:space="preserve">
     <value>已连接</value>
   </data>
   <data name="ConnectingCA" xml:space="preserve">
-    <value>连接至彩色分析仪...</value>
+    <value>正在连接色彩分析仪...</value>
   </data>
   <data name="CurrentSN" xml:space="preserve">
     <value>当前序列号：{0}</value>
@@ -157,25 +157,25 @@
     <value>语言切换失败</value>
   </data>
   <data name="ErrorAtMeasuringIteration" xml:space="preserve">
-    <value>迭代时的误差测量 </value>
+    <value>测量出错，迭代 </value>
   </data>
   <data name="ErrUnexpected" xml:space="preserve">
-    <value>发生意外错误: {0}</value>
+    <value>发生意外错误：{0}</value>
   </data>
   <data name="FillSN" xml:space="preserve">
     <value>请先填写 SN！</value>
   </data>
   <data name="MakeZeroCalibration" xml:space="preserve">
-    <value>请先进行零点校准 !</value>
+    <value>请先进行零点校准！</value>
   </data>
   <data name="Measuring" xml:space="preserve">
-    <value>测量...</value>
+    <value>正在测量...</value>
   </data>
   <data name="ResultsForSN" xml:space="preserve">
-    <value>SN 的结果</value>
+    <value>结果 SN</value>
   </data>
   <data name="SavedToJSON" xml:space="preserve">
-    <value>中保存为 JSON 格式</value>
+    <value>已保存为 JSON</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>警告</value>
@@ -193,40 +193,40 @@
     <value>Русский</value>
   </data>
   <data name="ZeroCalibration" xml:space="preserve">
-    <value>零校准</value>
+    <value>零点校准</value>
   </data>
   <data name="MeasurementTimeSec" xml:space="preserve">
-    <value>测量时间：</value>
+    <value>测量时间（秒）：</value>
   </data>
   <data name="SerialNumber" xml:space="preserve">
     <value>序列号：</value>
   </data>
   <data name="TopLeftPoint" xml:space="preserve">
-    <value>1。左上</value>
+    <value>1. 左上</value>
   </data>
   <data name="TopCenterPoint" xml:space="preserve">
-    <value>2。顶中</value>
+    <value>2. 上中</value>
   </data>
   <data name="TopRightPoint" xml:space="preserve">
-    <value>3。右上</value>
+    <value>3. 右上</value>
   </data>
   <data name="MiddleLeftPoint" xml:space="preserve">
-    <value>4。左中</value>
+    <value>4. 左中</value>
   </data>
   <data name="CenterPoint" xml:space="preserve">
-    <value>5。中心</value>
+    <value>5. 中心</value>
   </data>
   <data name="MiddleRightPoint" xml:space="preserve">
-    <value>6。右中</value>
+    <value>6. 右中</value>
   </data>
   <data name="BottomLeftPoint" xml:space="preserve">
-    <value>7。左下</value>
+    <value>7. 左下</value>
   </data>
   <data name="BottomCenterPoint" xml:space="preserve">
-    <value>8。底部中心</value>
+    <value>8. 下中</value>
   </data>
   <data name="BottomRightPoint" xml:space="preserve">
-    <value>9。右下</value>
+    <value>9. 右下</value>
   </data>
   <data name="LanguageMenu" xml:space="preserve">
     <value>语言</value>
@@ -235,13 +235,13 @@
     <value>R. 红色</value>
   </data>
   <data name="GreenPoint" xml:space="preserve">
-    <value>G.格林</value>
+    <value>G. 绿色</value>
   </data>
   <data name="BluePoint" xml:space="preserve">
-    <value>B.蓝色</value>
+    <value>B. 蓝色</value>
   </data>
   <data name="BlackPoint" xml:space="preserve">
-    <value>0。黑色</value>
+    <value>0. 黑色</value>
   </data>
   <data name="SaveResultsButton" xml:space="preserve">
     <value>保存结果</value>
@@ -250,58 +250,58 @@
     <value>清除字段</value>
   </data>
   <data name="ConnectionError" xml:space="preserve">
-    <value>连接失败或结束了错误</value>
+    <value>连接失败或出现错误</value>
   </data>
   <data name="DisconnectedCA" xml:space="preserve">
-    <value>断开连接</value>
+    <value>已断开连接</value>
   </data>
   <data name="MeasureWihoutConnectionError" xml:space="preserve">
-    <value>请首先连接彩色分析仪</value>
+    <value>请先连接色彩分析仪</value>
   </data>
   <data name="LocalizationServiceResErr" xml:space="preserve">
-    <value>Loctisationservice警告：在.resx中未找到的钥匙的资源用于文化</value>
+    <value>本地化服务警告：.resx 中未找到对应资源，区域性</value>
   </data>
   <data name="LocalizationServiceFormatErr" xml:space="preserve">
-    <value>lotisationservice错误：格式化键字符串</value>
+    <value>本地化服务错误：格式化字符串的键</value>
   </data>
   <data name="CultureNotFoundErr" xml:space="preserve">
-    <value>本地化服务错误：未找到语言的文化</value>
+    <value>本地化服务错误：未找到该语言的区域性</value>
   </data>
   <data name="WorkFolderCreated" xml:space="preserve">
     <value>已经创建了一个工作文件夹来存储结果</value>
   </data>
   <data name="WorkingFolderInitErr" xml:space="preserve">
-    <value>在工作文件夹初始化期间的错误</value>
+    <value>初始化工作文件夹时出错</value>
   </data>
   <data name="SaveJSONErrDeviceIsEmpty" xml:space="preserve">
     <value>保存错误：没有设备数据</value>
   </data>
   <data name="SaveJSONErrForSN" xml:space="preserve">
-    <value>保存到JSON的错误</value>
+    <value>保存 JSON 时出错，SN</value>
   </data>
   <data name="CsvSnErr" xml:space="preserve">
     <value>CSV保存错误：未指定序列号。</value>
   </data>
   <data name="CsvDataErr" xml:space="preserve">
-    <value>CSV节省错误：无数据保存</value>
+    <value>CSV 保存错误：没有可保存的数据</value>
   </data>
   <data name="CsvLocationErr" xml:space="preserve">
     <value>CSV保存错误：未指定位置名称</value>
   </data>
   <data name="WorkFolderCreatedForSN" xml:space="preserve">
-    <value>已经为带有SN的设备创建了一个文件夹</value>
+    <value>已为带 SN 的设备创建文件夹</value>
   </data>
   <data name="TestStartInfo" xml:space="preserve">
-    <value>用SN对设备进行测试已经开始: {0}</value>
+    <value>已开始测试设备，SN：{0}</value>
   </data>
   <data name="NoSNErr" xml:space="preserve">
-    <value>没有sn</value>
+    <value>无 SN</value>
   </data>
   <data name="NoData" xml:space="preserve">
     <value>没有数据</value>
   </data>
   <data name="LvIsTooLow" xml:space="preserve">
-    <value>注意：测得的亮度LV太低</value>
+    <value>注意：测得的亮度 Lv 过低</value>
   </data>
   <data name="InvalidResultErr" xml:space="preserve">
     <value>结果无效</value>
@@ -310,22 +310,22 @@
     <value>错误：该服务未返回测量结果 {0}</value>
   </data>
   <data name="ColorAnalyzerErr" xml:space="preserve">
-    <value>颜色分析仪错误:(</value>
+    <value>色彩分析仪错误 :(</value>
   </data>
   <data name="UnexpectedMeasurementErr" xml:space="preserve">
-    <value>意外的测量误差</value>
+    <value>意外的测量错误</value>
   </data>
   <data name="IncorrectFormatForSNErr" xml:space="preserve">
-    <value>请从拉丁字母和数字中输入正确的序列号</value>
+    <value>请输入正确的序列号（仅限拉丁字母和数字）</value>
   </data>
   <data name="AlreadyActivated" xml:space="preserve">
-    <value>已经激活了</value>
+    <value>已激活</value>
   </data>
   <data name="MeasButStatusErr" xml:space="preserve">
     <value>错误：无法找到用于更新的测量点的状态</value>
   </data>
   <data name="ClearFieldsDone" xml:space="preserve">
-    <value>田地和测量结果已清除</value>
+    <value>字段和测量结果已清除</value>
   </data>
   <data name="ViewModelClearing" xml:space="preserve">
     <value>ViewModel资源正在清除...</value>
@@ -337,13 +337,13 @@
     <value>结果成功保存</value>
   </data>
   <data name="Saved" xml:space="preserve">
-    <value>保存</value>
+    <value>已保存</value>
   </data>
   <data name="SaveCanceled" xml:space="preserve">
     <value>保存已被用户取消</value>
   </data>
   <data name="Saving" xml:space="preserve">
-    <value>保存...</value>
+    <value>正在保存...</value>
   </data>
   <data name="SnCantBeEmpty" xml:space="preserve">
     <value>序列号不能为空</value>
@@ -352,13 +352,13 @@
     <value>错误：在 {0} 中未找到外部程序文件</value>
   </data>
   <data name="RunExternalAppUnexpectedErr" xml:space="preserve">
-    <value>启动外部程序时出错: {0}</value>
+    <value>启动外部程序时出错：{0}</value>
   </data>
   <data name="TestFormatString" xml:space="preserve">
-    <value>这是一个数字测试： {0}</value>
+    <value>这是一个数字测试：{0}</value>
   </data>
   <data name="ConfigDirNotFound" xml:space="preserve">
-    <value>未找到配置目录 : {0}</value>
+    <value>未找到配置目录：{0}</value>
   </data>
   <data name="ChooseConfiguration" xml:space="preserve">
     <value>选择配置…</value>
@@ -418,7 +418,7 @@
     <value>报告生成失败</value>
   </data>
   <data name="ErrorInBackgroundTask" xml:space="preserve">
-    <value>后台任务出错: {0}</value>
+    <value>后台任务出错：{0}</value>
   </data>
   <data name="ReportGenerationCanceled" xml:space="preserve">
     <value>已取消创建报告</value>
@@ -433,7 +433,7 @@
     <value>上传过程失败</value>
   </data>
   <data name="ErrWithArg" xml:space="preserve">
-    <value>错误: {0}</value>
+    <value>错误：{0}</value>
   </data>
   <data name="WarningFailedToCleanup" xml:space="preserve">
     <value>警告：无法清理 {0}。错误：{1}</value>
@@ -508,13 +508,13 @@
     <value>已连接（已校准）</value>
   </data>
   <data name="SpecVerdictFormat" xml:space="preserve">
-    <value>规格: {0}</value>
+    <value>规格：{0}</value>
   </data>
   <data name="SpecVerdictPass" xml:space="preserve">
     <value>通过</value>
   </data>
   <data name="SpecVerdictWarn" xml:space="preserve">
-    <value>提示</value>
+    <value>警告</value>
   </data>
   <data name="SpecVerdictFail" xml:space="preserve">
     <value>不合格</value>
@@ -526,13 +526,13 @@
     <value>{0}/{1} 点</value>
   </data>
   <data name="SpecWaitingFor" xml:space="preserve">
-    <value>等待: {0}</value>
+    <value>等待：{0}</value>
   </data>
   <data name="SpecSelectConfig" xml:space="preserve">
     <value>请选择设备配置，以按规格检查测量结果</value>
   </data>
   <data name="SpecUnavailable" xml:space="preserve">
-    <value>规格检查不可用: {0}</value>
+    <value>规格检查不可用：{0}</value>
   </data>
   <data name="SpecBound_min" xml:space="preserve">
     <value>最小</value>
@@ -646,10 +646,10 @@
     <value>建议重新测量</value>
   </data>
   <data name="SaveSpecHeader" xml:space="preserve">
-    <value>部分数值不符合规格:</value>
+    <value>部分数值不符合规格：</value>
   </data>
   <data name="SaveSpecHeaderFewAttempts" xml:space="preserve">
-    <value>部分数值不符合规格，且部分点位测量次数少于 3 次:</value>
+    <value>部分数值不符合规格，且部分点位测量次数少于 3 次：</value>
   </data>
   <data name="SaveSpecRemeasureHint" xml:space="preserve">
     <value>请对这些点位重新测量，以获得更可靠的结果。</value>
@@ -712,5 +712,257 @@
   </data>
   <data name="UnitMs" xml:space="preserve">
     <value>ms</value>
+  </data>
+  <data name="AnalyzerUsbCable" xml:space="preserve">
+    <value>分析仪的USB线</value>
+  </data>
+  <data name="AnalyzerUsbCable_CA310" xml:space="preserve">
+    <value>分析仪主机的USB线</value>
+  </data>
+  <data name="AnalyzerUsbCable_CA410" xml:space="preserve">
+    <value>探头的USB线</value>
+  </data>
+  <data name="AnalyzerErrorUnknownText" xml:space="preserve">
+    <value>未知错误</value>
+  </data>
+  <data name="AnalyzerError_DeviceNotFound" xml:space="preserve">
+    <value>未找到分析仪。请检查USB线和电源。</value>
+  </data>
+  <data name="AnalyzerError_DeviceNotSupported" xml:space="preserve">
+    <value>不支持此设备。请连接CA-310或CA-410。</value>
+  </data>
+  <data name="AnalyzerError_ProbeNotConnected" xml:space="preserve">
+    <value>测量探头未连接。请检查探头连接。</value>
+  </data>
+  <data name="AnalyzerError_ProbeNotConnected_CA310" xml:space="preserve">
+    <value>测量探头未连接到主机。请检查探头线缆和P1接口。</value>
+  </data>
+  <data name="AnalyzerError_ProbeNotConnected_CA410" xml:space="preserve">
+    <value>测量探头未连接。请检查探头的USB线。</value>
+  </data>
+  <data name="AnalyzerError_PortInUse" xml:space="preserve">
+    <value>分析仪端口被其他程序占用。请关闭其他使用分析仪的应用程序。</value>
+  </data>
+  <data name="AnalyzerError_MeasurementInProgress" xml:space="preserve">
+    <value>测量仍在进行。请等待其完成。</value>
+  </data>
+  <data name="AnalyzerError_HardwareSetup" xml:space="preserve">
+    <value>硬件配置不正确。请检查分析仪主机和测量探头的连接。</value>
+  </data>
+  <data name="AnalyzerError_HardwareSetup_CA410" xml:space="preserve">
+    <value>硬件配置不正确。请检查探头连接。</value>
+  </data>
+  <data name="AnalyzerError_FirmwareIncompatible" xml:space="preserve">
+    <value>分析仪固件不兼容。请更新固件。</value>
+  </data>
+  <data name="AnalyzerError_ConnectionMismatch" xml:space="preserve">
+    <value>连接设置与分析仪不匹配。请重新连接分析仪。</value>
+  </data>
+  <data name="AnalyzerError_SystemError" xml:space="preserve">
+    <value>与分析仪通信失败。请重启应用程序和分析仪。</value>
+  </data>
+  <data name="AnalyzerError_MemoryAccess" xml:space="preserve">
+    <value>无法访问分析仪存储器。请重新连接测量探头。</value>
+  </data>
+  <data name="AnalyzerError_MemoryAccess_CA310" xml:space="preserve">
+    <value>无法访问主机存储器。请重新连接探头线缆。</value>
+  </data>
+  <data name="AnalyzerError_MemoryAccess_CA410" xml:space="preserve">
+    <value>无法访问探头存储器。请通过USB重新连接探头。</value>
+  </data>
+  <data name="AnalyzerError_DataNotFound" xml:space="preserve">
+    <value>分析仪中未找到数据。请重新校准。</value>
+  </data>
+  <data name="AnalyzerError_CalChannelZero" xml:space="preserve">
+    <value>通道0无法校准。请选择其他通道。</value>
+  </data>
+  <data name="AnalyzerError_ZeroCalLight" xml:space="preserve">
+    <value>零点校准失败：探头受到光照。请遮挡探头避免进光后重试。</value>
+  </data>
+  <data name="AnalyzerError_ZeroCalLight_CA310" xml:space="preserve">
+    <value>零点校准失败：探头受到光照。请将探头旋环转到0-CAL位置后重试。</value>
+  </data>
+  <data name="AnalyzerError_ZeroCalLight_CA410" xml:space="preserve">
+    <value>零点校准失败：探头受到光照。请将探头移离屏幕和光源后重试。</value>
+  </data>
+  <data name="AnalyzerError_ZeroCalRequired" xml:space="preserve">
+    <value>需要零点校准。请先执行零点校准，然后重新测量。</value>
+  </data>
+  <data name="AnalyzerError_OutOfRange" xml:space="preserve">
+    <value>数值超出测量范围。请检查探头位置和屏幕亮度。</value>
+  </data>
+  <data name="AnalyzerError_MeasurementFailed" xml:space="preserve">
+    <value>测量失败。请检查测量探头的位置和屏幕上的测试颜色。</value>
+  </data>
+  <data name="AnalyzerError_NoSync" xml:space="preserve">
+    <value>无同步信号。请检查同步模式和与屏幕的连接。</value>
+  </data>
+  <data name="AnalyzerError_ColorTempFailed" xml:space="preserve">
+    <value>无法计算色温：数值超出测量范围。请重新测量。</value>
+  </data>
+  <data name="AnalyzerError_FrequencyOutOfRange" xml:space="preserve">
+    <value>屏幕刷新频率超出分析仪范围。请检查同步模式。</value>
+  </data>
+  <data name="AnalyzerError_ChannelNumber" xml:space="preserve">
+    <value>通道编号无效。允许范围为0至99。</value>
+  </data>
+  <data name="AnalyzerError_ChannelId" xml:space="preserve">
+    <value>通道ID无效。</value>
+  </data>
+  <data name="AnalyzerError_ChannelIdTooLong" xml:space="preserve">
+    <value>通道ID过长：最多10个字符。</value>
+  </data>
+  <data name="AnalyzerError_ChannelComment" xml:space="preserve">
+    <value>通道备注无效。请检查允许的长度。</value>
+  </data>
+  <data name="AnalyzerError_SavingCancelled" xml:space="preserve">
+    <value>用户已取消保存。</value>
+  </data>
+  <data name="AnalyzerError_NotNow" xml:space="preserve">
+    <value>当前无法执行该操作。请等待当前操作完成后重试。</value>
+  </data>
+  <data name="AnalyzerError_BodyOnly" xml:space="preserve">
+    <value>该命令仅支持分析仪主机。</value>
+  </data>
+  <data name="AnalyzerError_ProbeOnly" xml:space="preserve">
+    <value>该命令仅支持测量探头。</value>
+  </data>
+  <data name="AnalyzerError_SettingsMismatch" xml:space="preserve">
+    <value>该参数与当前分析仪或探头设置不符。请检查设置。</value>
+  </data>
+  <data name="AnalyzerError_ConfigType" xml:space="preserve">
+    <value>配置类型或类型组合无效。请检查设置。</value>
+  </data>
+  <data name="AnalyzerError_UserDataNotSet" xml:space="preserve">
+    <value>未设置用户校准数据。</value>
+  </data>
+  <data name="AnalyzerError_Ca500Only" xml:space="preserve">
+    <value>该功能仅适用于CA-500。</value>
+  </data>
+  <data name="AnalyzerError_CalTypeMismatch" xml:space="preserve">
+    <value>校准类型与ND滤光片类型不一致。</value>
+  </data>
+  <data name="AnalyzerError_SamplingCombination" xml:space="preserve">
+    <value>采样频率与采样数的组合无效。</value>
+  </data>
+  <data name="AnalyzerError_SyncValueOutOfRange" xml:space="preserve">
+    <value>同步频率或积分时间超出允许范围。请检查设置。</value>
+  </data>
+  <data name="AnalyzerError_ColorValue" xml:space="preserve">
+    <value>颜色或亮度值（x、y、Lv）无效。</value>
+  </data>
+  <data name="AnalyzerError_SdkInternal" xml:space="preserve">
+    <value>分析仪SDK内部错误。请重启应用程序和分析仪。</value>
+  </data>
+  <data name="AnalyzerError_CalFileOpen" xml:space="preserve">
+    <value>无法打开校准数据文件。请检查文件名。</value>
+  </data>
+  <data name="AnalyzerError_InvalidArgument" xml:space="preserve">
+    <value>内部错误：分析仪命令参数无效。</value>
+  </data>
+  <data name="AnalyzerError_Duplicate" xml:space="preserve">
+    <value>内部错误：名称或ID已存在。</value>
+  </data>
+  <data name="AnalyzerError_InvalidAnalyzerNumber" xml:space="preserve">
+    <value>分析仪编号无效。请检查连接。</value>
+  </data>
+  <data name="AnalyzerError_InvalidPortId" xml:space="preserve">
+    <value>端口标识（RS/USB）无效。请检查分析仪端口。</value>
+  </data>
+  <data name="AnalyzerError_InvalidBaudRate" xml:space="preserve">
+    <value>端口波特率无效。请检查端口设置。</value>
+  </data>
+  <data name="AnalyzerError_NullPointer" xml:space="preserve">
+    <value>内部错误：SDK调用中出现空指针。</value>
+  </data>
+  <data name="AnalyzerError_InvalidIndex" xml:space="preserve">
+    <value>内部错误：索引无效。</value>
+  </data>
+  <data name="AnalyzerError_InvalidAnalyzerId" xml:space="preserve">
+    <value>分析仪ID无效。</value>
+  </data>
+  <data name="AnalyzerError_InvalidProbeNumber" xml:space="preserve">
+    <value>测量探头编号无效。</value>
+  </data>
+  <data name="AnalyzerError_InvalidProbeId" xml:space="preserve">
+    <value>测量探头ID无效。</value>
+  </data>
+  <data name="AnalyzerError_NoObject" xml:space="preserve">
+    <value>内部错误：请求了不存在的SDK对象。</value>
+  </data>
+  <data name="AnalyzerError_NoOutputProbe" xml:space="preserve">
+    <value>未选择输出测量探头。</value>
+  </data>
+  <data name="AnalyzerError_BufferTooSmall" xml:space="preserve">
+    <value>内部错误：缓冲区大小不足。</value>
+  </data>
+  <data name="AnalyzerError_InvalidTimeout" xml:space="preserve">
+    <value>通信端口超时设置无效。请检查设置。</value>
+  </data>
+  <data name="AnalyzerError_UsbOpen" xml:space="preserve">
+    <value>无法打开USB连接。请检查{0}并重新连接分析仪。</value>
+  </data>
+  <data name="AnalyzerError_ComOpen" xml:space="preserve">
+    <value>无法打开COM端口。请检查线缆和端口号。</value>
+  </data>
+  <data name="AnalyzerError_PortState" xml:space="preserve">
+    <value>分析仪通信端口出错。请检查{0}并重新连接分析仪。</value>
+  </data>
+  <data name="AnalyzerError_SendFailed" xml:space="preserve">
+    <value>无法向分析仪发送数据。请检查{0}。</value>
+  </data>
+  <data name="AnalyzerError_ReceiveFailed" xml:space="preserve">
+    <value>无法从分析仪接收数据。请检查{0}。</value>
+  </data>
+  <data name="AnalyzerError_NoResponse" xml:space="preserve">
+    <value>分析仪无响应。请检查{0}和电源，然后重试。</value>
+  </data>
+  <data name="AnalyzerError_ConnectionClosed" xml:space="preserve">
+    <value>与分析仪的连接已关闭。请检查{0}并重新连接分析仪。</value>
+  </data>
+  <data name="AnalyzerError_NetworkConnect" xml:space="preserve">
+    <value>无法建立与分析仪的网络连接。请检查网络地址和线缆。</value>
+  </data>
+  <data name="AnalyzerError_NetworkLost" xml:space="preserve">
+    <value>与分析仪的网络连接已中断。请检查网络后重试。</value>
+  </data>
+  <data name="AnalyzerError_CalData" xml:space="preserve">
+    <value>校准数据不可接受。请检查数值。</value>
+  </data>
+  <data name="AnalyzerError_AnalogRange" xml:space="preserve">
+    <value>模拟输出范围不可接受。请检查设置。</value>
+  </data>
+  <data name="AnalyzerError_InputShortage" xml:space="preserve">
+    <value>输入数据不足。请重新设置。</value>
+  </data>
+  <data name="AnalyzerError_MatrixCal" xml:space="preserve">
+    <value>RGB+W矩阵校准错误。请检查校准数据。</value>
+  </data>
+  <data name="AnalyzerError_CommandUnsupported" xml:space="preserve">
+    <value>分析仪不支持此命令。请检查型号和模式。</value>
+  </data>
+  <data name="AnalyzerError_HoldError" xml:space="preserve">
+    <value>保持模式错误。请重置保持模式。</value>
+  </data>
+  <data name="AnalyzerError_MemoryData" xml:space="preserve">
+    <value>分析仪存储器中的数据无效。请检查数据文件。</value>
+  </data>
+  <data name="AnalyzerError_FlickerRange" xml:space="preserve">
+    <value>闪烁值超出允许范围。</value>
+  </data>
+  <data name="AnalyzerError_FlickerSync" xml:space="preserve">
+    <value>闪烁测量的同步频率无效。请检查设置。</value>
+  </data>
+  <data name="AnalyzerError_FlickerDark" xml:space="preserve">
+    <value>亮度过低，无法测量闪烁。</value>
+  </data>
+  <data name="AnalyzerError_FlickerProbe" xml:space="preserve">
+    <value>该探头无法测量闪烁。请检查探头类型。</value>
+  </data>
+  <data name="AnalyzerError_CommandFailed" xml:space="preserve">
+    <value>分析仪错误。请重试；若再次出现，请重启分析仪。</value>
+  </data>
+  <data name="AnalyzerError_Unknown" xml:space="preserve">
+    <value>分析仪错误：{1}</value>
   </data>
 </root>

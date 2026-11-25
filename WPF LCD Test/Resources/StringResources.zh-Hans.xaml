@@ -23,13 +23,13 @@
     </system:String>
     <system:String x:Key="Chinese">中文</system:String>
     <system:String x:Key="ZeroCalibration">
-        零校准
+        零点校准
     </system:String>
     <system:String x:Key="DeviceCardNoAnalyzer">无分析仪</system:String>
-    <system:String x:Key="DeviceCardPressCalibration">请按“零校准”</system:String>
+    <system:String x:Key="DeviceCardPressCalibration">请按“零点校准”</system:String>
     <system:String x:Key="DeviceCardCalibrating">校准中…</system:String>
     <system:String x:Key="MeasurementTimeSec">
-        测量时间：
+        测量时间（秒）：
     </system:String>
     <system:String x:Key="SerialNumber">
         序列号：
@@ -38,7 +38,7 @@
         1. 左上
     </system:String>
     <system:String x:Key="TopCenterPoint">
-        2. 顶中
+        2. 上中
     </system:String>
     <system:String x:Key="TopRightPoint">
         3. 右上
@@ -56,7 +56,7 @@
         7. 左下
     </system:String>
     <system:String x:Key="BottomCenterPoint">
-        8. 底部中心
+        8. 下中
     </system:String>
     <system:String x:Key="BottomRightPoint">
         9. 右下
@@ -71,10 +71,10 @@
         R. 红色
     </system:String>
     <system:String x:Key="GreenPoint">
-        G.格林
+        G. 绿色
     </system:String>
     <system:String x:Key="BluePoint">
-        B.蓝色
+        B. 蓝色
     </system:String>
     <system:String x:Key="WhitePoint">
         W. 白色
@@ -86,7 +86,7 @@
         保存结果
     </system:String>
     <system:String x:Key="ClearFieldsButton">
-        明确的结果
+        清除结果
     </system:String>
     <system:String x:Key="NewDeviceUnderTestButton">
         保存结果
@@ -138,7 +138,7 @@
         同步模式
     </system:String>
     <system:String x:Key="SaveButton">
-        节省
+        保存
     </system:String>
     <system:String x:Key="ResetToDefaultButton">
         恢复默认
