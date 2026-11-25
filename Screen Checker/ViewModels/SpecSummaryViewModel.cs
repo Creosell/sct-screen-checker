@@ -172,6 +172,41 @@ namespace ScreenChecker.ViewModels
             }
 
         /// <summary>
+        /// Builds the confirmation text for saving a device that has remarks against the specification or is not fully measured.
+        /// </summary>
+        /// <param name="incomplete">Whether some points are not measured.</param>
+        /// <returns>The text to confirm; null when there is nothing to warn about.</returns>
+        public string? BuildSaveWarning(bool incomplete)
+            {
+            var problems = DescribeProblems();
+            if (problems.Count == 0 && !incomplete) return null;
+
+            bool fewAttempts = problems.Any(problem => problem.FewAttempts);
+            var lines = new List<string>();
+            if (incomplete)
+                {
+                lines.Add(Text("SaveNotFullNote"));
+                if (problems.Count > 0) lines.Add(string.Empty);
+                }
+
+            if (problems.Count > 0)
+                {
+                lines.Add(Text(fewAttempts ? "SaveSpecHeaderFewAttempts" : "SaveSpecHeader"));
+                lines.AddRange(problems.Select(problem => "• " + problem.Text));
+                }
+
+            if (fewAttempts)
+                {
+                lines.Add(string.Empty);
+                lines.Add(Text("SaveSpecRemeasureHint"));
+                }
+
+            lines.Add(string.Empty);
+            lines.Add(Text("SaveSpecQuestion"));
+            return string.Join(Environment.NewLine, lines);
+            }
+
+        /// <summary>
         /// Tells whether a point the check comes from was measured fewer than three times; a point that already has three attempts
         /// is never asked to be measured again.
         /// </summary>

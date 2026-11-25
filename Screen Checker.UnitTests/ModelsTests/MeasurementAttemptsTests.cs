@@ -77,6 +77,50 @@ namespace ScreenChecker.UnitTests.ModelsTests
             }
 
         [Test]
+        public void ApplyAttemptChoices_StartsTheSeriesOfADeviatedPointAndTakesTheBestAttempt()
+            {
+            var device = new DeviceUnderTest("SN1");
+            device.RecordAttempt(Attempt("Center", 240));
+            var deviated = new SpecEvaluation(SpecVerdict.Warn, true, []) { Attempts = new Dictionary<string, SpecAttemptInfo> { ["Center"] = new(1, 0, true) } };
+
+            device.ApplyAttemptChoices(deviated);
+            device.RecordAttempt(Attempt("Center", 260));
+            device.RecordAttempt(Attempt("Center", 255));
+            var best = new SpecEvaluation(SpecVerdict.Pass, true, []) { Attempts = new Dictionary<string, SpecAttemptInfo> { ["Center"] = new(3, 1, true) } };
+            device.ApplyAttemptChoices(best);
+
+            Assert.That(device.AttemptCount("Center"), Is.EqualTo(3));
+            Assert.That(device.Measurements.Single().Lv, Is.EqualTo(260));
+            }
+
+        [Test]
+        public void ApplyAttemptChoices_PointWithoutDeviationsKeepsOnlyItsLatestMeasurement()
+            {
+            var device = new DeviceUnderTest("SN1");
+            device.RecordAttempt(Attempt("Center", 300));
+            var clean = new SpecEvaluation(SpecVerdict.Pass, true, []) { Attempts = new Dictionary<string, SpecAttemptInfo> { ["Center"] = new(1, 0, false) } };
+
+            device.ApplyAttemptChoices(clean);
+            device.RecordAttempt(Attempt("Center", 240));
+
+            Assert.That((device.AttemptCount("Center"), device.Measurements.Single().Lv), Is.EqualTo((1, 240.0)));
+            }
+
+        [Test]
+        public void ApplyAttemptChoices_AnswerForAnOlderStateOfThePointIsNotApplied()
+            {
+            var device = new DeviceUnderTest("SN1");
+            device.StartSeries("Center");
+            device.RecordAttempt(Attempt("Center", 150));
+            device.RecordAttempt(Attempt("Center", 180));
+            var stale = new SpecEvaluation(SpecVerdict.Pass, true, []) { Attempts = new Dictionary<string, SpecAttemptInfo> { ["Center"] = new(1, 0, false) } };
+
+            device.ApplyAttemptChoices(stale);
+
+            Assert.That(device.Measurements.Single().Lv, Is.EqualTo(180), "an answer about one attempt must not override two");
+            }
+
+        [Test]
         public void Json_WritesAttemptsOnlyForPointsMeasuredSeveralTimes()
             {
             var device = new DeviceUnderTest("SN1");

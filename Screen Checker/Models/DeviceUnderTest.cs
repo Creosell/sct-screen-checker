@@ -98,6 +98,25 @@ namespace ScreenChecker.Models
             }
 
         /// <summary>
+        /// Takes over the verdict of the specification check on the attempts: starts the series of every point that
+        /// deviated from the specification (its next measurements are kept as attempts) and makes the best attempt
+        /// of every point the one its measurement holds. A point measured since the check is left alone.
+        /// </summary>
+        /// <param name="evaluation">The evaluation of this device.</param>
+        public void ApplyAttemptChoices(SpecEvaluation evaluation)
+            {
+            ArgumentNullException.ThrowIfNull(evaluation);
+
+            foreach (var (location, info) in evaluation.Attempts)
+                {
+                if (AttemptCount(location) != info.Count) continue;
+
+                if (info.Deviated) StartSeries(location);
+                if (info.Count > 1) SelectBestAttempt(location, info.Best);
+                }
+            }
+
+        /// <summary>
         /// Gets the number of accepted attempts of a point.
         /// </summary>
         /// <param name="location">Measurement location identifier.</param>

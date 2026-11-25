@@ -62,6 +62,7 @@ namespace ScreenChecker
             AddService<IDeviceConfigurationService, DeviceConfigurationService>(services);
             AddService<IReportGenerationService, ReportGenerationService>(services);
             services.AddSingleton<ILogService, LogService>();
+            services.AddTransient<ISpecCheckCoordinator, SpecCheckCoordinator>();
 
             // ViewModels
             AddViewModel<MainWindowViewModel>(services);

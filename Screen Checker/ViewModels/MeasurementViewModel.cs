@@ -27,11 +27,8 @@ namespace ScreenChecker.ViewModels
         private readonly ISettingsService _settingsService;
         private readonly IPathProvider _pathProvider;
         private readonly IMeasurementStatusService _measurementStatusService;
-        private readonly ISpecEvaluationService _specEvaluationService;
+        private readonly ISpecCheckCoordinator _specCheck;
         private readonly ILogService _logService;
-        private CancellationTokenSource? _specCts;
-        private Task _specTask = Task.CompletedTask;
-        private string? _lastSpecError;
 
         private DeviceUnderTest? _currentDevice;
         private string _serialNumber = string.Empty;
@@ -388,7 +385,7 @@ namespace ScreenChecker.ViewModels
         /// <param name="settingsService">Service for application settings.</param>
         /// <param name="measurementStatusService">Service for managing measurement statuses.</param>
         /// <param name="analyzerRegistryService">Registry of the last confirmed channel per probe.</param>
-        /// <param name="specEvaluationService">Service checking the measurements against the device specification.</param>
+        /// <param name="specCheck">Coordinator checking the measurements against the device specification.</param>
         /// <param name="attemptCounter">Counter of the rejected measurement attempts per point.</param>
         /// <param name="deviceConfigurationService">Service discovering the device configuration files.</param>
         /// <param name="reportGenerationService">Service running the report generator.</param>
@@ -404,7 +401,7 @@ namespace ScreenChecker.ViewModels
             IPathProvider pathProvider,
             IMeasurementStatusService measurementStatusService,
             IAnalyzerRegistryService analyzerRegistryService,
-            ISpecEvaluationService specEvaluationService,
+            ISpecCheckCoordinator specCheck,
             IAttemptCounter attemptCounter,
             IDeviceConfigurationService deviceConfigurationService,
             IReportGenerationService reportGenerationService,
@@ -420,7 +417,7 @@ namespace ScreenChecker.ViewModels
             _pathProvider = pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
             _measurementStatusService = measurementStatusService ?? throw new ArgumentNullException(nameof(measurementStatusService));
             _analyzerRegistryService = analyzerRegistryService ?? throw new ArgumentNullException(nameof(analyzerRegistryService));
-            _specEvaluationService = specEvaluationService ?? throw new ArgumentNullException(nameof(specEvaluationService));
+            _specCheck = specCheck ?? throw new ArgumentNullException(nameof(specCheck));
             _attemptCounter = attemptCounter ?? throw new ArgumentNullException(nameof(attemptCounter));
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
             _reportGenerationService = reportGenerationService ?? throw new ArgumentNullException(nameof(reportGenerationService));
@@ -717,10 +714,9 @@ namespace ScreenChecker.ViewModels
                 _currentDevice.DeviceConfiguration = SelectedDeviceConfiguration;
                 _currentDevice.IsTV = IsTvCheckboxChecked;
 
-                await _specTask;
-                var problems = Spec.DescribeProblems();
-                bool incomplete = !AreAllStatusesRepresentedInMeasurements();
-                if ((problems.Count > 0 || incomplete) && !_dialogService.ShowQuestion(BuildSaveWarning(problems, incomplete), $"{Warning}"))
+                await _specCheck.Pending;
+                string? warning = Spec.BuildSaveWarning(!AreAllStatusesRepresentedInMeasurements());
+                if (warning != null && !_dialogService.ShowQuestion(warning, $"{Warning}"))
                     {
                     Log(SaveCanceled);
                     return false;
@@ -1154,112 +1150,45 @@ namespace ScreenChecker.ViewModels
         /// <summary>
         /// Starts the specification check of the current measurements; the previous request is abandoned.
         /// </summary>
-        private void RequestSpecCheck() => _specTask = CheckSpecAsync();
+        private void RequestSpecCheck() =>
+            _specCheck.Request(new SpecCheckRequest(SelectedDeviceConfiguration, _currentDevice, PreviewSerialNumber, IsTvCheckboxChecked), ShowSpecCheck);
 
         /// <summary>
-        /// Evaluates the measurements taken so far against the selected configuration and shows the result.
-        /// Without a device, an empty one is evaluated so the table lists the checked metrics as pending.
+        /// Shows the outcome of a specification check: the device info panel, the attempts of the points and the log.
         /// </summary>
-        private async Task CheckSpecAsync()
+        private void ShowSpecCheck(SpecCheckResult result)
             {
-            _specCts?.Cancel();
-            var cts = _specCts = new CancellationTokenSource();
-
-            if (string.IsNullOrEmpty(SelectedDeviceConfiguration))
+            switch (result)
                 {
-                ExecuteThreadInUI(() => Spec.ShowMessage(ResourceManager.GetString("SpecSelectConfig")!));
-                return;
+                case SpecCheckResult.ConfigurationNeeded:
+                    Spec.ShowMessage(ResourceManager.GetString("SpecSelectConfig")!);
+                    break;
+
+                case SpecCheckResult.Evaluated evaluated:
+                    evaluated.Device.ApplyAttemptChoices(evaluated.Evaluation);
+                    ShowAttempts(evaluated.Evaluation);
+                    Spec.Show(evaluated.Evaluation, evaluated.MeasuredPoints, evaluated.TotalPoints);
+                    break;
+
+                case SpecCheckResult.Unavailable unavailable:
+                    string message = string.Format(ResourceManager.GetString("SpecUnavailable")!, unavailable.Error);
+                    Spec.ShowMessage(message);
+                    if (unavailable.IsNew) _logService.Append(message, LogSeverity.Warning);
+                    break;
                 }
-
-            var device = _currentDevice ?? new DeviceUnderTest(PreviewSerialNumber);
-            device.DeviceConfiguration = SelectedDeviceConfiguration;
-            device.IsTV = IsTvCheckboxChecked;
-            string deviceJson = _fileService.SerializeDevice(device);
-            int measuredPoints = device.Measurements.Count;
-            int totalPoints = _measurementStatusService.AllMeasurementButtonStatuses.Count - (device.IsTV ? 0 : 1);
-
-            SpecEvaluationOutcome outcome;
-            try
-                {
-                outcome = await _specEvaluationService.EvaluateAsync(deviceJson, cts.Token);
-                }
-            catch (OperationCanceledException)
-                {
-                return;
-                }
-            if (cts.IsCancellationRequested) return;
-
-            ExecuteThreadInUI(() =>
-            {
-                if (outcome.Evaluation != null)
-                    {
-                    _lastSpecError = null;
-                    ApplyAttempts(device, outcome.Evaluation);
-                    Spec.Show(outcome.Evaluation, measuredPoints, totalPoints);
-                    return;
-                    }
-
-                string error = outcome.Error ?? "?";
-                Spec.ShowMessage(string.Format(ResourceManager.GetString("SpecUnavailable")!, error));
-                if (error != _lastSpecError)
-                    {
-                    _lastSpecError = error;
-                    _logService.Append(string.Format(ResourceManager.GetString("SpecUnavailable")!, error), LogSeverity.Warning);
-                    }
-            });
             }
 
         /// <summary>
-        /// Starts the series of every point that deviated from the specification (its next measurements are kept as attempts),
-        /// takes over the choice of the best attempt of every point from the specification check and shows the attempts counters.
-        /// A result computed for an older state of the device (a point was measured meanwhile) is not applied.
+        /// Refreshes the results table and shows the attempts counters of the points.
         /// </summary>
-        private void ApplyAttempts(DeviceUnderTest device, SpecEvaluation evaluation)
+        private void ShowAttempts(SpecEvaluation evaluation)
             {
-            foreach (var (location, info) in evaluation.Attempts)
-                {
-                if (device.AttemptCount(location) != info.Count) continue;
-
-                if (info.Deviated) device.StartSeries(location);
-                if (info.Count > 1) device.SelectBestAttempt(location, info.Best);
-                }
-
             RefreshResults();
             foreach (var row in Results)
                 {
                 bool isClean = !evaluation.Checks.Any(check => check.Status is SpecStatus.Warning or SpecStatus.Fail && check.Locations.Contains(row.Location));
                 row.ShowAttempts(evaluation.Attempts.GetValueOrDefault(row.Location), isClean);
                 }
-            }
-
-        /// <summary>
-        /// Builds the confirmation text for saving a device that has remarks against the specification.
-        /// </summary>
-        private static string BuildSaveWarning(IReadOnlyList<SpecProblem> problems, bool incomplete)
-            {
-            bool fewAttempts = problems.Any(problem => problem.FewAttempts);
-            var lines = new List<string>();
-            if (incomplete)
-                {
-                lines.Add(ResourceManager.GetString("SaveNotFullNote")!);
-                if (problems.Count > 0) lines.Add(string.Empty);
-                }
-
-            if (problems.Count > 0)
-                {
-                lines.Add(ResourceManager.GetString(fewAttempts ? "SaveSpecHeaderFewAttempts" : "SaveSpecHeader")!);
-                lines.AddRange(problems.Select(problem => "• " + problem.Text));
-                }
-
-            if (fewAttempts)
-                {
-                lines.Add(string.Empty);
-                lines.Add(ResourceManager.GetString("SaveSpecRemeasureHint")!);
-                }
-
-            lines.Add(string.Empty);
-            lines.Add(ResourceManager.GetString("SaveSpecQuestion")!);
-            return string.Join(Environment.NewLine, lines);
             }
 
         private void LocalizationService_LanguageChanged(object? sender, EventArgs e)
@@ -1369,7 +1298,7 @@ namespace ScreenChecker.ViewModels
             _colorMeasurementService.CurrentChannelChanged -= ColorMeasurementService_CurrentChannelChanged;
             _uploadService.StatusMessage -= UploadService_StatusMessage;
             _localizationService.LanguageChanged -= LocalizationService_LanguageChanged;
-            _specCts?.Cancel();
+            _specCheck.Cancel();
 
             ( _colorMeasurementService as IDisposable )?.Dispose();
             ( _fileService as IDisposable )?.Dispose();

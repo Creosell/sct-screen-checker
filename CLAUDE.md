@@ -55,6 +55,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 | IAttemptCounter | Rejected measurement attempts per point (instance state, no statics) |
 | IDeviceConfigurationService | Scans the config directory and builds the device configuration tree (`IFileSystem`) |
 | IReportGenerationService | Runs `Report Generator.exe` through `IProcessRunner`: exit code to status, cancellation kills the process tree |
+| ISpecCheckCoordinator | Specification check of the measurement page (transient): builds the request, runs `ISpecEvaluationService`, answers only the latest request and delivers a typed `SpecCheckResult` on the UI thread |
 | ILogService | Application log (singleton, registered without `TracingProxy`): text, warning/error entries of the Log tab, unread counter; the view model exposes it as `LogService` |
 | IPathProvider | Centralized path resolution (BaseDirectory, ConfigDirectory, DataDirectory) |
 
