@@ -96,9 +96,6 @@ namespace ScreenChecker.Views
                 viewModel.PropertyChanged -= ViewModel_PropertyChanged;
                 viewModel.RequestClearInputFocus -= ViewModel_RequestClearInputFocus;
             }
-            // TODO: Отпишитесь от любых других событий ViewModel или сервисов,
-            // на которые вы подписались напрямую в коде-за этого View и
-            // которые могут привести к утечкам памяти.
         }
 
         // --- Обработчик события изменения коллекции лога ---
@@ -116,7 +113,6 @@ namespace ScreenChecker.Views
                     LogScrollViewer.ScrollToEnd(); // Прокручиваем до конца журнала
                 }, System.Windows.Threading.DispatcherPriority.ContextIdle);
             }
-            // TODO: Сохраните обработку изменений других свойств ViewModel, если необходимо
         }
 
         // --- Копирует весь журнал в буфер обмена ---
