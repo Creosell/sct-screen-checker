@@ -61,6 +61,7 @@ namespace ScreenChecker
             AddService<IAttemptCounter, AttemptCounter>(services);
             AddService<IDeviceConfigurationService, DeviceConfigurationService>(services);
             AddService<IReportGenerationService, ReportGenerationService>(services);
+            services.AddSingleton<ILogService, LogService>();
 
             // ViewModels
             AddViewModel<MainWindowViewModel>(services);

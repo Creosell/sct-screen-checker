@@ -86,7 +86,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockSpecEvaluationService.Object,
                 new AttemptCounter(),
                 new DeviceConfigurationService(new System.IO.Abstractions.TestingHelpers.MockFileSystem(), _mockPathProvider.Object),
-                _mockReportGenerationService.Object
+                _mockReportGenerationService.Object,
+                new LogService(_mockLocalizationService.Object, _mockDispatcher.Object)
             );
             }
 
@@ -165,7 +166,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             // Arrange
             _viewModel.IsReportGenerating = false;
             // Сбрасываем лог, чтобы проверить запись
-            _viewModel.ExecuteClearLog();
+            _viewModel.LogService.Clear();
 
             var expectedExePath = _mockReportGenerationService.Object.ExecutablePath;
 
@@ -182,9 +183,9 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
 
                 // Проверяем, что в лог попал ключ ошибки (RunExternalAppNotFoundErr)
                 // Текст лога берется из свойства LogText
-                Assert.That(_viewModel.LogText, Does.Contain(nameof(RunExternalAppNotFoundErr)));
+                Assert.That(_viewModel.LogService.Text, Does.Contain(nameof(RunExternalAppNotFoundErr)));
             });
-            Assert.That(_viewModel.LogText, Does.Contain(expectedExePath));
+            Assert.That(_viewModel.LogService.Text, Does.Contain(expectedExePath));
             }
 
         [TestCase(ReportGenerationStatus.Success, 0, LogSeverity.Info)]
@@ -196,15 +197,15 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _mockReportGenerationService.Setup(r => r.IsAvailable).Returns(true);
             _mockReportGenerationService.Setup(r => r.GenerateAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ReportGenerationResult(status, exitCode));
-            int before = _viewModel.LogEntries.Count;
+            int before = _viewModel.LogService.Entries.Count;
 
             await ((RelayCommand)_viewModel.ReportGenerateCommand).ExecuteAsync(null);
 
             Assert.That(_viewModel.IsReportGenerating, Is.False);
             if (expected == LogSeverity.Info)
-                Assert.That(_viewModel.LogEntries.Count, Is.EqualTo(before), "info goes to the copyable text only");
+                Assert.That(_viewModel.LogService.Entries.Count, Is.EqualTo(before), "info goes to the copyable text only");
             else
-                Assert.That(_viewModel.LogEntries.Last().Severity, Is.EqualTo(expected));
+                Assert.That(_viewModel.LogService.Entries.Last().Severity, Is.EqualTo(expected));
             }
 
         [Test]
@@ -231,7 +232,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             await running;
 
             Assert.That(_viewModel.IsReportGenerating, Is.False);
-            Assert.That(_viewModel.LogText, Does.Contain(nameof(ReportGenerationCanceled)));
+            Assert.That(_viewModel.LogService.Text, Does.Contain(nameof(ReportGenerationCanceled)));
             }
 
         [Test]
@@ -244,7 +245,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             await ((RelayCommand)_viewModel.ReportGenerateCommand).ExecuteAsync(null);
 
             Assert.That(_viewModel.IsReportGenerating, Is.False);
-            Assert.That(_viewModel.LogText, Does.Contain(nameof(ErrorInBackgroundTask)));
+            Assert.That(_viewModel.LogService.Text, Does.Contain(nameof(ErrorInBackgroundTask)));
             }
 
         [Test]
@@ -376,14 +377,14 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             {
             // Arrange
             var validSerialNumber = "SN12345";
-            _viewModel.ExecuteClearLog();
+            _viewModel.LogService.Clear();
 
             // Act
             _viewModel.ExecuteApplySerialNumber(validSerialNumber);
 
             // Assert
-            Assert.That(_viewModel.LogText, Does.Contain("CurrentSN"));
-            Assert.That(_viewModel.LogText, Does.Contain(validSerialNumber));
+            Assert.That(_viewModel.LogService.Text, Does.Contain("CurrentSN"));
+            Assert.That(_viewModel.LogService.Text, Does.Contain(validSerialNumber));
             }
 
         // --- Тесты для ExecuteConnectAsync ---
@@ -841,14 +842,14 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             // Arrange
             _viewModel.SelectedDeviceConfiguration = "TestConfig";
             _mockUploadService.Setup(u => u.UploadReportsAsync()).ReturnsAsync(true);
-            _viewModel.ExecuteClearLog();
+            _viewModel.LogService.Clear();
 
             // Act
             await ((RelayCommand)_viewModel.UploadReportsCommand).ExecuteAsync(null);
 
             // Assert
             _mockUploadService.Verify(u => u.UploadReportsAsync(), Times.Once);
-            Assert.That(_viewModel.LogText, Does.Contain("StartingReportUploading"));
+            Assert.That(_viewModel.LogService.Text, Does.Contain("StartingReportUploading"));
             }
 
         [Test]
@@ -857,14 +858,14 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             // Arrange
             _viewModel.SelectedDeviceConfiguration = "TestConfig";
             _mockUploadService.Setup(u => u.UploadReportsAsync()).ReturnsAsync(false);
-            _viewModel.ExecuteClearLog();
+            _viewModel.LogService.Clear();
 
             // Act
             await ((RelayCommand)_viewModel.UploadReportsCommand).ExecuteAsync(null);
 
             // Assert
             _mockUploadService.Verify(u => u.UploadReportsAsync(), Times.Once);
-            Assert.That(_viewModel.LogText, Does.Contain("UploadFailed"));
+            Assert.That(_viewModel.LogService.Text, Does.Contain("UploadFailed"));
             }
 
         [Test]
@@ -963,7 +964,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
 
             var row = _viewModel.Results.Single(r => r.Location == location);
             Assert.That((row.X, row.Y, row.Lv, row.T), Is.EqualTo(("0.313", "0.329", "100", "6500")));
-            Assert.That(_viewModel.LogText, Does.Not.Contain("x=0.313"));
+            Assert.That(_viewModel.LogService.Text, Does.Not.Contain("x=0.313"));
             }
 
         [Test]
@@ -983,7 +984,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             var row = _viewModel.Results.Single(r => r.Location == location);
             Assert.That(row.Lv, Is.EqualTo("100"), "the previous accepted attempt stays");
             Assert.That(row.Status.IsPassed, Is.False, "only the status of the last measurement is red");
-            Assert.That(_viewModel.LogEntries.Last().Severity, Is.EqualTo(LogSeverity.Warning));
+            Assert.That(_viewModel.LogService.Entries.Last().Severity, Is.EqualTo(LogSeverity.Warning));
             }
 
         [Test]
@@ -992,21 +993,21 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _mockDispatcher.Setup(d => d.CheckAccess()).Returns(true);
             _viewModel.SelectedTabIndex = 1;
             _viewModel.SelectedTabIndex = 0;
-            Assert.That(_viewModel.UnreadIssues, Is.EqualTo(0));
+            Assert.That(_viewModel.LogService.UnreadIssues, Is.EqualTo(0));
 
             _mockColorMeasurementService.Raise(s => s.StatusMessage += null, _mockColorMeasurementService.Object, "info line");
-            Assert.That(_viewModel.UnreadIssues, Is.EqualTo(0), "informational lines are not counted");
+            Assert.That(_viewModel.LogService.UnreadIssues, Is.EqualTo(0), "informational lines are not counted");
 
             _viewModel.Spec.Show(new SpecEvaluation(SpecVerdict.Warn, false,
                 [new SpecCheck("Brightness", 90, 100, 120, null, SpecStatus.Warning, ["WhiteColor"], [])]), 1, 14);
-            Assert.That(_viewModel.UnreadIssues, Is.EqualTo(1));
+            Assert.That(_viewModel.LogService.UnreadIssues, Is.EqualTo(1));
 
             _viewModel.SelectedTabIndex = 1;
-            Assert.That(_viewModel.UnreadIssues, Is.EqualTo(0));
+            Assert.That(_viewModel.LogService.UnreadIssues, Is.EqualTo(0));
 
             _viewModel.Spec.Show(new SpecEvaluation(SpecVerdict.Fail, false,
                 [new SpecCheck("Brightness", 50, 100, 120, null, SpecStatus.Fail, ["WhiteColor"], [])]), 1, 14);
-            Assert.That(_viewModel.UnreadIssues, Is.EqualTo(0), "nothing is unread while the log is open");
+            Assert.That(_viewModel.LogService.UnreadIssues, Is.EqualTo(0), "nothing is unread while the log is open");
             }
 
         [Test]
@@ -1015,15 +1016,15 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _mockDispatcher.Setup(d => d.CheckAccess()).Returns(false);
             var queued = new List<Action>();
             _mockDispatcher.Setup(d => d.BeginInvoke(It.IsAny<Action>())).Callback<Action>(queued.Add);
-            int before = _viewModel.LogEntries.Count;
+            int before = _viewModel.LogService.Entries.Count;
 
             _viewModel.ReportGenerateCommand.Execute(null);
 
-            Assert.That(_viewModel.LogEntries.Count, Is.EqualTo(before), "the bound collection must not change on a foreign thread");
-            Assert.That(_viewModel.LogText, Does.Contain("Report Generator.exe"), "the text of the log is updated at once");
+            Assert.That(_viewModel.LogService.Entries.Count, Is.EqualTo(before), "the bound collection must not change on a foreign thread");
+            Assert.That(_viewModel.LogService.Text, Does.Contain("Report Generator.exe"), "the text of the log is updated at once");
 
             queued.ForEach(action => action());
-            Assert.That(_viewModel.LogEntries.Count, Is.GreaterThan(before));
+            Assert.That(_viewModel.LogService.Entries.Count, Is.GreaterThan(before));
             }
 
         [Test]
@@ -1080,14 +1081,14 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             {
             _viewModel.SelectedTabIndex = 1;
             _viewModel.SelectedTabIndex = 0;
-            Assert.That(_viewModel.UnreadSeverity, Is.EqualTo(LogSeverity.Info));
+            Assert.That(_viewModel.LogService.UnreadSeverity, Is.EqualTo(LogSeverity.Info));
 
             _viewModel.ReportGenerateCommand.Execute(null);
-            Assert.That(_viewModel.UnreadSeverity, Is.EqualTo(LogSeverity.Error));
+            Assert.That(_viewModel.LogService.UnreadSeverity, Is.EqualTo(LogSeverity.Error));
 
             _viewModel.SelectedTabIndex = 1;
-            Assert.That(_viewModel.UnreadIssues, Is.EqualTo(0));
-            Assert.That(_viewModel.UnreadSeverity, Is.EqualTo(LogSeverity.Info));
+            Assert.That(_viewModel.LogService.UnreadIssues, Is.EqualTo(0));
+            Assert.That(_viewModel.LogService.UnreadSeverity, Is.EqualTo(LogSeverity.Info));
             }
 
         [TestCase(1, "1")]
@@ -1100,20 +1101,20 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _viewModel.SelectedTabIndex = 0;
             for (int i = 0; i < errors; i++) _viewModel.ReportGenerateCommand.Execute(null);
 
-            Assert.That(_viewModel.UnreadIssuesText, Is.EqualTo(expected));
+            Assert.That(_viewModel.LogService.UnreadIssuesText, Is.EqualTo(expected));
             }
 
         [Test]
         public void LogEntries_HoldOnlyWarningsAndErrors()
             {
-            int before = _viewModel.LogEntries.Count;
+            int before = _viewModel.LogService.Entries.Count;
             _viewModel.ExecuteApplySerialNumber("SN12345");
-            Assert.That(_viewModel.LogEntries.Count, Is.EqualTo(before), "info goes to the copyable text only");
-            Assert.That(_viewModel.LogText, Does.Contain("SN12345"));
+            Assert.That(_viewModel.LogService.Entries.Count, Is.EqualTo(before), "info goes to the copyable text only");
+            Assert.That(_viewModel.LogService.Text, Does.Contain("SN12345"));
 
             _viewModel.ReportGenerateCommand.Execute(null);
 
-            Assert.That(_viewModel.LogEntries.Count, Is.EqualTo(before + 1));
+            Assert.That(_viewModel.LogService.Entries.Count, Is.EqualTo(before + 1));
             }
 
         private async Task PrepareDeviceWithOneMeasurementAsync()
@@ -1203,7 +1204,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
 
             _mockColorMeasurementService.Raise(s => s.StatusMessage += null, _mockColorMeasurementService.Object, Resources.Resources.Measuring);
 
-            Assert.That(_viewModel.LogEntries.Select(e => e.Message), Does.Not.Contain(Resources.Resources.Measuring));
+            Assert.That(_viewModel.LogService.Entries.Select(e => e.Message), Does.Not.Contain(Resources.Resources.Measuring));
             }
 
         [Test]
@@ -1904,7 +1905,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockSpecEvaluationService.Object,
                 new AttemptCounter(),
                 new DeviceConfigurationService(new System.IO.Abstractions.FileSystem(), _mockPathProvider.Object),
-                _mockReportGenerationService.Object);
+                _mockReportGenerationService.Object,
+                new LogService(_mockLocalizationService.Object, _mockDispatcher.Object));
             return viewModel;
             }
 
@@ -1928,7 +1930,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             using var viewModel = CreateViewModelWithConfigDirectory(dir => { });
 
             // Assert
-            Assert.That(viewModel.LogText, Does.Contain(nameof(ConfigDirNotFound)));
+            Assert.That(viewModel.LogService.Text, Does.Contain(nameof(ConfigDirNotFound)));
             }
 
         [Test]
@@ -1939,7 +1941,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 File.WriteAllText(Path.Combine(dir, "Config1.yaml"), string.Empty));
 
             // Assert
-            Assert.That(viewModel.LogText, Does.Not.Contain(nameof(ConfigDirNotFound)));
+            Assert.That(viewModel.LogService.Text, Does.Not.Contain(nameof(ConfigDirNotFound)));
             }
 
         [Test]

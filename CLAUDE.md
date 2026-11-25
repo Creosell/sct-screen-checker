@@ -55,6 +55,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 | IAttemptCounter | Rejected measurement attempts per point (instance state, no statics) |
 | IDeviceConfigurationService | Scans the config directory and builds the device configuration tree (`IFileSystem`) |
 | IReportGenerationService | Runs `Report Generator.exe` through `IProcessRunner`: exit code to status, cancellation kills the process tree |
+| ILogService | Application log (singleton, registered without `TracingProxy`): text, warning/error entries of the Log tab, unread counter; the view model exposes it as `LogService` |
 | IPathProvider | Centralized path resolution (BaseDirectory, ConfigDirectory, DataDirectory) |
 
 **Testability:** All system dependencies (file system, COM device, MessageBox, WPF Dispatcher) are wrapped in interfaces injected via DI. File system uses `System.IO.Abstractions` (`IFileSystem` / `MockFileSystem`). COM device wrapped in `Ca310MemoryWrapper` / `Ca310ProbeWrapper` with proper `Marshal.ReleaseComObject` cleanup.

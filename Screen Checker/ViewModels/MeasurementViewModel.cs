@@ -28,7 +28,7 @@ namespace ScreenChecker.ViewModels
         private readonly IPathProvider _pathProvider;
         private readonly IMeasurementStatusService _measurementStatusService;
         private readonly ISpecEvaluationService _specEvaluationService;
-        private readonly LogHandler _logHandler;
+        private readonly ILogService _logService;
         private CancellationTokenSource? _specCts;
         private Task _specTask = Task.CompletedTask;
         private string? _lastSpecError;
@@ -52,11 +52,7 @@ namespace ScreenChecker.ViewModels
         private bool _isTvCheckboxChecked;
         private bool _isReportGenerating;
         private bool _isUploadingReports;
-        private string _logText = string.Empty;
-        private int _logLineCount = 0;
-        private LogSeverity _pendingLogSeverity = LogSeverity.Info;
         private int _selectedTabIndex;
-        private int _unreadIssues;
 
         private readonly Dictionary<string, DeviceConfigTreeNode> _configNodesByPath = [];
         private DeviceConfigTreeNode? _selectedConfigNode;
@@ -208,8 +204,6 @@ namespace ScreenChecker.ViewModels
 
         private bool _isSavingDevice;
         private bool _hasUnsavedMeasurements;
-        private LogSeverity _unreadSeverity;
-        private const int MaxUnreadShown = 99;
         private int _pendingReportsCount;
         private CancellationTokenSource? _reportCts;
 
@@ -245,16 +239,10 @@ namespace ScreenChecker.ViewModels
                 }
             }
 
-        public string LogText
-            {
-            get => _logText;
-            set => SetProperty(ref _logText, value);
-            }
-
         /// <summary>
-        /// Gets the log entries shown in the Log tab (the text of the same entries is <see cref="LogText"/>).
+        /// Gets the application log: its text, the warnings and errors of the Log tab and the unread counter.
         /// </summary>
-        public ObservableCollection<LogEntry> LogEntries { get; } = [];
+        public ILogService LogService => _logService;
 
         /// <summary>
         /// Gets the per-point values of the Results tab.
@@ -269,42 +257,9 @@ namespace ScreenChecker.ViewModels
             get => _selectedTabIndex;
             set
                 {
-                if (SetProperty(ref _selectedTabIndex, value) && value == LogTabIndex)
-                    ResetUnread();
+                if (SetProperty(ref _selectedTabIndex, value))
+                    _logService.IsShown = value == LogTabIndex;
                 }
-            }
-
-        /// <summary>
-        /// Gets the number of warnings and errors added to the log while the Log tab was not shown.
-        /// </summary>
-        public int UnreadIssues
-            {
-            get => _unreadIssues;
-            private set
-                {
-                if (SetProperty(ref _unreadIssues, value))
-                    OnPropertyChanged(nameof(UnreadIssuesText));
-                }
-            }
-
-        /// <summary>
-        /// Gets the text of the Log tab counter: the number of unread issues, "99+" when there are more than 99.
-        /// </summary>
-        public string UnreadIssuesText => _unreadIssues > MaxUnreadShown ? $"{MaxUnreadShown}+" : _unreadIssues.ToString();
-
-        /// <summary>
-        /// Gets the most severe level among the unread warnings and errors; colors the counter of the Log tab.
-        /// </summary>
-        public LogSeverity UnreadSeverity
-            {
-            get => _unreadSeverity;
-            private set => SetProperty(ref _unreadSeverity, value);
-            }
-
-        private void ResetUnread()
-            {
-            UnreadIssues = 0;
-            UnreadSeverity = LogSeverity.Info;
             }
 
         public bool IsMeasurementButtonsEnabled
@@ -437,6 +392,7 @@ namespace ScreenChecker.ViewModels
         /// <param name="attemptCounter">Counter of the rejected measurement attempts per point.</param>
         /// <param name="deviceConfigurationService">Service discovering the device configuration files.</param>
         /// <param name="reportGenerationService">Service running the report generator.</param>
+        /// <param name="logService">Application log.</param>
         public MeasurementViewModel(
             IColorMeasurementService colorMeasurementService,
             IFileService fileService,
@@ -451,7 +407,8 @@ namespace ScreenChecker.ViewModels
             ISpecEvaluationService specEvaluationService,
             IAttemptCounter attemptCounter,
             IDeviceConfigurationService deviceConfigurationService,
-            IReportGenerationService reportGenerationService)
+            IReportGenerationService reportGenerationService,
+            ILogService logService)
             {
             _colorMeasurementService = colorMeasurementService ?? throw new ArgumentNullException(nameof(colorMeasurementService));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
@@ -467,14 +424,14 @@ namespace ScreenChecker.ViewModels
             _attemptCounter = attemptCounter ?? throw new ArgumentNullException(nameof(attemptCounter));
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
             _reportGenerationService = reportGenerationService ?? throw new ArgumentNullException(nameof(reportGenerationService));
-            _logHandler = new LogHandler(_localizationService, AddLogMessage);
-            Spec = new SpecSummaryViewModel(_measurementStatusService, AppendToLog);
+            _logService = logService ?? throw new ArgumentNullException(nameof(logService));
+            Spec = new SpecSummaryViewModel(_measurementStatusService, _logService.Append);
             Results = new(( _measurementStatusService.AllMeasurementButtonStatuses ?? [] ).Select(status => new MeasurementResultRow(status)));
 
             ZeroCalibrationCommand = new RelayCommand(ExecuteZeroCalibrationAsync, CanExecuteZeroCalibration);
             SaveResultsCommand = new RelayCommand(ExecuteSaveResultsAsync, CanExecuteSaveResults);
             ClearFieldsCommand = new RelayCommand(ExecuteClearFields, CanExecuteClearFields);
-            ClearLogCommand = new RelayCommand(ExecuteClearLog);
+            ClearLogCommand = new RelayCommand(_logService.Clear);
             SwitchLanguageCommand = new RelayCommand(ExecuteSwitchLanguage, CanExecuteSwitchLanguage);
             NewDeviceUnderTestCommand = new RelayCommand(ExecuteNewDeviceUnderTest, CanExecuteNewDeviceUnderTest, allowConcurrentExecution: true);
             ReportGenerateCommand = new RelayCommand(ExecuteReportGenerateCommandAsync, CanExecuteReportGenerateCommand, allowConcurrentExecution: true);
@@ -941,17 +898,6 @@ namespace ScreenChecker.ViewModels
             }
 
         /// <summary>
-        /// Clears the log text.
-        /// </summary>
-        public void ExecuteClearLog()
-            {
-            LogText = string.Empty;
-            LogEntries.Clear();
-            ResetUnread();
-            _logLineCount = 0;
-            }
-
-        /// <summary>
         /// Runs the report generator; calling it again while the generator runs cancels the run.
         /// </summary>
         private async Task ExecuteReportGenerateCommandAsync(object parameter)
@@ -1170,61 +1116,8 @@ namespace ScreenChecker.ViewModels
         private static string LocalizedLocation(string location) =>
             Resources.Resources.ResourceManager.GetString($"SpecLocation_{location}") is { Length: > 0 } name ? name : location;
 
-        private void Log(string messageOrKey, object[]? args = null, LogSeverity severity = LogSeverity.Info, [CallerArgumentExpression(nameof(messageOrKey))] string? resourceName = null)
-            {
-            _pendingLogSeverity = severity;
-            try
-                {
-                _logHandler.Log(messageOrKey, args, resourceName);
-                }
-            finally
-                {
-                _pendingLogSeverity = LogSeverity.Info;
-                }
-            }
-
-        private void AddLogMessage(string message) => AppendToLog(message, _pendingLogSeverity);
-
-        /// <summary>
-        /// Appends a message to the log with automatic cleanup of old entries.
-        /// Limits log to last 500 lines to prevent memory issues.
-        /// </summary>
-        private void AppendToLog(string message, LogSeverity severity = LogSeverity.Info)
-            {
-            if (string.IsNullOrEmpty(message)) return;
-
-            const int maxLines = 500;
-            _logLineCount++;
-
-            // If we exceed the limit, trim old lines
-            if (_logLineCount > maxLines)
-                {
-                var lines = LogText.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-                var linesToKeep = lines.Skip(lines.Length - maxLines + 1);
-                LogText = string.Join(Environment.NewLine, linesToKeep) + Environment.NewLine;
-                _logLineCount = maxLines;
-                }
-
-            var entry = new LogEntry(DateTime.Now, message, severity);
-            if (severity != LogSeverity.Info) ExecuteThreadInUI(() => AddLogEntry(entry));
-
-            LogText += $"{entry.Time:HH:mm:ss} {message}{Environment.NewLine}";
-            }
-
-        /// <summary>
-        /// Adds an entry to the collection the Log tab shows; must run on the UI thread because the collection is bound
-        /// (messages may be logged from background tasks, e.g. when the report generator finishes).
-        /// </summary>
-        private void AddLogEntry(LogEntry entry)
-            {
-            const int maxEntries = 500;
-            if (LogEntries.Count >= maxEntries) LogEntries.RemoveAt(0);
-            LogEntries.Add(entry);
-            if (SelectedTabIndex == LogTabIndex) return;
-
-            UnreadIssues++;
-            if (entry.Severity > UnreadSeverity) UnreadSeverity = entry.Severity;
-            }
+        private void Log(string messageOrKey, object[]? args = null, LogSeverity severity = LogSeverity.Info, [CallerArgumentExpression(nameof(messageOrKey))] string? resourceName = null) =>
+            _logService.Write(messageOrKey, args, severity, resourceName);
 
         private void UpdateUIState()
             {
@@ -1311,7 +1204,7 @@ namespace ScreenChecker.ViewModels
                 if (error != _lastSpecError)
                     {
                     _lastSpecError = error;
-                    AppendToLog(string.Format(ResourceManager.GetString("SpecUnavailable")!, error), LogSeverity.Warning);
+                    _logService.Append(string.Format(ResourceManager.GetString("SpecUnavailable")!, error), LogSeverity.Warning);
                     }
             });
             }
@@ -1482,7 +1375,7 @@ namespace ScreenChecker.ViewModels
             ( _fileService as IDisposable )?.Dispose();
             ( _dialogService as IDisposable )?.Dispose();
 
-            ExecuteClearLog();
+            _logService.Clear();
             _currentDevice = null;
             _serialNumber = string.Empty;
             _measurementTime = 2;
@@ -1502,14 +1395,14 @@ namespace ScreenChecker.ViewModels
         private void ColorMeasurementService_StatusMessage(object? sender, string message)
             {
             if (message == Measuring) return;
-            ExecuteThreadInUI(() => AppendToLog(message, ServiceMessageSeverity(message)));
+            ExecuteThreadInUI(() => _logService.Append(message, ServiceMessageSeverity(message)));
             }
 
         private void FileService_StatusMessage(object? sender, string message) =>
-            ExecuteThreadInUI(() => AppendToLog(message, ServiceMessageSeverity(message)));
+            ExecuteThreadInUI(() => _logService.Append(message, ServiceMessageSeverity(message)));
 
         private void UploadService_StatusMessage(object? sender, string message) =>
-            ExecuteThreadInUI(() => AppendToLog(message, ServiceMessageSeverity(message)));
+            ExecuteThreadInUI(() => _logService.Append(message, ServiceMessageSeverity(message)));
 
         /// <summary>
         /// Tells whether a message coming from a service reports a failure, by the localized prefix of its error texts.

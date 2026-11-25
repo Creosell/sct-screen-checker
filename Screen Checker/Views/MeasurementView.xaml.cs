@@ -5,6 +5,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using ScreenChecker.Interfaces;
 using ScreenChecker.Models;
 using ScreenChecker.ViewModels; // Убедись, что используешь пространство имен твоего ViewModel
 
@@ -70,6 +71,7 @@ namespace ScreenChecker.Views
             if (e.OldValue is MeasurementViewModel oldViewModel)
             {
                 oldViewModel.PropertyChanged -= ViewModel_PropertyChanged;
+                oldViewModel.LogService.PropertyChanged -= LogService_PropertyChanged;
                 oldViewModel.RequestClearInputFocus -= ViewModel_RequestClearInputFocus;
             }
 
@@ -77,6 +79,7 @@ namespace ScreenChecker.Views
             if (e.NewValue is MeasurementViewModel newViewModel)
             {
                 newViewModel.PropertyChanged += ViewModel_PropertyChanged;
+                newViewModel.LogService.PropertyChanged += LogService_PropertyChanged;
                 newViewModel.RequestClearInputFocus += ViewModel_RequestClearInputFocus;
                 _deviceCard.ShowImmediately(newViewModel);
             }
@@ -94,6 +97,7 @@ namespace ScreenChecker.Views
             if (this.DataContext is MeasurementViewModel viewModel)
             {
                 viewModel.PropertyChanged -= ViewModel_PropertyChanged;
+                viewModel.LogService.PropertyChanged -= LogService_PropertyChanged;
                 viewModel.RequestClearInputFocus -= ViewModel_RequestClearInputFocus;
             }
         }
@@ -102,9 +106,13 @@ namespace ScreenChecker.Views
         private void ViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (sender is MeasurementViewModel viewModel) _deviceCard.OnViewModelPropertyChanged(viewModel, e.PropertyName);
+        }
 
-            // Если изменилось свойство LogText в ViewModel
-            if (e.PropertyName == nameof(MeasurementViewModel.LogText))
+        // --- Обработчик изменения свойств журнала ---
+        private void LogService_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Если изменился текст журнала
+            if (e.PropertyName == nameof(ILogService.Text))
             {
                 // Выполняем прокрутку TextBox до конца
                 // Используем Dispatcher, чтобы прокрутка произошла после обновления UI
@@ -118,9 +126,9 @@ namespace ScreenChecker.Views
         // --- Копирует весь журнал в буфер обмена ---
         private void CopyLog_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is MeasurementViewModel viewModel && !string.IsNullOrEmpty(viewModel.LogText))
+            if (DataContext is MeasurementViewModel viewModel && !string.IsNullOrEmpty(viewModel.LogService.Text))
             {
-                Clipboard.SetText(viewModel.LogText);
+                Clipboard.SetText(viewModel.LogService.Text);
             }
         }
 
