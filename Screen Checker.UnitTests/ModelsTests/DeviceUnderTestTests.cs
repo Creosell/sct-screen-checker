@@ -67,6 +67,7 @@ namespace ScreenChecker.UnitTests.ModelsTests
         public void RecordAttempt_AnotherAttemptOfALocationKeepsBothAndHoldsTheLatest()
         {
             DeviceUnderTest dut = new DeviceUnderTest("SN003");
+            dut.StartSeries("Center");
             dut.RecordAttempt(new Measurement("Center", 1, 2, 100, 25));
             dut.RecordAttempt(new Measurement("Edge", 5, 6, 7, 8));
 

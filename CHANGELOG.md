@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.4] - 2026-11-25
+
+### Changed
+- The attempts of a point are kept only from its first measurement with a remark against the specification (a value below typ or outside min/max). Until then a repeated measurement replaces the earlier one, so a measurement taken with the probe at a wrong point can no longer outrank the right one as the "best" attempt. The measurement with the first remark replaces the held one and starts the series of the point; the next measurements are added to it and the report generator picks the best as before. The series lasts until the device is changed; a point that never deviated is saved without the `Attempts` list in the JSON.
+
 ## [1.4.3] - 2026-11-25
 
 ### Added

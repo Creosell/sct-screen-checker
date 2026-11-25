@@ -55,8 +55,11 @@ namespace ScreenChecker.Models
             Measurements = [];
             }
 
+        private readonly HashSet<string> _seriesPoints = [];
+
         /// <summary>
-        /// Records an accepted measurement of a point as one more attempt. The point keeps all its attempts and its
+        /// Records an accepted measurement of a point. Until the point is in a series (see <see cref="StartSeries"/>)
+        /// the measurement replaces the earlier one; in a series the point keeps all its attempts and its
         /// measurement holds the latest one until the report generator (the only place that ranks the attempts)
         /// answers with the best one, see <see cref="SelectBestAttempt"/>.
         /// </summary>
@@ -67,12 +70,19 @@ namespace ScreenChecker.Models
             ArgumentNullException.ThrowIfNull(attempt);
 
             var existing = Measurements.FirstOrDefault(m => m.Location == attempt.Location);
-            List<Measurement> attempts = existing == null ? [attempt]
+            List<Measurement> attempts = existing == null || !_seriesPoints.Contains(attempt.Location) ? [attempt]
                 : existing.Attempts.Count > 0 ? [.. existing.Attempts, attempt]
                 : [existing, attempt];
 
             return StoreAttempts(attempts, attempts.Count - 1);
             }
+
+        /// <summary>
+        /// Starts the series of a point: its next measurements are kept as attempts instead of replacing the held one.
+        /// The series lasts as long as the device.
+        /// </summary>
+        /// <param name="location">Measurement location identifier.</param>
+        public void StartSeries(string location) => _seriesPoints.Add(location);
 
         /// <summary>
         /// Makes another attempt of a point the one its measurement holds (the choice of the specification check).

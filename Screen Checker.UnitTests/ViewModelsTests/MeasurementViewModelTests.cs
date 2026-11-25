@@ -1193,6 +1193,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _viewModel.IsDeviceConnected = true;
             _viewModel.IsDeviceCalibrated = true;
             var location = MeasurementLocation.WhiteColor.ToString();
+            _viewModel.CurrentDevice.StartSeries(location);
             Measurement Attempt(double lv) => new() { Location = location, x = 0.3127, y = 0.3290, Lv = lv, T = 6500, IsValid = true };
             _mockColorMeasurementService.SetupSequence(s => s.MeasureAsync(It.IsAny<int>()))
                 .ReturnsAsync(Attempt(150)).ReturnsAsync(Attempt(180)).ReturnsAsync(Attempt(170));
@@ -1223,6 +1224,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _viewModel.IsDeviceConnected = true;
             _viewModel.IsDeviceCalibrated = true;
             var location = MeasurementLocation.WhiteColor.ToString();
+            _viewModel.CurrentDevice.StartSeries(location);
             Measurement Attempt(double lv) => new() { Location = location, x = 0.3127, y = 0.3290, Lv = lv, T = 6500, IsValid = true };
             _mockColorMeasurementService.SetupSequence(s => s.MeasureAsync(It.IsAny<int>())).ReturnsAsync(Attempt(150)).ReturnsAsync(Attempt(180));
 
@@ -1287,6 +1289,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _viewModel.IsDeviceConnected = true;
             _viewModel.IsDeviceCalibrated = true;
             var location = MeasurementLocation.WhiteColor.ToString();
+            _viewModel.CurrentDevice.StartSeries(location);
             Measurement Attempt(double lv) => new() { Location = location, x = 0.3127, y = 0.3290, Lv = lv, T = 6500, IsValid = true };
             _mockColorMeasurementService.SetupSequence(s => s.MeasureAsync(It.IsAny<int>())).ReturnsAsync(Attempt(150)).ReturnsAsync(Attempt(180));
 
@@ -1298,6 +1301,34 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             Assert.That(_viewModel.CurrentDevice.Measurements.Single().BestAttemptIndex, Is.EqualTo(0), "the check chose the first attempt");
             Assert.That(row.Lv, Is.EqualTo("150"));
             Assert.That((row.Tries, row.TriesLevel), Is.EqualTo(("2/3", TriesLevel.Enough)));
+            }
+
+        [Test]
+        [TestCase(false, 1, TestName = "ARepeatOfAPointWithoutDeviationsOverwritesTheResult")]
+        [TestCase(true, 2, TestName = "ARepeatOfADeviatedPointStartsTheSeries")]
+        public async Task ExecuteMeasureAsync_TheSeriesOfAPointStartsWithTheFirstDeviatedMeasurement(bool deviated, int expectedAttempts)
+            {
+            _mockDispatcher.Setup(d => d.CheckAccess()).Returns(true);
+            _mockFileService.Setup(f => f.SerializeDevice(It.IsAny<DeviceUnderTest>())).Returns("{}");
+            var evaluation = new SpecEvaluation(SpecVerdict.Pass, false, [])
+                {
+                Attempts = new Dictionary<string, SpecAttemptInfo> { ["WhiteColor"] = new(1, 0, deviated) }
+                };
+            _mockSpecEvaluationService.Setup(s => s.EvaluateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new SpecEvaluationOutcome(evaluation, null));
+            _viewModel.SelectedDeviceConfiguration = "TestConfig";
+            _viewModel.ExecuteApplySerialNumber("SN12345");
+            _viewModel.IsDeviceConnected = true;
+            _viewModel.IsDeviceCalibrated = true;
+            var location = MeasurementLocation.WhiteColor.ToString();
+            Measurement Attempt(double lv) => new() { Location = location, x = 0.3127, y = 0.3290, Lv = lv, T = 6500, IsValid = true };
+            _mockColorMeasurementService.SetupSequence(s => s.MeasureAsync(It.IsAny<int>())).ReturnsAsync(Attempt(240)).ReturnsAsync(Attempt(260));
+
+            await ((RelayCommand)_viewModel.MeasureCommand).ExecuteAsync(location);
+            await Task.Delay(50);
+            await ((RelayCommand)_viewModel.MeasureCommand).ExecuteAsync(location);
+
+            Assert.That(_viewModel.CurrentDevice.AttemptCount(location), Is.EqualTo(expectedAttempts));
             }
 
         [Test]
@@ -1314,6 +1345,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _viewModel.SelectedDeviceConfiguration = "TestConfig";
             _viewModel.ExecuteApplySerialNumber("SN12345");
             var location = MeasurementLocation.WhiteColor.ToString();
+            _viewModel.CurrentDevice.StartSeries(location);
             _viewModel.CurrentDevice.RecordAttempt(new Measurement { Location = location, x = 0.3, y = 0.3, Lv = 150, T = 6500 });
             _viewModel.CurrentDevice.RecordAttempt(new Measurement { Location = location, x = 0.3, y = 0.3, Lv = 180, T = 6500 });
             _viewModel.CurrentDevice.SelectBestAttempt(location, 1);

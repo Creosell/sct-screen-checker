@@ -21,9 +21,22 @@ namespace ScreenChecker.UnitTests.ModelsTests
             }
 
         [Test]
+        public void RecordAttempt_WithoutASeriesReplacesTheEarlierMeasurement()
+            {
+            var device = new DeviceUnderTest("SN1");
+
+            device.RecordAttempt(Attempt("Center", 300));
+            device.RecordAttempt(Attempt("Center", 240));
+
+            Assert.That(device.Measurements.Single().Lv, Is.EqualTo(240));
+            Assert.That(device.AttemptCount("Center"), Is.EqualTo(1));
+            }
+
+        [Test]
         public void RecordAttempt_KeepsEveryAttemptAndHoldsTheLatestUntilTheGeneratorChooses()
             {
             var device = new DeviceUnderTest("SN1");
+            device.StartSeries("Center");
 
             device.RecordAttempt(Attempt("Center", 150));
             device.RecordAttempt(Attempt("Center", 180));
@@ -39,6 +52,7 @@ namespace ScreenChecker.UnitTests.ModelsTests
             {
             var device = new DeviceUnderTest("SN1");
             device.Measurements.Add(Attempt("Center", 100));
+            device.StartSeries("Center");
 
             device.RecordAttempt(Attempt("Center", 90));
 
@@ -49,6 +63,7 @@ namespace ScreenChecker.UnitTests.ModelsTests
         public void SelectBestAttempt_SwitchesTheValuesOfThePointAndIgnoresABadIndex()
             {
             var device = new DeviceUnderTest("SN1");
+            device.StartSeries("Center");
             device.RecordAttempt(Attempt("Center", 150));
             device.RecordAttempt(Attempt("Center", 180));
 
@@ -65,6 +80,7 @@ namespace ScreenChecker.UnitTests.ModelsTests
         public void Json_WritesAttemptsOnlyForPointsMeasuredSeveralTimes()
             {
             var device = new DeviceUnderTest("SN1");
+            device.StartSeries("Center");
             device.RecordAttempt(Attempt("TopLeft", 100));
             device.RecordAttempt(Attempt("Center", 150));
             device.RecordAttempt(Attempt("Center", 180, t: double.PositiveInfinity));

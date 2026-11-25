@@ -1427,15 +1427,18 @@ namespace ScreenChecker.ViewModels
             }
 
         /// <summary>
-        /// Takes over the choice of the best attempt of every point from the specification check and shows the attempts counters.
+        /// Starts the series of every point that deviated from the specification (its next measurements are kept as attempts),
+        /// takes over the choice of the best attempt of every point from the specification check and shows the attempts counters.
         /// A result computed for an older state of the device (a point was measured meanwhile) is not applied.
         /// </summary>
         private void ApplyAttempts(DeviceUnderTest device, SpecEvaluation evaluation)
             {
             foreach (var (location, info) in evaluation.Attempts)
                 {
-                if (info.Count > 1 && device.AttemptCount(location) == info.Count)
-                    device.SelectBestAttempt(location, info.Best);
+                if (device.AttemptCount(location) != info.Count) continue;
+
+                if (info.Deviated) device.StartSeries(location);
+                if (info.Count > 1) device.SelectBestAttempt(location, info.Best);
                 }
 
             RefreshResults();
