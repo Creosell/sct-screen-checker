@@ -24,6 +24,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
         private Mock<IMeasurementStatusService> _mockMeasurementStatusService;
         private Mock<ISpecEvaluationService> _mockSpecEvaluationService;
         private Mock<IAnalyzerRegistryService> _mockAnalyzerRegistryService;
+        private Mock<IReportGenerationService> _mockReportGenerationService;
         private MeasurementViewModel _viewModel;
 
         [SetUp]
@@ -41,6 +42,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             _mockDispatcher.Setup(d => d.CheckAccess()).Returns(true);
             _mockSpecEvaluationService = new Mock<ISpecEvaluationService>();
             _mockAnalyzerRegistryService = new Mock<IAnalyzerRegistryService>();
+            _mockReportGenerationService = new Mock<IReportGenerationService>();
+            _mockReportGenerationService.Setup(r => r.ExecutablePath).Returns(@"C:\TestApp\Report Generator.exe");
 
             // Setup PathProvider
             _mockPathProvider.Setup(p => p.BaseDirectory).Returns("C:\\TestApp");
@@ -82,7 +85,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockAnalyzerRegistryService.Object,
                 _mockSpecEvaluationService.Object,
                 new AttemptCounter(),
-                new DeviceConfigurationService(new System.IO.Abstractions.TestingHelpers.MockFileSystem(), _mockPathProvider.Object)
+                new DeviceConfigurationService(new System.IO.Abstractions.TestingHelpers.MockFileSystem(), _mockPathProvider.Object),
+                _mockReportGenerationService.Object
             );
             }
 
@@ -163,14 +167,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             // Сбрасываем лог, чтобы проверить запись
             _viewModel.ExecuteClearLog();
 
-            var appDir = AppDomain.CurrentDomain.BaseDirectory;
-            var exeName = "Report Generator.exe";
-            var expectedExePath = Path.Combine(appDir, exeName);
-
-            if (File.Exists(expectedExePath))
-                {
-                File.Delete(expectedExePath);
-                }
+            var expectedExePath = _mockReportGenerationService.Object.ExecutablePath;
 
             // Act
             if (_viewModel.ReportGenerateCommand.CanExecute(null))
@@ -188,6 +185,66 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 Assert.That(_viewModel.LogText, Does.Contain(nameof(RunExternalAppNotFoundErr)));
             });
             Assert.That(_viewModel.LogText, Does.Contain(expectedExePath));
+            }
+
+        [TestCase(ReportGenerationStatus.Success, 0, LogSeverity.Info)]
+        [TestCase(ReportGenerationStatus.NoDataFound, 2, LogSeverity.Warning)]
+        [TestCase(ReportGenerationStatus.ConfigError, 3, LogSeverity.Error)]
+        [TestCase(ReportGenerationStatus.Failed, 7, LogSeverity.Error)]
+        public async Task ReportGenerateCommand_LogsTheOutcomeOfTheGeneratorWithItsSeverityAndFinishesTheRun(ReportGenerationStatus status, int exitCode, LogSeverity expected)
+            {
+            _mockReportGenerationService.Setup(r => r.IsAvailable).Returns(true);
+            _mockReportGenerationService.Setup(r => r.GenerateAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ReportGenerationResult(status, exitCode));
+            int before = _viewModel.LogEntries.Count;
+
+            await ((RelayCommand)_viewModel.ReportGenerateCommand).ExecuteAsync(null);
+
+            Assert.That(_viewModel.IsReportGenerating, Is.False);
+            if (expected == LogSeverity.Info)
+                Assert.That(_viewModel.LogEntries.Count, Is.EqualTo(before), "info goes to the copyable text only");
+            else
+                Assert.That(_viewModel.LogEntries.Last().Severity, Is.EqualTo(expected));
+            }
+
+        [Test]
+        public async Task ReportGenerateCommand_SecondClickWhileGenerating_CancelsTheRun()
+            {
+            _mockReportGenerationService.Setup(r => r.IsAvailable).Returns(true);
+            _mockReportGenerationService.Setup(r => r.GenerateAsync(It.IsAny<CancellationToken>()))
+                .Returns<CancellationToken>(async token =>
+                    {
+                    try
+                        {
+                        await Task.Delay(Timeout.Infinite, token);
+                        }
+                    catch (OperationCanceledException)
+                        {
+                        }
+                    return new ReportGenerationResult(ReportGenerationStatus.Canceled, 0);
+                    });
+            var command = (RelayCommand)_viewModel.ReportGenerateCommand;
+
+            var running = command.ExecuteAsync(null);
+            Assert.That(_viewModel.IsReportGenerating, Is.True);
+            await command.ExecuteAsync(null);
+            await running;
+
+            Assert.That(_viewModel.IsReportGenerating, Is.False);
+            Assert.That(_viewModel.LogText, Does.Contain(nameof(ReportGenerationCanceled)));
+            }
+
+        [Test]
+        public async Task ReportGenerateCommand_WhenTheGeneratorThrows_LogsTheErrorAndFinishesTheRun()
+            {
+            _mockReportGenerationService.Setup(r => r.IsAvailable).Returns(true);
+            _mockReportGenerationService.Setup(r => r.GenerateAsync(It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new InvalidOperationException("boom"));
+
+            await ((RelayCommand)_viewModel.ReportGenerateCommand).ExecuteAsync(null);
+
+            Assert.That(_viewModel.IsReportGenerating, Is.False);
+            Assert.That(_viewModel.LogText, Does.Contain(nameof(ErrorInBackgroundTask)));
             }
 
         [Test]
@@ -1846,7 +1903,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockAnalyzerRegistryService.Object,
                 _mockSpecEvaluationService.Object,
                 new AttemptCounter(),
-                new DeviceConfigurationService(new System.IO.Abstractions.FileSystem(), _mockPathProvider.Object));
+                new DeviceConfigurationService(new System.IO.Abstractions.FileSystem(), _mockPathProvider.Object),
+                _mockReportGenerationService.Object);
             return viewModel;
             }
 

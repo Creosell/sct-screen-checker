@@ -60,6 +60,7 @@ namespace ScreenChecker
             AddService<ISpecEvaluationService, SpecEvaluationService>(services);
             AddService<IAttemptCounter, AttemptCounter>(services);
             AddService<IDeviceConfigurationService, DeviceConfigurationService>(services);
+            AddService<IReportGenerationService, ReportGenerationService>(services);
 
             // ViewModels
             AddViewModel<MainWindowViewModel>(services);

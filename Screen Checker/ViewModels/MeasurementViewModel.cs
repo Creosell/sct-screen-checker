@@ -41,6 +41,7 @@ namespace ScreenChecker.ViewModels
         private readonly IAnalyzerRegistryService _analyzerRegistryService;
         private readonly IAttemptCounter _attemptCounter;
         private readonly IDeviceConfigurationService _deviceConfigurationService;
+        private readonly IReportGenerationService _reportGenerationService;
         private int _measurementTime = 2;
         private string _selectedDeviceConfiguration;
         private bool _isMeasurementButtonsEnabled;
@@ -75,14 +76,6 @@ namespace ScreenChecker.ViewModels
         };
 
         public event EventHandler RequestClearInputFocus;
-
-        private enum ReportExitCode
-            {
-            Success = 0,
-            GeneralError = 1,
-            NoDataFound = 2,
-            ConfigError = 3
-            }
 
         #endregion
 
@@ -218,8 +211,7 @@ namespace ScreenChecker.ViewModels
         private LogSeverity _unreadSeverity;
         private const int MaxUnreadShown = 99;
         private int _pendingReportsCount;
-        private Process? _reportProcess;
-        private bool _reportCancelRequested;
+        private CancellationTokenSource? _reportCts;
 
         public bool IsReportGenerating
             {
@@ -444,6 +436,7 @@ namespace ScreenChecker.ViewModels
         /// <param name="specEvaluationService">Service checking the measurements against the device specification.</param>
         /// <param name="attemptCounter">Counter of the rejected measurement attempts per point.</param>
         /// <param name="deviceConfigurationService">Service discovering the device configuration files.</param>
+        /// <param name="reportGenerationService">Service running the report generator.</param>
         public MeasurementViewModel(
             IColorMeasurementService colorMeasurementService,
             IFileService fileService,
@@ -457,7 +450,8 @@ namespace ScreenChecker.ViewModels
             IAnalyzerRegistryService analyzerRegistryService,
             ISpecEvaluationService specEvaluationService,
             IAttemptCounter attemptCounter,
-            IDeviceConfigurationService deviceConfigurationService)
+            IDeviceConfigurationService deviceConfigurationService,
+            IReportGenerationService reportGenerationService)
             {
             _colorMeasurementService = colorMeasurementService ?? throw new ArgumentNullException(nameof(colorMeasurementService));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
@@ -472,6 +466,7 @@ namespace ScreenChecker.ViewModels
             _specEvaluationService = specEvaluationService ?? throw new ArgumentNullException(nameof(specEvaluationService));
             _attemptCounter = attemptCounter ?? throw new ArgumentNullException(nameof(attemptCounter));
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
+            _reportGenerationService = reportGenerationService ?? throw new ArgumentNullException(nameof(reportGenerationService));
             _logHandler = new LogHandler(_localizationService, AddLogMessage);
             Spec = new SpecSummaryViewModel(_measurementStatusService, AppendToLog);
             Results = new(( _measurementStatusService.AllMeasurementButtonStatuses ?? [] ).Select(status => new MeasurementResultRow(status)));
@@ -482,7 +477,7 @@ namespace ScreenChecker.ViewModels
             ClearLogCommand = new RelayCommand(ExecuteClearLog);
             SwitchLanguageCommand = new RelayCommand(ExecuteSwitchLanguage, CanExecuteSwitchLanguage);
             NewDeviceUnderTestCommand = new RelayCommand(ExecuteNewDeviceUnderTest, CanExecuteNewDeviceUnderTest, allowConcurrentExecution: true);
-            ReportGenerateCommand = new RelayCommand(ExecuteReportGenerateCommand, CanExecuteReportGenerateCommand);
+            ReportGenerateCommand = new RelayCommand(ExecuteReportGenerateCommandAsync, CanExecuteReportGenerateCommand, allowConcurrentExecution: true);
             MeasureCommand = new RelayCommand(ExecuteMeasureAsync, CanExecuteMeasure);
             ApplySerialNumberCommand = new RelayCommand(ExecuteApplySerialNumber, CanExecuteApplySerialNumber);
             UploadReportsCommand = new RelayCommand(ExecuteUploadReportsAsync, CanExecuteUploadReportsAsync, allowConcurrentExecution: true);
@@ -957,94 +952,41 @@ namespace ScreenChecker.ViewModels
             }
 
         /// <summary>
-        /// Executes the external report generator application.
+        /// Runs the report generator; calling it again while the generator runs cancels the run.
         /// </summary>
-        private void ExecuteReportGenerateCommand(object parameter)
+        private async Task ExecuteReportGenerateCommandAsync(object parameter)
             {
             if (IsReportGenerating)
                 {
-                CancelReportGeneration();
+                _reportCts?.Cancel();
                 return;
                 }
 
+            if (!_reportGenerationService.IsAvailable)
+                {
+                Log(RunExternalAppNotFoundErr, [_reportGenerationService.ExecutablePath], LogSeverity.Error);
+                Flash(ReportFeedback, false);
+                return;
+                }
+
+            using var cts = new CancellationTokenSource();
+            _reportCts = cts;
+            Log(StartingReportGeneration);
+            IsReportGenerating = true;
+
             try
                 {
-                var appDir = AppDomain.CurrentDomain.BaseDirectory;
-                var exePath = Path.Combine(appDir, ExternalApps.ReportGenerator);
-
-                if (!File.Exists(exePath))
-                    {
-                    Log(RunExternalAppNotFoundErr, [exePath], LogSeverity.Error);
-                    Flash(ReportFeedback, false);
-                    return;
-                    }
-
-                Log(StartingReportGeneration);
-                _reportCancelRequested = false;
-                IsReportGenerating = true;
-
-                Task.Run(() =>
-                {
-                    using var process = new Process
-                        {
-                        StartInfo = new ProcessStartInfo
-                            {
-                            FileName = exePath,
-                            WorkingDirectory = appDir,
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            CreateNoWindow = true
-                            }
-                        };
-
-                    try
-                        {
-                        process.Start();
-                        _reportProcess = process;
-                        process.BeginOutputReadLine();
-                        process.BeginErrorReadLine();
-                        process.WaitForExit();
-                        if (_reportCancelRequested)
-                            {
-                            Log(ReportGenerationCanceled, severity: LogSeverity.Warning);
-                            FlashCanceled(ReportFeedback);
-                            }
-                        else
-                            {
-                            HandleReportGenerationResult((ReportExitCode)process.ExitCode);
-                            }
-                        }
-                    catch (Exception ex)
-                        {
-                        Log(ErrorInBackgroundTask, [ex.Message], LogSeverity.Error);
-                        }
-                    finally
-                        {
-                        _reportProcess = null;
-                        ExecuteThreadInUI(() => IsReportGenerating = false);
-                        }
-                });
+                var result = await _reportGenerationService.GenerateAsync(cts.Token);
+                HandleReportGenerationResult(result);
                 }
             catch (Exception ex)
                 {
-                Log(RunExternalAppUnexpectedErr, [ex.Message], LogSeverity.Error);
-                IsReportGenerating = false;
+                Log(ErrorInBackgroundTask, [ex.Message], LogSeverity.Error);
                 }
-            }
-
-        /// <summary>
-        /// Cancels the running report generation by killing the generator process.
-        /// </summary>
-        private void CancelReportGeneration()
-            {
-            _reportCancelRequested = true;
-            try
+            finally
                 {
-                _reportProcess?.Kill(true);
-                }
-            catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception)
-                {
+                _reportCts = null;
+                ExecuteThreadInUI(() => IsReportGenerating = false);
                 }
             }
 
@@ -1201,16 +1143,23 @@ namespace ScreenChecker.ViewModels
                 : (false, $"{ErrMeasurementOutOfRange}: '{measurement.Location}'.\n{Actual} x: {measurement.x:F3}, y: {measurement.y:F3}");
             }
 
-        private void HandleReportGenerationResult(ReportExitCode exitCode)
+        private void HandleReportGenerationResult(ReportGenerationResult result)
             {
-            Flash(ReportFeedback, exitCode == ReportExitCode.Success);
-            ExecuteThreadInUI(RefreshPendingReports);
-            var (message, severity) = exitCode switch
+            if (result.Status == ReportGenerationStatus.Canceled)
                 {
-                    ReportExitCode.Success => ($"{ReportGeneratedSuccessfully}", LogSeverity.Info),
-                    ReportExitCode.NoDataFound => ($"{NoDataFoundForReportGenerator}", LogSeverity.Warning),
-                    ReportExitCode.ConfigError => ($"{InvalidReportConfiguration}", LogSeverity.Error),
-                    _ => ($"{ReportGenerationFailed} ({Code}: {(int)exitCode})", LogSeverity.Error)
+                Log(ReportGenerationCanceled, severity: LogSeverity.Warning);
+                FlashCanceled(ReportFeedback);
+                return;
+                }
+
+            Flash(ReportFeedback, result.Status == ReportGenerationStatus.Success);
+            ExecuteThreadInUI(RefreshPendingReports);
+            var (message, severity) = result.Status switch
+                {
+                    ReportGenerationStatus.Success => ($"{ReportGeneratedSuccessfully}", LogSeverity.Info),
+                    ReportGenerationStatus.NoDataFound => ($"{NoDataFoundForReportGenerator}", LogSeverity.Warning),
+                    ReportGenerationStatus.ConfigError => ($"{InvalidReportConfiguration}", LogSeverity.Error),
+                    _ => ($"{ReportGenerationFailed} ({Code}: {result.ExitCode})", LogSeverity.Error)
                     };
             Log(message, severity: severity);
             }
