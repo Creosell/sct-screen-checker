@@ -242,6 +242,66 @@ namespace ScreenChecker.UnitTests.ServicesTests
 
         #endregion
 
+        #region MoveToUploaded Tests
+
+        private const string UploadedDir = "C:\\TestApp\\uploaded_reports";
+
+        [Test]
+        public void MoveToUploaded_ZipArchive_IsMovedToTheUploadedFolder()
+        {
+            _mockFileSystem.AddFile("C:\\TestApp\\report_archive\\Dev_20230115_1430.zip", new MockFileData("zip"));
+            _mockFileSystem.AddDirectory(UploadedDir);
+
+            _uploadService.MoveToUploaded("C:\\TestApp\\report_archive\\Dev_20230115_1430.zip", UploadedDir);
+
+            Assert.That(_mockFileSystem.File.Exists("C:\\TestApp\\report_archive\\Dev_20230115_1430.zip"), Is.False);
+            Assert.That(_mockFileSystem.File.Exists(UploadedDir + "\\Dev_20230115_1430.zip"), Is.True);
+        }
+
+        [Test]
+        public void MoveToUploaded_ZipArchive_ReplacesTheFileOfTheSameName()
+        {
+            _mockFileSystem.AddFile("C:\\TestApp\\report_archive\\Dev_20230115_1430.zip", new MockFileData("new"));
+            _mockFileSystem.AddFile(UploadedDir + "\\Dev_20230115_1430.zip", new MockFileData("old"));
+
+            _uploadService.MoveToUploaded("C:\\TestApp\\report_archive\\Dev_20230115_1430.zip", UploadedDir);
+
+            Assert.That(_mockFileSystem.File.ReadAllText(UploadedDir + "\\Dev_20230115_1430.zip"), Is.EqualTo("new"));
+        }
+
+        [Test]
+        public void MoveToUploaded_ResultFile_IsDeleted()
+        {
+            _mockFileSystem.AddFile("C:\\TestApp\\results\\Dev_20230115_1430.json", new MockFileData("{}"));
+            _mockFileSystem.AddDirectory(UploadedDir);
+
+            _uploadService.MoveToUploaded("C:\\TestApp\\results\\Dev_20230115_1430.json", UploadedDir);
+
+            Assert.That(_mockFileSystem.File.Exists("C:\\TestApp\\results\\Dev_20230115_1430.json"), Is.False);
+            Assert.That(_mockFileSystem.Directory.GetFiles(UploadedDir), Is.Empty);
+        }
+
+        [Test]
+        public void MoveToUploaded_MissingFile_DoesNothing()
+        {
+            _uploadService.MoveToUploaded("C:\\TestApp\\results\\gone.json", UploadedDir);
+
+            Assert.That(_statusMessages, Is.Empty);
+        }
+
+        [Test]
+        public void MoveToUploaded_MoveFailure_IsReportedAsWarning()
+        {
+            _mockFileSystem.AddFile("C:\\TestApp\\report_archive\\Dev_20230115_1430.zip", new MockFileData("zip"));
+
+            // The destination folder does not exist, so the move throws.
+            _uploadService.MoveToUploaded("C:\\TestApp\\report_archive\\Dev_20230115_1430.zip", UploadedDir);
+
+            Assert.That(_statusMessages, Has.Some.Contains("Loc_WarningFailedToCleanup Dev_20230115_1430.zip"));
+        }
+
+        #endregion
+
         #region ExecuteSingleFileUploadAsync Tests
 
         // Note: ExecuteSingleFileUploadAsync is a private method that creates Process instances directly.

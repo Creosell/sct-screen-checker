@@ -116,11 +116,11 @@ namespace ScreenChecker.Services
                 }
 
             var baseDir = _pathProvider.BaseDirectory;
-            var uploadedReportsDir = Path.Combine(baseDir, UploadedReportsFolderName);
+            var uploadedReportsDir = _fileSystem.Path.Combine(baseDir, UploadedReportsFolderName);
 
-            if (!Directory.Exists(uploadedReportsDir))
+            if (!_fileSystem.Directory.Exists(uploadedReportsDir))
                 {
-                Directory.CreateDirectory(uploadedReportsDir);
+                _fileSystem.Directory.CreateDirectory(uploadedReportsDir);
                 }
 
             var uploadTasks = new List<Task<bool>>();
@@ -137,32 +137,7 @@ namespace ScreenChecker.Services
                     {
                         bool success = await ExecuteSingleFileUploadAsync(currentPath, remoteDir, cancellationToken);
 
-                        if (success)
-                            {
-                            try
-                                {
-                                if (File.Exists(currentPath))
-                                    {
-                                    string fileName = Path.GetFileName(currentPath);
-                                    string extension = Path.GetExtension(currentPath).ToLower();
-
-                                    if (extension == ".zip")
-                                        {
-                                        string destPath = Path.Combine(destinationFolder, fileName);
-                                        if (File.Exists(destPath)) File.Delete(destPath);
-                                        File.Move(currentPath, destPath);
-                                        }
-                                    else
-                                        {
-                                        File.Delete(currentPath);
-                                        }
-                                    }
-                                }
-                            catch (Exception ex)
-                                {
-                                ReportStatus(WarningFailedToCleanup, [Path.GetFileName(currentPath), ex.Message]);
-                                }
-                            }
+                        if (success) MoveToUploaded(currentPath, destinationFolder);
                         return success;
                     });
 
@@ -188,6 +163,35 @@ namespace ScreenChecker.Services
                 }
 
             return allSucceeded;
+            }
+
+        /// <summary>
+        /// Cleans up a file after a successful upload: a zip archive is moved to the uploaded reports folder
+        /// (replacing a file of the same name), any other file is deleted. A failure is reported as a warning.
+        /// </summary>
+        /// <param name="localPath">Path of the uploaded file.</param>
+        /// <param name="destinationFolder">Folder the uploaded archives are moved to.</param>
+        internal void MoveToUploaded(string localPath, string destinationFolder)
+            {
+            try
+                {
+                if (!_fileSystem.File.Exists(localPath)) return;
+
+                if (_fileSystem.Path.GetExtension(localPath).ToLower() == ".zip")
+                    {
+                    string destPath = _fileSystem.Path.Combine(destinationFolder, _fileSystem.Path.GetFileName(localPath));
+                    if (_fileSystem.File.Exists(destPath)) _fileSystem.File.Delete(destPath);
+                    _fileSystem.File.Move(localPath, destPath);
+                    }
+                else
+                    {
+                    _fileSystem.File.Delete(localPath);
+                    }
+                }
+            catch (Exception ex)
+                {
+                ReportStatus(WarningFailedToCleanup, [_fileSystem.Path.GetFileName(localPath), ex.Message]);
+                }
             }
 
         /// <summary>
