@@ -107,6 +107,7 @@ Supports English (default), Chinese Simplified and Russian. Resources in `Screen
 - Tests mirror source structure in `Screen Checker.UnitTests/`
 - Coverage: ViewModels, all Services (including COM lifecycle), Models, Converters, Commands
 - Do **not** use `dotnet build` to build before running tests — use MSBuild due to COM interop
+- The daily run (`default.runsettings`, set in the test project) skips the slow tests: `Category("Ui")` (`FieldStylesTests`, WPF style checks, ~27 s) and `Category("Simulator")` (`SimulatedColorMeasurementServiceTests`, the Debug analyzer simulator with its real delays, ~19 s). Run everything before a release build and after changes to `FieldStyles.xaml` or `DebugTools/`: `dotnet test "Screen Checker.UnitTests\Screen Checker.UnitTests.csproj" --no-build --settings "Screen Checker.UnitTests\all.runsettings"`
 
 ## Release
 

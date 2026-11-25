@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Full run, including the slow Ui and Simulator tests: dotnet test with the settings option set to this file -->
+<RunSettings>
+  <RunConfiguration>
+  </RunConfiguration>
+</RunSettings>

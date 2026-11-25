@@ -12,6 +12,7 @@ namespace ScreenChecker.UnitTests.ViewsTests
     /// the chosen value, the items of the list, the underline that grows and stays filled while the list is open.
     /// </summary>
     [TestFixture]
+    [Category("Ui")]
     public class FieldStylesTests
         {
         private sealed record Option(string Name)

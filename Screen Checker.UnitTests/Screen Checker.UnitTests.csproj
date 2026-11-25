@@ -10,6 +10,7 @@
     <IsTestProject>true</IsTestProject>
     <OutputType>WinExe</OutputType>
     <UseWPF>true</UseWPF>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\default.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>

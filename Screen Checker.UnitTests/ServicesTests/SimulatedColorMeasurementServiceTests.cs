@@ -9,6 +9,7 @@ using static ScreenChecker.Resources.Resources;
 namespace ScreenChecker.UnitTests.ServicesTests
     {
     [TestFixture]
+    [Category("Simulator")]
     public class SimulatedColorMeasurementServiceTests
         {
         private ObservableCollection<MeasurementStatus> _statuses = null!;

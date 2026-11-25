@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Daily run: skips the slow WPF style tests (Ui) and the analyzer simulator tests (Simulator). Run all.runsettings before a release build. -->
+<RunSettings>
+  <RunConfiguration>
+    <TestCaseFilter>Category!=Ui&amp;Category!=Simulator</TestCaseFilter>
+  </RunConfiguration>
+</RunSettings>
