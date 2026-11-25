@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.6] - 2026-11-25
+
+### Fixed
+- A measurement whose iteration failed (an error of the analyzer in one of the repeated readings) counted that iteration as zero in the average, so the brightness and the coordinates came out too low. The average is taken over the successful iterations only; a measurement where no iteration succeeded is reported as invalid instead of being recorded as zeros
+
 ## [1.4.5] - 2026-11-25
 
 ### Changed

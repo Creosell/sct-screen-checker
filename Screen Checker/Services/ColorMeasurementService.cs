@@ -338,10 +338,11 @@ namespace ScreenChecker.Services
         private bool IsValidChannel(int channel) => channel >= AppConstants.ColorAnalyzer.MinChannel && channel <= AppConstants.ColorAnalyzer.MaxChannel;
 
         /// <summary>
-        /// Asynchronously performs series of measurements and calculates average values.
+        /// Asynchronously performs series of measurements and calculates average values of the successful ones;
+        /// an iteration that failed is reported and left out of the average.
         /// </summary>
         /// <param name="measurementTime">Number of measurements to perform.</param>
-        /// <returns>Measurement object containing averaged results.</returns>
+        /// <returns>Measurement object containing averaged results; invalid when no iteration succeeded.</returns>
         public async Task<Measurement> MeasureAsync(int measurementTime)
             {
             var result = new Measurement();
@@ -364,9 +365,9 @@ namespace ScreenChecker.Services
 
                     StatusMessage?.Invoke(this, Measuring);
 
-                    var xValues = new double[measurementTime];
-                    var yValues = new double[measurementTime];
-                    var LvValues = new double[measurementTime];
+                    var xValues = new List<double>(measurementTime);
+                    var yValues = new List<double>(measurementTime);
+                    var LvValues = new List<double>(measurementTime);
                     var temperatures = new List<double>(measurementTime);
 
                     for (var i = 0; i < measurementTime; i++)
@@ -377,9 +378,9 @@ namespace ScreenChecker.Services
                                 {
                                 _objCa200.SingleCa.Measure();
                                 var probe = _objCa200.SingleCa.SingleProbe;
-                                xValues[i] = probe.sx;
-                                yValues[i] = probe.sy;
-                                LvValues[i] = probe.Lv;
+                                xValues.Add(probe.sx);
+                                yValues.Add(probe.sy);
+                                LvValues.Add(probe.Lv);
                                 temperatures.Add(probe.T);
                                 }
                             MeasurementProgress?.Invoke(this, (double)( i + 1 ) / measurementTime * 100);
@@ -399,6 +400,12 @@ namespace ScreenChecker.Services
                             {
                             Thread.Sleep(1000);
                             }
+                        }
+
+                    if (xValues.Count == 0)
+                        {
+                        result.IsValid = false;
+                        return;
                         }
 
                     result.x = xValues.Average();

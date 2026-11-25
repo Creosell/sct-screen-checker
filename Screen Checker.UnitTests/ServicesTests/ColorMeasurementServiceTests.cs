@@ -342,13 +342,24 @@ namespace ScreenChecker.Tests
 
             _mockCa.Verify(m => m.Measure(), Times.Exactly(3)); // Все попытки измерения должны быть сделаны
 
-            // Важное замечание: текущая логика `MeasureAsync` в случае ошибки `continue;`
-            // добавляет в массивы значений нули (значение по умолчанию для double).
-            // Это означает, что среднее будет рассчитано с учетом этих нулей,
-            // если только вы не измените логику для отбрасывания неудачных измерений.
-            // Если ожидается, что среднее будет только из успешных измерений,
-            // тогда потребуется модификация ColorMeasurementService.MeasureAsync.
-            // Для данного теста, мы проверяем, что сервис не падает и логирует ошибку.
+            // The failed iteration is left out of the average instead of counting as zero.
+            Assert.That(measurement.x, Is.EqualTo(expectedSx).Within(1e-9));
+            Assert.That(measurement.y, Is.EqualTo(expectedSy).Within(1e-9));
+            Assert.That(measurement.Lv, Is.EqualTo(expectedLv).Within(1e-9));
+            Assert.That(measurement.T, Is.EqualTo(expectedT).Within(1e-9));
+            }
+
+        [Test]
+        public async Task MeasureAsync_WhenEveryIterationFails_IsInvalid()
+            {
+            _mockCa200.Setup(m => m.AutoConnect()).Verifiable();
+            await _service.ConnectAsync();
+            await _service.CalibrateZeroAsync();
+            _mockCa.Setup(m => m.Measure()).Throws(new COMException("Measure iteration COM Error", -2147024891));
+
+            var measurement = await _service.MeasureAsync(2);
+
+            Assert.That(measurement.IsValid, Is.False);
             }
 
         [TestCase(-3200.0, 6500.0)]
