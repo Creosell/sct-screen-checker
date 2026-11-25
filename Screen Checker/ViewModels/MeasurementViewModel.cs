@@ -1,5 +1,4 @@
 ﻿using MvvmHelpers;
-using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -40,6 +39,7 @@ namespace ScreenChecker.ViewModels
         private bool _isChannelConfirmed;
         private ColorimeterInfo? _colorimeter;
         private readonly IAnalyzerRegistryService _analyzerRegistryService;
+        private readonly IAttemptCounter _attemptCounter;
         private int _measurementTime = 2;
         private string _selectedDeviceConfiguration;
         private bool _isMeasurementButtonsEnabled;
@@ -72,8 +72,6 @@ namespace ScreenChecker.ViewModels
             { MeasurementLocation.BlueColor.ToString(), (0.14, 0.08) },
             { MeasurementLocation.WhiteColor.ToString(), (0.3127, 0.3290) }
         };
-
-        private static readonly ConcurrentDictionary<string, int> _measurementAttemptCountersMap = new();
 
         public event EventHandler RequestClearInputFocus;
 
@@ -443,6 +441,7 @@ namespace ScreenChecker.ViewModels
         /// <param name="measurementStatusService">Service for managing measurement statuses.</param>
         /// <param name="analyzerRegistryService">Registry of the last confirmed channel per probe.</param>
         /// <param name="specEvaluationService">Service checking the measurements against the device specification.</param>
+        /// <param name="attemptCounter">Counter of the rejected measurement attempts per point.</param>
         public MeasurementViewModel(
             IColorMeasurementService colorMeasurementService,
             IFileService fileService,
@@ -454,7 +453,8 @@ namespace ScreenChecker.ViewModels
             IPathProvider pathProvider,
             IMeasurementStatusService measurementStatusService,
             IAnalyzerRegistryService analyzerRegistryService,
-            ISpecEvaluationService specEvaluationService)
+            ISpecEvaluationService specEvaluationService,
+            IAttemptCounter attemptCounter)
             {
             _colorMeasurementService = colorMeasurementService ?? throw new ArgumentNullException(nameof(colorMeasurementService));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
@@ -467,6 +467,7 @@ namespace ScreenChecker.ViewModels
             _measurementStatusService = measurementStatusService ?? throw new ArgumentNullException(nameof(measurementStatusService));
             _analyzerRegistryService = analyzerRegistryService ?? throw new ArgumentNullException(nameof(analyzerRegistryService));
             _specEvaluationService = specEvaluationService ?? throw new ArgumentNullException(nameof(specEvaluationService));
+            _attemptCounter = attemptCounter ?? throw new ArgumentNullException(nameof(attemptCounter));
             _logHandler = new LogHandler(_localizationService, AddLogMessage);
             Spec = new SpecSummaryViewModel(_measurementStatusService, AppendToLog);
             Results = new(( _measurementStatusService.AllMeasurementButtonStatuses ?? [] ).Select(status => new MeasurementResultRow(status)));
@@ -1151,17 +1152,17 @@ namespace ScreenChecker.ViewModels
         private void ProcessValidMeasurement(Measurement measurement, ref bool isSuccess, ref string message)
             {
             var (validationPassed, validationMessage) = MeasurementValidation(measurement);
-            int currentAttempt = GetAttemptCount(measurement.Location);
+            int currentAttempt = _attemptCounter.Get(measurement.Location);
 
             if (validationPassed)
                 {
                 ApplyMeasurementResult(measurement, ref message);
                 isSuccess = true;
-                ResetAttemptCount(measurement.Location);
+                _attemptCounter.Reset(measurement.Location);
                 }
             else if (currentAttempt < MAX_MEASUREMENT_ATTEMPTS_BEFORE_CONFIRM)
                 {
-                IncrementAttemptCount(measurement.Location);
+                _attemptCounter.Increment(measurement.Location);
                 string retryMsg = $"{validationMessage} \n{PleaseTryToMeasureAgain}";
                 _dialogService.ShowMessage(retryMsg, $"{Warning}");
                 message = $"{FailedMeasurementForLocation}: {measurement.Location}.\n ({Attempt} {currentAttempt + 1}). {PleaseTryToMeasureAgain}";
@@ -1182,7 +1183,7 @@ namespace ScreenChecker.ViewModels
                     message = $"{SaveCanceled}";
                     }
                 Log(message);
-                ResetAttemptCount(measurement.Location);
+                _attemptCounter.Reset(measurement.Location);
                 }
             }
 
@@ -1260,25 +1261,6 @@ namespace ScreenChecker.ViewModels
         /// </summary>
         private static string LocalizedLocation(string location) =>
             Resources.Resources.ResourceManager.GetString($"SpecLocation_{location}") is { Length: > 0 } name ? name : location;
-
-        private static int GetAttemptCount(string location)
-            {
-            _measurementAttemptCountersMap.TryGetValue(location, out int count);
-            return count;
-            }
-
-        private static void IncrementAttemptCount(string location)
-            {
-            if (!_measurementAttemptCountersMap.TryAdd(location, 1))
-                _measurementAttemptCountersMap[location]++;
-            }
-
-        private static void ResetAttemptCount(string location) => _measurementAttemptCountersMap[location] = 0;
-
-        /// <summary>
-        /// Clears all measurement attempt counts. Used for testing purposes.
-        /// </summary>
-        public void ClearAllAttemptCounts() => _measurementAttemptCountersMap.Clear();
 
         private void Log(string messageOrKey, object[]? args = null, LogSeverity severity = LogSeverity.Info, [CallerArgumentExpression(nameof(messageOrKey))] string? resourceName = null)
             {

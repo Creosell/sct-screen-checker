@@ -58,6 +58,7 @@ namespace ScreenChecker
             AddService<IDialogService, DialogService>(services);
             AddService<IUploadService, UploadService>(services);
             AddService<ISpecEvaluationService, SpecEvaluationService>(services);
+            AddService<IAttemptCounter, AttemptCounter>(services);
 
             // ViewModels
             AddViewModel<MainWindowViewModel>(services);

@@ -80,11 +80,9 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockPathProvider.Object,
                 _mockMeasurementStatusService.Object,
                 _mockAnalyzerRegistryService.Object,
-                _mockSpecEvaluationService.Object
+                _mockSpecEvaluationService.Object,
+                new AttemptCounter()
             );
-
-            // Сбрасываем статический счетчик попыток измерений между тестами
-            _viewModel.ClearAllAttemptCounts();
             }
 
         [TearDown]
@@ -1845,8 +1843,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockPathProvider.Object,
                 _mockMeasurementStatusService.Object,
                 _mockAnalyzerRegistryService.Object,
-                _mockSpecEvaluationService.Object);
-            viewModel.ClearAllAttemptCounts();
+                _mockSpecEvaluationService.Object,
+                new AttemptCounter());
             return viewModel;
             }
 
