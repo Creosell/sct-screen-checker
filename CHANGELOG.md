@@ -7,21 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.4.6] - 2026-11-25
-
-### Fixed
-- A measurement whose iteration failed (an error of the analyzer in one of the repeated readings) counted that iteration as zero in the average, so the brightness and the coordinates came out too low. The average is taken over the successful iterations only; a measurement where no iteration succeeded is reported as invalid instead of being recorded as zeros
-
-## [1.4.5] - 2026-11-25
-
-### Changed
-- The report upload runs the Nextcloud CLI through the same process runner as the report generator: the arguments are passed as a list (no hand-made quotes), the output of the CLI is read as UTF-8 and the unused `-f` flag of the `upload` action is no longer passed. The error text of a failed upload is the output of the CLI as before. Needs the Nextcloud CLI 1.1.1, which writes its output in UTF-8
-- After a successful upload the archive is moved to `uploaded_reports` and the result files are deleted through the file system abstraction like the rest of the service
-
 ## [1.4.4] - 2026-11-25
 
 ### Changed
 - The attempts of a point are kept only from its first measurement with a remark against the specification (a value below typ or outside min/max). Until then a repeated measurement replaces the earlier one, so a measurement taken with the probe at a wrong point can no longer outrank the right one as the "best" attempt. The measurement with the first remark replaces the held one and starts the series of the point; the next measurements are added to it and the report generator picks the best as before. The series lasts until the device is changed; a point that never deviated is saved without the `Attempts` list in the JSON.
+- The report upload runs the Nextcloud CLI through the same process runner as the report generator: the arguments are passed as a list (no hand-made quotes), the output of the CLI is read as UTF-8 and the unused `-f` flag of the `upload` action is no longer passed. The error text of a failed upload is the output of the CLI as before. Needs the Nextcloud CLI 1.1.1, which writes its output in UTF-8
+- After a successful upload the archive is moved to `uploaded_reports` and the result files are deleted through the file system abstraction like the rest of the service
+
+### Fixed
+- A measurement whose iteration failed (an error of the analyzer in one of the repeated readings) counted that iteration as zero in the average, so the brightness and the coordinates came out too low. The average is taken over the successful iterations only; a measurement where no iteration succeeded is reported as invalid instead of being recorded as zeros
 
 ## [1.4.3] - 2026-11-25
 
