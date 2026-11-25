@@ -42,5 +42,8 @@
     <SolidColorBrush x:Key="LogErrBackground" Color="#FFFDE4E4" />
     <SolidColorBrush x:Key="LogWarnBar" Color="#FFFFB300" />
     <SolidColorBrush x:Key="LogErrBar" Color="#FFE53935" />
+    <SolidColorBrush x:Key="MeasureButtonOk" Color="#FF006400" />
+    <SolidColorBrush x:Key="MeasureButtonErr" Color="#FF8B0000" />
+    <SolidColorBrush x:Key="MeasureButtonIdle" Color="#FF696969" />
     <Thickness x:Key="LogBarThickness">4,0,0,0</Thickness>
 </ResourceDictionary>

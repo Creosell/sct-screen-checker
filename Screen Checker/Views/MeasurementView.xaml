@@ -521,6 +521,15 @@
             <Setter Property="Margin" Value="5" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="MaterialDesign:ButtonAssist.CornerRadius" Value="15" />
+            <Setter Property="Background" Value="{DynamicResource MeasureButtonIdle}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource MeasureButtonOk}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="False">
+                    <Setter Property="Background" Value="{DynamicResource MeasureButtonErr}" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </UserControl.Resources>
 
@@ -785,7 +794,7 @@
                             Grid.Row="0"
                             Grid.Column="0"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[TopLeft].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[TopLeft].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.TopLeft}"
                             Content="{DynamicResource TopLeftPoint}"
@@ -802,7 +811,7 @@
                             Grid.Row="0"
                             Grid.Column="1"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[TopCenter].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[TopCenter].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.TopCenter}"
                             Content="{DynamicResource TopCenterPoint}"
@@ -820,7 +829,7 @@
                             Grid.Row="0"
                             Grid.Column="2"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[TopRight].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[TopRight].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.TopRight}"
                             Content="{DynamicResource TopRightPoint}"
@@ -838,7 +847,7 @@
                             Grid.Row="1"
                             Grid.Column="0"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[MiddleLeft].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[MiddleLeft].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.MiddleLeft}"
                             Content="{DynamicResource MiddleLeftPoint}"
@@ -856,7 +865,7 @@
                             Grid.Row="1"
                             Grid.Column="1"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[Center].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[Center].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.Center}"
                             Content="{DynamicResource CenterPoint}"
@@ -874,7 +883,7 @@
                             Grid.Row="1"
                             Grid.Column="2"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[MiddleRight].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[MiddleRight].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.MiddleRight}"
                             Content="{DynamicResource MiddleRightPoint}"
@@ -892,7 +901,7 @@
                             Grid.Row="2"
                             Grid.Column="0"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[BottomLeft].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[BottomLeft].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.BottomLeft}"
                             Content="{DynamicResource BottomLeftPoint}"
@@ -910,7 +919,7 @@
                             Grid.Row="2"
                             Grid.Column="1"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[BottomCenter].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[BottomCenter].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.BottomCenter}"
                             Content="{DynamicResource BottomCenterPoint}"
@@ -928,7 +937,7 @@
                             Grid.Row="2"
                             Grid.Column="2"
                             Margin="5"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[BottomRight].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[BottomRight].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.BottomRight}"
                             Content="{DynamicResource BottomRightPoint}"
@@ -958,7 +967,7 @@
                         <Button
                             Grid.Column="0"
                             Margin="1"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[RedColor].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[RedColor].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.RedColor}"
                             Content="{DynamicResource RedPoint}"
@@ -972,7 +981,7 @@
                             Style="{StaticResource SpecBadgeStyle}" />
                         <Button
                             Grid.Column="1"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[GreenColor].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[GreenColor].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.GreenColor}"
                             Content="{DynamicResource GreenPoint}"
@@ -986,7 +995,7 @@
                             Style="{StaticResource SpecBadgeStyle}" />
                         <Button
                             Grid.Column="2"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[BlueColor].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[BlueColor].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.BlueColor}"
                             Content="{DynamicResource BluePoint}"
@@ -1000,7 +1009,7 @@
                             Style="{StaticResource SpecBadgeStyle}" />
                         <Button
                             Grid.Column="3"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[WhiteColor].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[WhiteColor].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.WhiteColor}"
                             Content="{DynamicResource WhitePoint}"
@@ -1015,7 +1024,7 @@
                             Style="{StaticResource SpecBadgeStyle}" />
                         <Button
                             Grid.Column="4"
-                            Background="{Binding DataContext.MeasurementStatusService.Statuses[BlackColor].StatusColor, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                            Tag="{Binding DataContext.MeasurementStatusService.Statuses[BlackColor].IsPassed, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             Command="{Binding DataContext.MeasureCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                             CommandParameter="{x:Static models:MeasurementLocation.BlackColor}"
                             Content="{DynamicResource BlackPoint}"

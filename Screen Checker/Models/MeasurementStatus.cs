@@ -1,6 +1,5 @@
 ﻿using MvvmHelpers;
 using System.Text.Json.Serialization;
-using System.Windows.Media;
 
 namespace ScreenChecker.Models
     {
@@ -35,10 +34,7 @@ namespace ScreenChecker.Models
             set
                 {
                 if (SetProperty(ref _isPassed, value))
-                    {
-                    OnPropertyChanged(nameof(StatusColor));
                     OnPropertyChanged(nameof(SpecBadge));
-                    }
                 }
             }
 
@@ -73,21 +69,6 @@ namespace ScreenChecker.Models
         /// </summary>
         [JsonIgnore]
         public SpecStatus SpecBadge => IsPassed == true ? SpecRemark : SpecStatus.Pass;
-
-        /// <summary>
-        /// Gets the status color brush based on measurement result.
-        /// Green for passed, red for failed, gray for not measured.
-        /// </summary>
-        [JsonIgnore]
-        public Brush StatusColor
-            {
-            get => IsPassed switch
-                {
-                    true => Brushes.DarkGreen,
-                    false => Brushes.DarkRed,
-                    _ => Brushes.DimGray
-                    };
-            }
 
         /// <summary>
         /// Gets or sets the formatted string of measured values (x, y, Lv, T).

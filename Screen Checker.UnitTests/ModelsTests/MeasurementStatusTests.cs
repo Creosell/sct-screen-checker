@@ -89,45 +89,6 @@ namespace ScreenChecker.UnitTests.ModelsTests
         }
 
         [Test]
-        public void StatusColor_WhenPassedIsTrue_ReturnsDarkGreen()
-        {
-            // Arrange
-            var status = new MeasurementStatus();
-
-            // Act
-            status.IsPassed = true;
-
-            // Assert
-            Assert.That(status.StatusColor, Is.EqualTo(Brushes.DarkGreen));
-        }
-
-        [Test]
-        public void StatusColor_WhenPassedIsFalse_ReturnsDarkRed()
-        {
-            // Arrange
-            var status = new MeasurementStatus();
-
-            // Act
-            status.IsPassed = false;
-
-            // Assert
-            Assert.That(status.StatusColor, Is.EqualTo(Brushes.DarkRed));
-        }
-
-        [Test]
-        public void StatusColor_WhenPassedIsNull_ReturnsDimGray()
-        {
-            // Arrange
-            var status = new MeasurementStatus();
-
-            // Act
-            status.IsPassed = null;
-
-            // Assert
-            Assert.That(status.StatusColor, Is.EqualTo(Brushes.DimGray));
-        }
-
-        [Test]
         public void MeasuredValuesString_CanBeSetAndGet()
         {
             // Arrange
@@ -142,7 +103,7 @@ namespace ScreenChecker.UnitTests.ModelsTests
         }
 
         [Test]
-        public void IsPassed_WhenChanged_RaisesPropertyChangedForStatusColor()
+        public void IsPassed_WhenChanged_RaisesPropertyChanged()
         {
             // Arrange
             var status = new MeasurementStatus();
@@ -159,7 +120,7 @@ namespace ScreenChecker.UnitTests.ModelsTests
 
             // Assert
             Assert.That(propertyChangedEvents, Does.Contain("IsPassed"));
-            Assert.That(propertyChangedEvents, Does.Contain("StatusColor"));
+            Assert.That(propertyChangedEvents, Does.Contain("SpecBadge"));
         }
 
         [Test]
@@ -180,28 +141,6 @@ namespace ScreenChecker.UnitTests.ModelsTests
 
             // Assert
             Assert.That(propertyChangedRaised, Is.True);
-        }
-
-        [Test]
-        public void StatusColor_ChangesWhenIsPassedChanges()
-        {
-            // Arrange
-            var status = new MeasurementStatus();
-
-            // Act & Assert - Initially null -> DimGray
-            Assert.That(status.StatusColor, Is.EqualTo(Brushes.DimGray));
-
-            // Set to true -> DarkGreen
-            status.IsPassed = true;
-            Assert.That(status.StatusColor, Is.EqualTo(Brushes.DarkGreen));
-
-            // Set to false -> DarkRed
-            status.IsPassed = false;
-            Assert.That(status.StatusColor, Is.EqualTo(Brushes.DarkRed));
-
-            // Set back to null -> DimGray
-            status.IsPassed = null;
-            Assert.That(status.StatusColor, Is.EqualTo(Brushes.DimGray));
         }
 
         [Test]
