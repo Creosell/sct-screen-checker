@@ -364,4 +364,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /.claude
-graphify-out/cache/
+graphify-out/*
+!graphify-out/graph.json
