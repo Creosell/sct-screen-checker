@@ -48,6 +48,7 @@ namespace ScreenChecker.UnitTests.ViewModels
             services.AddSingleton(new Mock<IAnalyzerRegistryService>().Object);
             services.AddSingleton(new Mock<ISpecEvaluationService>().Object);
             services.AddSingleton<IAttemptCounter>(new AttemptCounter());
+            services.AddSingleton<IMeasurementAcceptance, MeasurementAcceptance>();
 
             var mockPathProvider = new Mock<IPathProvider>();
             mockPathProvider.Setup(p => p.BaseDirectory).Returns("C:\\TestApp\\");

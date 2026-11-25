@@ -53,6 +53,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 | IDialogService | File dialogs, message boxes |
 | IMeasurementStatusService | Measurement state tracking |
 | IAttemptCounter | Rejected measurement attempts per point (instance state, no statics) |
+| IMeasurementAcceptance | Plausibility of a measurement (luminance, coordinates) and the retry policy: returns `Accepted`, `Rejected(reason, attempt)` or `ConfirmationNeeded(reason)`; dialogs and log stay in the view model |
 | IDeviceConfigurationService | Scans the config directory and builds the device configuration tree (`IFileSystem`) |
 | IReportGenerationService | Runs `Report Generator.exe` through `IProcessRunner`: exit code to status, cancellation kills the process tree |
 | ISpecCheckCoordinator | Specification check of the measurement page (transient): builds the request, runs `ISpecEvaluationService`, answers only the latest request and delivers a typed `SpecCheckResult` on the UI thread |
@@ -65,7 +66,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 
 **Path Management:** `IPathProvider` / `PathProvider` — single source of truth for `BaseDirectory`, `ConfigDirectory`, `DataDirectory`. No hardcoded `AppDomain.CurrentDomain.BaseDirectory`.
 
-**Constants:** `AppConstants` class. `ColorAnalyzer.MinChannel` = 0, `MaxChannel` = 99. `MeasurementViewModel.COLOR_COORDINATES_TOLERANCE` = 0.15.
+**Constants:** `AppConstants` class. `ColorAnalyzer.MinChannel` = 0, `MaxChannel` = 99. `MeasurementAcceptance.ColorCoordinatesTolerance` = 0.15.
 
 **Feedback animations:** `ActionFeedbackSignal` (Models) is raised by a ViewModel when an action finished; `ActionFeedbackBehavior` (Views/Behaviors) plays the green/red breathing on any element via `behaviors:ActionFeedbackBehavior.Signal="{Binding ...}"` (modes Fill: the background breathes, a glow pulses and the label names the outcome; Underline, Overlay: a line; Glow: the glow only, used by the measurement buttons). No code-behind is needed in a page.
 

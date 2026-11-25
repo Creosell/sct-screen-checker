@@ -84,7 +84,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockMeasurementStatusService.Object,
                 _mockAnalyzerRegistryService.Object,
                 new SpecCheckCoordinator(_mockSpecEvaluationService.Object, _mockFileService.Object, _mockMeasurementStatusService.Object, _mockDispatcher.Object),
-                new AttemptCounter(),
+                new MeasurementAcceptance(new AttemptCounter()),
                 new DeviceConfigurationService(new System.IO.Abstractions.TestingHelpers.MockFileSystem(), _mockPathProvider.Object),
                 _mockReportGenerationService.Object,
                 new LogService(_mockLocalizationService.Object, _mockDispatcher.Object)
@@ -789,8 +789,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
         [Test]
         public void FormatMeasurement_UsesThePrecisionOfTheReportVerdict()
             {
-            var white = MeasurementViewModel.FormatMeasurement(new Measurement("WhiteColor", 0.27664, 0.28024, 319.6, 10834.4));
-            var black = MeasurementViewModel.FormatMeasurement(new Measurement("BlackColor", 0.276, 0.28, 0.0503124, double.PositiveInfinity));
+            var white = MeasurementFormatter.Format(new Measurement("WhiteColor", 0.27664, 0.28024, 319.6, 10834.4));
+            var black = MeasurementFormatter.Format(new Measurement("BlackColor", 0.276, 0.28, 0.0503124, double.PositiveInfinity));
 
             Assert.That(white, Is.EqualTo(("0.277", "0.280", "320", "10834")));
             Assert.That(black.Lv, Is.EqualTo("0.0503"));
@@ -1903,7 +1903,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockMeasurementStatusService.Object,
                 _mockAnalyzerRegistryService.Object,
                 new SpecCheckCoordinator(_mockSpecEvaluationService.Object, _mockFileService.Object, _mockMeasurementStatusService.Object, _mockDispatcher.Object),
-                new AttemptCounter(),
+                new MeasurementAcceptance(new AttemptCounter()),
                 new DeviceConfigurationService(new System.IO.Abstractions.FileSystem(), _mockPathProvider.Object),
                 _mockReportGenerationService.Object,
                 new LogService(_mockLocalizationService.Object, _mockDispatcher.Object));

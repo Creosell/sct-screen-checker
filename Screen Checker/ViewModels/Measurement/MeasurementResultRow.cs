@@ -144,7 +144,7 @@ namespace ScreenChecker.ViewModels
                 return;
                 }
 
-            (X, Y, Lv, T) = MeasurementViewModel.FormatMeasurement(measurement);
+            (X, Y, Lv, T) = MeasurementFormatter.Format(measurement);
             }
 
         /// <summary>

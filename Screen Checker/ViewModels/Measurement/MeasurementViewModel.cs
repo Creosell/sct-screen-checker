@@ -36,7 +36,7 @@ namespace ScreenChecker.ViewModels
         private bool _isChannelConfirmed;
         private ColorimeterInfo? _colorimeter;
         private readonly IAnalyzerRegistryService _analyzerRegistryService;
-        private readonly IAttemptCounter _attemptCounter;
+        private readonly IMeasurementAcceptance _acceptance;
         private readonly IDeviceConfigurationService _deviceConfigurationService;
         private readonly IReportGenerationService _reportGenerationService;
         private int _measurementTime = 2;
@@ -55,18 +55,8 @@ namespace ScreenChecker.ViewModels
         private DeviceConfigTreeNode? _selectedConfigNode;
 
         private const string SERIAL_NUMBER_PATTERN = "^[a-zA-Z0-9]*$";
-        private const int MAX_MEASUREMENT_ATTEMPTS_BEFORE_CONFIRM = 1;
-        private const double COLOR_COORDINATES_TOLERANCE = 0.15;
         private const string PreviewSerialNumber = "preview";
         private const int LogTabIndex = 1;
-
-        private static readonly Dictionary<string, (double x, double y)> primariesNTSC = new()
-        {
-            { MeasurementLocation.RedColor.ToString(), (0.67, 0.33) },
-            { MeasurementLocation.GreenColor.ToString(), (0.21, 0.71) },
-            { MeasurementLocation.BlueColor.ToString(), (0.14, 0.08) },
-            { MeasurementLocation.WhiteColor.ToString(), (0.3127, 0.3290) }
-        };
 
         public event EventHandler RequestClearInputFocus;
 
@@ -386,7 +376,7 @@ namespace ScreenChecker.ViewModels
         /// <param name="measurementStatusService">Service for managing measurement statuses.</param>
         /// <param name="analyzerRegistryService">Registry of the last confirmed channel per probe.</param>
         /// <param name="specCheck">Coordinator checking the measurements against the device specification.</param>
-        /// <param name="attemptCounter">Counter of the rejected measurement attempts per point.</param>
+        /// <param name="acceptance">Rules deciding whether a measurement is plausible enough to be kept.</param>
         /// <param name="deviceConfigurationService">Service discovering the device configuration files.</param>
         /// <param name="reportGenerationService">Service running the report generator.</param>
         /// <param name="logService">Application log.</param>
@@ -402,7 +392,7 @@ namespace ScreenChecker.ViewModels
             IMeasurementStatusService measurementStatusService,
             IAnalyzerRegistryService analyzerRegistryService,
             ISpecCheckCoordinator specCheck,
-            IAttemptCounter attemptCounter,
+            IMeasurementAcceptance acceptance,
             IDeviceConfigurationService deviceConfigurationService,
             IReportGenerationService reportGenerationService,
             ILogService logService)
@@ -418,7 +408,7 @@ namespace ScreenChecker.ViewModels
             _measurementStatusService = measurementStatusService ?? throw new ArgumentNullException(nameof(measurementStatusService));
             _analyzerRegistryService = analyzerRegistryService ?? throw new ArgumentNullException(nameof(analyzerRegistryService));
             _specCheck = specCheck ?? throw new ArgumentNullException(nameof(specCheck));
-            _attemptCounter = attemptCounter ?? throw new ArgumentNullException(nameof(attemptCounter));
+            _acceptance = acceptance ?? throw new ArgumentNullException(nameof(acceptance));
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
             _reportGenerationService = reportGenerationService ?? throw new ArgumentNullException(nameof(reportGenerationService));
             _logService = logService ?? throw new ArgumentNullException(nameof(logService));
@@ -994,95 +984,42 @@ namespace ScreenChecker.ViewModels
 
         private void ProcessValidMeasurement(Measurement measurement, ref bool isSuccess, ref string message)
             {
-            var (validationPassed, validationMessage) = MeasurementValidation(measurement);
-            int currentAttempt = _attemptCounter.Get(measurement.Location);
-
-            if (validationPassed)
+            switch (_acceptance.Assess(measurement))
                 {
-                ApplyMeasurementResult(measurement, ref message);
-                isSuccess = true;
-                _attemptCounter.Reset(measurement.Location);
-                }
-            else if (currentAttempt < MAX_MEASUREMENT_ATTEMPTS_BEFORE_CONFIRM)
-                {
-                _attemptCounter.Increment(measurement.Location);
-                string retryMsg = $"{validationMessage} \n{PleaseTryToMeasureAgain}";
-                _dialogService.ShowMessage(retryMsg, $"{Warning}");
-                message = $"{FailedMeasurementForLocation}: {measurement.Location}.\n ({Attempt} {currentAttempt + 1}). {PleaseTryToMeasureAgain}";
-                string reason = System.Text.RegularExpressions.Regex.Replace(validationMessage, @"\s+", " ").Trim();
-                string logMessage = $"{FailedMeasurementForLocation}: {LocalizedLocation(measurement.Location)} ({Attempt} {currentAttempt + 1}). {reason}";
-                Log(logMessage, severity: LogSeverity.Warning);
-                }
-            else
-                {
-                if (_dialogService.ShowQuestion($"{SaveNotCorrectResultQuestion}\n{validationMessage}.\n", $"{Warning}"))
-                    {
+                case AcceptanceResult.Accepted:
                     ApplyMeasurementResult(measurement, ref message);
-                    message = $"{ResultsSaved} '{measurement.Location}'. \n {ValidationMessage}: {validationMessage}";
                     isSuccess = true;
-                    }
-                else
-                    {
-                    message = $"{SaveCanceled}";
-                    }
-                Log(message);
-                _attemptCounter.Reset(measurement.Location);
+                    break;
+
+                case AcceptanceResult.Rejected rejected:
+                    _dialogService.ShowMessage($"{rejected.Reason} \n{PleaseTryToMeasureAgain}", $"{Warning}");
+                    message = $"{FailedMeasurementForLocation}: {measurement.Location}.\n ({Attempt} {rejected.Attempt}). {PleaseTryToMeasureAgain}";
+                    string reason = System.Text.RegularExpressions.Regex.Replace(rejected.Reason, @"\s+", " ").Trim();
+                    Log($"{FailedMeasurementForLocation}: {LocalizedLocation(measurement.Location)} ({Attempt} {rejected.Attempt}). {reason}", severity: LogSeverity.Warning);
+                    break;
+
+                case AcceptanceResult.ConfirmationNeeded confirmation:
+                    if (_dialogService.ShowQuestion($"{SaveNotCorrectResultQuestion}\n{confirmation.Reason}.\n", $"{Warning}"))
+                        {
+                        ApplyMeasurementResult(measurement, ref message);
+                        message = $"{ResultsSaved} '{measurement.Location}'. \n {ValidationMessage}: {confirmation.Reason}";
+                        isSuccess = true;
+                        }
+                    else
+                        {
+                        message = $"{SaveCanceled}";
+                        }
+                    Log(message);
+                    break;
                 }
             }
 
         private void ApplyMeasurementResult(Measurement measurement, ref string message)
             {
-            var (x, y, Lv, T) = FormatMeasurement(measurement);
+            var (x, y, Lv, T) = MeasurementFormatter.Format(measurement);
             message = $"x={x}, y={y}, Lv={Lv}, T={T}";
             _currentDevice!.RecordAttempt(measurement);
             _hasUnsavedMeasurements = true;
-            }
-
-        /// <summary>
-        /// Formats a measurement for the Results table and the tooltips with the precision the report verdict is made at
-        /// (coordinates 3 decimals, luminance 0, the luminance of the black point 4, temperature 0), so the number on the screen
-        /// is the number the point is accepted by.
-        /// </summary>
-        /// <param name="measurement">The measurement to format.</param>
-        /// <returns>The coordinates, luminance and temperature as text.</returns>
-        internal static (string x, string y, string Lv, string T) FormatMeasurement(Measurement measurement)
-            {
-            return (
-                measurement.x.ToString("F3", CultureInfo.InvariantCulture),
-                measurement.y.ToString("F3", CultureInfo.InvariantCulture),
-                measurement.Location == MeasurementLocation.BlackColor.ToString()
-                    ? measurement.Lv.ToString("F4", CultureInfo.InvariantCulture)
-                    : measurement.Lv.ToString("F0", CultureInfo.InvariantCulture),
-                double.IsFinite(measurement.T) ? measurement.T.ToString("F0", CultureInfo.InvariantCulture) : NotAvailable
-            );
-            }
-
-        private static (bool result, string message) MeasurementValidation(Measurement measurement)
-            {
-            // Brightness check
-            if (!measurement.Location.Equals(MeasurementLocation.BlackColor.ToString()))
-                {
-                if (measurement.Lv <= 5) return (false, $"{LvIsTooLow}: {measurement.Lv:F1}. {CheckProbe}");
-                }
-            else
-                {
-                // Black color logic
-                if (measurement.Lv >= 5) return (false, $"{LvIsTooHigh}. \n {Brightness}: {measurement.Lv:F1}");
-                return (true, MeasurementValidationPassed);
-                }
-
-            // Coordinates check (White only for uniformity, but logic implies general check)
-            if (!primariesNTSC.TryGetValue(measurement.Location, out var target))
-                target = primariesNTSC[MeasurementLocation.WhiteColor.ToString()];
-
-            bool inRange = measurement.x >= target.x - COLOR_COORDINATES_TOLERANCE &&
-                           measurement.x <= target.x + COLOR_COORDINATES_TOLERANCE &&
-                           measurement.y >= target.y - COLOR_COORDINATES_TOLERANCE &&
-                           measurement.y <= target.y + COLOR_COORDINATES_TOLERANCE;
-
-            return inRange
-                ? (true, MeasurementValidationPassed)
-                : (false, $"{ErrMeasurementOutOfRange}: '{measurement.Location}'.\n{Actual} x: {measurement.x:F3}, y: {measurement.y:F3}");
             }
 
         private void HandleReportGenerationResult(ReportGenerationResult result)

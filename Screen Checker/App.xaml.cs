@@ -59,6 +59,7 @@ namespace ScreenChecker
             AddService<IUploadService, UploadService>(services);
             AddService<ISpecEvaluationService, SpecEvaluationService>(services);
             AddService<IAttemptCounter, AttemptCounter>(services);
+            AddService<IMeasurementAcceptance, MeasurementAcceptance>(services);
             AddService<IDeviceConfigurationService, DeviceConfigurationService>(services);
             AddService<IReportGenerationService, ReportGenerationService>(services);
             services.AddSingleton<ILogService, LogService>();
