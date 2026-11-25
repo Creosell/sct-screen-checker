@@ -185,6 +185,8 @@ publish/
 # Note: Comment the next line if you want to checkin your web deploy settings,
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
+# The release tool publishes with this profile (sct_app.toml), so it is tracked
+!**/PublishProfiles/FolderProfile.pubxml
 *.publishproj
 
 # Microsoft Azure Web App publish settings. Comment the next line if you want to
@@ -362,11 +364,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /.claude
-
-# Release tools
-!tools/release/
-!tools/release/**
-tools/release/.env
-tools/release/release.log
-release_artifacts/
 graphify-out/cache/
