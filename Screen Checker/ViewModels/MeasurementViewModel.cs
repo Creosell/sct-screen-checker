@@ -40,6 +40,7 @@ namespace ScreenChecker.ViewModels
         private ColorimeterInfo? _colorimeter;
         private readonly IAnalyzerRegistryService _analyzerRegistryService;
         private readonly IAttemptCounter _attemptCounter;
+        private readonly IDeviceConfigurationService _deviceConfigurationService;
         private int _measurementTime = 2;
         private string _selectedDeviceConfiguration;
         private bool _isMeasurementButtonsEnabled;
@@ -442,6 +443,7 @@ namespace ScreenChecker.ViewModels
         /// <param name="analyzerRegistryService">Registry of the last confirmed channel per probe.</param>
         /// <param name="specEvaluationService">Service checking the measurements against the device specification.</param>
         /// <param name="attemptCounter">Counter of the rejected measurement attempts per point.</param>
+        /// <param name="deviceConfigurationService">Service discovering the device configuration files.</param>
         public MeasurementViewModel(
             IColorMeasurementService colorMeasurementService,
             IFileService fileService,
@@ -454,7 +456,8 @@ namespace ScreenChecker.ViewModels
             IMeasurementStatusService measurementStatusService,
             IAnalyzerRegistryService analyzerRegistryService,
             ISpecEvaluationService specEvaluationService,
-            IAttemptCounter attemptCounter)
+            IAttemptCounter attemptCounter,
+            IDeviceConfigurationService deviceConfigurationService)
             {
             _colorMeasurementService = colorMeasurementService ?? throw new ArgumentNullException(nameof(colorMeasurementService));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
@@ -468,6 +471,7 @@ namespace ScreenChecker.ViewModels
             _analyzerRegistryService = analyzerRegistryService ?? throw new ArgumentNullException(nameof(analyzerRegistryService));
             _specEvaluationService = specEvaluationService ?? throw new ArgumentNullException(nameof(specEvaluationService));
             _attemptCounter = attemptCounter ?? throw new ArgumentNullException(nameof(attemptCounter));
+            _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
             _logHandler = new LogHandler(_localizationService, AddLogMessage);
             Spec = new SpecSummaryViewModel(_measurementStatusService, AppendToLog);
             Results = new(( _measurementStatusService.AllMeasurementButtonStatuses ?? [] ).Select(status => new MeasurementResultRow(status)));
@@ -504,24 +508,24 @@ namespace ScreenChecker.ViewModels
         #region Methods
 
         /// <summary>
-        /// Loads device configuration files from the disk, including any nested subfolders,
+        /// Loads the device configuration files, including any nested subfolders,
         /// and populates the hierarchical selection tree for cascading menu display.
         /// </summary>
         private void InitializeDeviceConfigurations()
             {
             try
                 {
-                if (!Directory.Exists(_pathProvider.ConfigDirectory))
-                    Directory.CreateDirectory(_pathProvider.ConfigDirectory);
+                var nodes = _deviceConfigurationService.LoadTree(SelectDeviceConfigurationCommand);
 
                 DeviceConfigurationTree.Clear();
                 _configNodesByPath.Clear();
                 _selectedConfigNode = null;
-                foreach (var node in BuildDeviceConfigurationTree(_pathProvider.ConfigDirectory))
+                foreach (var node in nodes)
                     DeviceConfigurationTree.Add(node);
+                IndexConfigurationNodes(nodes);
                 OnPropertyChanged(nameof(DeviceConfigurationCaptions));
 
-                if (FindFirstConfiguration(DeviceConfigurationTree) == null)
+                if (_configNodesByPath.Count == 0)
                     Log(ConfigDirNotFound, [_pathProvider.ConfigDirectory], LogSeverity.Error);
                 }
             catch (Exception ex)
@@ -531,40 +535,15 @@ namespace ScreenChecker.ViewModels
             }
 
         /// <summary>
-        /// Recursively builds device configuration tree nodes for a directory: subfolders
-        /// (containing at least one configuration file, direct or nested) ordered alphabetically
-        /// first, followed by the directory's own configuration files ordered alphabetically.
+        /// Indexes the configuration file nodes of the tree by their relative path.
         /// </summary>
-        /// <param name="directoryPath">Directory to scan.</param>
-        /// <returns>Sequence of child nodes for the directory.</returns>
-        private IEnumerable<DeviceConfigTreeNode> BuildDeviceConfigurationTree(string directoryPath)
+        /// <param name="nodes">Nodes to index, folders are searched recursively.</param>
+        private void IndexConfigurationNodes(IEnumerable<DeviceConfigTreeNode> nodes)
             {
-            foreach (var subDirectory in Directory.GetDirectories(directoryPath).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+            foreach (var node in nodes)
                 {
-                var folderNode = new DeviceConfigTreeNode { DisplayName = Path.GetFileName(subDirectory), IsFolder = true };
-                foreach (var childNode in BuildDeviceConfigurationTree(subDirectory))
-                    folderNode.Children.Add(childNode);
-
-                if (folderNode.Children.Any())
-                    yield return folderNode;
-                }
-
-            foreach (var file in Directory.GetFiles(directoryPath, "*.yaml").OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
-                {
-                var relativePath = Path.GetRelativePath(_pathProvider.ConfigDirectory, file);
-                var relativePathWithoutExtension = Path.Combine(
-                    Path.GetDirectoryName(relativePath) ?? string.Empty,
-                    Path.GetFileNameWithoutExtension(relativePath));
-
-                var fileNode = new DeviceConfigTreeNode
-                    {
-                    DisplayName = Path.GetFileNameWithoutExtension(file),
-                    RelativePath = relativePathWithoutExtension,
-                    IsFolder = false,
-                    SelectCommand = SelectDeviceConfigurationCommand
-                    };
-                _configNodesByPath[relativePathWithoutExtension] = fileNode;
-                yield return fileNode;
+                if (node.IsFolder) IndexConfigurationNodes(node.Children);
+                else _configNodesByPath[node.RelativePath!] = node;
                 }
             }
 
@@ -584,26 +563,6 @@ namespace ScreenChecker.ViewModels
 
             if (_selectedConfigNode != null)
                 _selectedConfigNode.IsSelected = true;
-            }
-
-        /// <summary>
-        /// Finds the identifier of the first configuration file in the tree, following display order
-        /// (subfolders before files at every level), for use as the default selection.
-        /// </summary>
-        /// <param name="nodes">Nodes to search, in display order.</param>
-        /// <returns>Relative path of the first configuration file found, or null if none exist.</returns>
-        private static string? FindFirstConfiguration(IEnumerable<DeviceConfigTreeNode> nodes)
-            {
-            foreach (var node in nodes)
-                {
-                if (!node.IsFolder)
-                    return node.RelativePath;
-
-                var foundInChildren = FindFirstConfiguration(node.Children);
-                if (foundInChildren != null)
-                    return foundInChildren;
-                }
-            return null;
             }
 
         /// <summary>

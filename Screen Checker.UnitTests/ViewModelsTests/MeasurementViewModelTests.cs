@@ -81,7 +81,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockMeasurementStatusService.Object,
                 _mockAnalyzerRegistryService.Object,
                 _mockSpecEvaluationService.Object,
-                new AttemptCounter()
+                new AttemptCounter(),
+                new DeviceConfigurationService(new System.IO.Abstractions.TestingHelpers.MockFileSystem(), _mockPathProvider.Object)
             );
             }
 
@@ -1844,7 +1845,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
                 _mockMeasurementStatusService.Object,
                 _mockAnalyzerRegistryService.Object,
                 _mockSpecEvaluationService.Object,
-                new AttemptCounter());
+                new AttemptCounter(),
+                new DeviceConfigurationService(new System.IO.Abstractions.FileSystem(), _mockPathProvider.Object));
             return viewModel;
             }
 
