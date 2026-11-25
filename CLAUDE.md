@@ -45,6 +45,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 | Service | Purpose |
 |---------|---------|
 | IColorMeasurementService | Color analyzer device access: CA-410 via CA-SDK2, CA-310 via COM |
+| IAnalyzerSession | The work with the analyzer for the measurement page (singleton): connection state, zero calibration with the channel confirmation (`CalibrateAsync` reports a typed `CalibrationOutcome` while the run is still in progress), measuring; wraps `IColorMeasurementService`, `IAnalyzerRegistryService` and the channel dialog |
 | IAnalyzerRegistryService | Last confirmed channel per probe serial number (`analyzers.json` next to the exe) |
 | ISettingsService | App configuration (singleton) |
 | ILocalizationService | Runtime language switching (singleton) |

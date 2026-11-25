@@ -50,6 +50,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             services.AddSingleton(new Mock<IAnalyzerRegistryService>().Object);
             services.AddSingleton(new Mock<ISpecEvaluationService>().Object);
             services.AddSingleton<IAttemptCounter>(new AttemptCounter());
+            services.AddSingleton<IAnalyzerSession, AnalyzerSession>();
             services.AddSingleton<IMeasurementAcceptance, MeasurementAcceptance>();
 
             var mockPathProvider = new Mock<IPathProvider>();

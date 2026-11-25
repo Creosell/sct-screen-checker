@@ -73,16 +73,14 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
             // так как новый LogHandler его не использует.
 
             _viewModel = new MeasurementViewModel(
-                _mockColorMeasurementService.Object,
+                new AnalyzerSession(_mockColorMeasurementService.Object, _mockAnalyzerRegistryService.Object, _mockDialogService.Object, _mockSettingsService.Object, _mockDispatcher.Object),
                 _mockFileService.Object,
                 _mockDialogService.Object,
                 _mockLocalizationService.Object,
                 _mockDispatcher.Object,
                 _mockUploadService.Object,
-                _mockSettingsService.Object,
                 _mockPathProvider.Object,
                 _mockMeasurementStatusService.Object,
-                _mockAnalyzerRegistryService.Object,
                 new SpecCheckCoordinator(_mockSpecEvaluationService.Object, _mockFileService.Object, _mockMeasurementStatusService.Object, _mockDispatcher.Object),
                 new MeasurementAcceptance(new AttemptCounter()),
                 new DeviceConfigurationService(new System.IO.Abstractions.TestingHelpers.MockFileSystem(), _mockPathProvider.Object),
@@ -1892,16 +1890,14 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
             _mockPathProvider.Setup(p => p.ConfigDirectory).Returns(_configTestDirectory);
 
             var viewModel = new MeasurementViewModel(
-                _mockColorMeasurementService.Object,
+                new AnalyzerSession(_mockColorMeasurementService.Object, _mockAnalyzerRegistryService.Object, _mockDialogService.Object, _mockSettingsService.Object, _mockDispatcher.Object),
                 _mockFileService.Object,
                 _mockDialogService.Object,
                 _mockLocalizationService.Object,
                 _mockDispatcher.Object,
                 _mockUploadService.Object,
-                _mockSettingsService.Object,
                 _mockPathProvider.Object,
                 _mockMeasurementStatusService.Object,
-                _mockAnalyzerRegistryService.Object,
                 new SpecCheckCoordinator(_mockSpecEvaluationService.Object, _mockFileService.Object, _mockMeasurementStatusService.Object, _mockDispatcher.Object),
                 new MeasurementAcceptance(new AttemptCounter()),
                 new DeviceConfigurationService(new System.IO.Abstractions.FileSystem(), _mockPathProvider.Object),

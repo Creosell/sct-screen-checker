@@ -1,5 +1,6 @@
 ﻿using MvvmHelpers;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -18,13 +19,12 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         {
         #region Fields & Constants
 
-        private readonly IColorMeasurementService _colorMeasurementService;
+        private readonly IAnalyzerSession _analyzer;
         private readonly IFileService _fileService;
         private readonly IDialogService _dialogService;
         private readonly ILocalizationService _localizationService;
         private readonly IDispatcher _dispatcher;
         private readonly IUploadService _uploadService;
-        private readonly ISettingsService _settingsService;
         private readonly IPathProvider _pathProvider;
         private readonly IMeasurementStatusService _measurementStatusService;
         private readonly ISpecCheckCoordinator _specCheck;
@@ -33,19 +33,12 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         private DeviceUnderTest? _currentDevice;
         private string _serialNumber = string.Empty;
         private bool _isSerialNumberConfirmed;
-        private bool _isChannelConfirmed;
-        private ColorimeterInfo? _colorimeter;
-        private readonly IAnalyzerRegistryService _analyzerRegistryService;
         private readonly IMeasurementAcceptance _acceptance;
         private readonly IDeviceConfigurationService _deviceConfigurationService;
         private readonly IReportGenerationService _reportGenerationService;
         private int _measurementTime = 2;
         private string _selectedDeviceConfiguration;
         private bool _isMeasurementButtonsEnabled;
-        private bool _isDeviceConnected;
-        private bool _isDeviceCalibrated;
-        private bool _isDeviceConnecting;
-        private bool _isDeviceCalibrating;
         private bool _isTvCheckboxChecked;
         private bool _isReportGenerating;
         private bool _isUploadingReports;
@@ -257,36 +250,21 @@ namespace ScreenChecker.ViewModels.MeasurementPage
 
         public bool IsDeviceConnected
             {
-            get => _isDeviceConnected;
-            set
-                {
-                if (SetProperty(ref _isDeviceConnected, value))
-                    {
-                    UpdateUIState();
-                    OnPropertyChanged(nameof(DeviceStateText));
-                    }
-                }
+            get => _analyzer.IsConnected;
+            set => _analyzer.IsConnected = value;
             }
 
         public bool IsDeviceCalibrated
             {
-            get => _isDeviceCalibrated;
-            set
-                {
-                if (SetProperty(ref _isDeviceCalibrated, value))
-                    {
-                    if (!value) IsChannelConfirmed = false;
-                    UpdateUIState();
-                    OnPropertyChanged(nameof(DeviceStateText));
-                    }
-                }
+            get => _analyzer.IsCalibrated;
+            set => _analyzer.IsCalibrated = value;
             }
 
         /// <summary>
         /// Gets the full description of the analyzer state shown as the tooltip of the state indicator.
         /// </summary>
-        public string DeviceStateText => !_isDeviceConnected ? DeviceStateNotConnected
-            : _isDeviceCalibrated ? DeviceStateConnectedCalibrated
+        public string DeviceStateText => !_analyzer.IsConnected ? DeviceStateNotConnected
+            : _analyzer.IsCalibrated ? DeviceStateConnectedCalibrated
             : DeviceStateConnectedNotCalibrated;
 
         /// <summary>
@@ -294,15 +272,15 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         /// while it is being re-confirmed, empty before the first confirmation (the card does not show it then).
         /// </summary>
         public string DeviceModelName =>
-            _isChannelConfirmed ? _colorMeasurementService.Model.ToDisplayName() : _colorimeter?.Model ?? string.Empty;
+            _analyzer.IsChannelConfirmed ? _analyzer.Model.ToDisplayName() : _analyzer.Colorimeter?.Model ?? string.Empty;
 
         /// <summary>
         /// Gets the active measurement channel label: the live value while the channel is confirmed, the last confirmed one
         /// while it is being re-confirmed, empty before the first confirmation (the card does not show it then).
         /// </summary>
         public string DeviceActiveChannelStatusText =>
-            _isChannelConfirmed ? FormatChannel(_colorMeasurementService.CurrentChannel, _colorMeasurementService.ChannelName)
-            : _colorimeter != null ? FormatChannel(_colorimeter.Channel, _colorimeter.ChannelName)
+            _analyzer.IsChannelConfirmed ? FormatChannel(_analyzer.CurrentChannel, _analyzer.ChannelName)
+            : _analyzer.Colorimeter != null ? FormatChannel(_analyzer.Colorimeter.Channel, _analyzer.Colorimeter.ChannelName)
             : string.Empty;
 
         /// <summary>
@@ -320,7 +298,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         /// Gets the probe serial number label: the last confirmed probe, empty before the first confirmation.
         /// </summary>
         public string DeviceProbeSerialText =>
-            _colorimeter != null ? string.Format(ProbeSerialNumberLabel, _colorimeter.ProbeSN) : string.Empty;
+            _analyzer.Colorimeter != null ? string.Format(ProbeSerialNumberLabel, _analyzer.Colorimeter.ProbeSN) : string.Empty;
 
         /// <summary>
         /// Gets or sets whether the inspector has confirmed the active channel after calibration.
@@ -328,16 +306,8 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         /// </summary>
         public bool IsChannelConfirmed
             {
-            get => _isChannelConfirmed;
-            set
-                {
-                if (SetProperty(ref _isChannelConfirmed, value))
-                    {
-                    OnPropertyChanged(nameof(DeviceModelName));
-                    OnPropertyChanged(nameof(DeviceActiveChannelStatusText));
-                    OnPropertyChanged(nameof(DeviceProbeSerialText));
-                    }
-                }
+            get => _analyzer.IsChannelConfirmed;
+            set => _analyzer.IsChannelConfirmed = value;
             }
         public ObservableCollection<DeviceConfigTreeNode> DeviceConfigurationTree { get; } = [];
         public IMeasurementStatusService MeasurementStatusService => _measurementStatusService;
@@ -366,7 +336,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         /// Initializes a new instance of the <see cref="MeasurementViewModel"/> class.
         /// Configures services, commands, and event subscriptions.
         /// </summary>
-        /// <param name="colorMeasurementService">Service for colorimeter interaction.</param>
+        /// <param name="analyzer">Session of the work with the color analyzer.</param>
         /// <param name="fileService">Service for file operations.</param>
         /// <param name="dialogService">Service for displaying dialogs.</param>
         /// <param name="localizationService">Service for localization management.</param>
@@ -374,39 +344,34 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         /// <param name="uploadService">Service for uploading reports.</param>
         /// <param name="settingsService">Service for application settings.</param>
         /// <param name="measurementStatusService">Service for managing measurement statuses.</param>
-        /// <param name="analyzerRegistryService">Registry of the last confirmed channel per probe.</param>
         /// <param name="specCheck">Coordinator checking the measurements against the device specification.</param>
         /// <param name="acceptance">Rules deciding whether a measurement is plausible enough to be kept.</param>
         /// <param name="deviceConfigurationService">Service discovering the device configuration files.</param>
         /// <param name="reportGenerationService">Service running the report generator.</param>
         /// <param name="logService">Application log.</param>
         public MeasurementViewModel(
-            IColorMeasurementService colorMeasurementService,
+            IAnalyzerSession analyzer,
             IFileService fileService,
             IDialogService dialogService,
             ILocalizationService localizationService,
             IDispatcher dispatcher,
             IUploadService uploadService,
-            ISettingsService settingsService,
             IPathProvider pathProvider,
             IMeasurementStatusService measurementStatusService,
-            IAnalyzerRegistryService analyzerRegistryService,
             ISpecCheckCoordinator specCheck,
             IMeasurementAcceptance acceptance,
             IDeviceConfigurationService deviceConfigurationService,
             IReportGenerationService reportGenerationService,
             ILogService logService)
             {
-            _colorMeasurementService = colorMeasurementService ?? throw new ArgumentNullException(nameof(colorMeasurementService));
+            _analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
-            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
             _uploadService = uploadService ?? throw new ArgumentNullException(nameof(uploadService));
             _pathProvider = pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
             _measurementStatusService = measurementStatusService ?? throw new ArgumentNullException(nameof(measurementStatusService));
-            _analyzerRegistryService = analyzerRegistryService ?? throw new ArgumentNullException(nameof(analyzerRegistryService));
             _specCheck = specCheck ?? throw new ArgumentNullException(nameof(specCheck));
             _acceptance = acceptance ?? throw new ArgumentNullException(nameof(acceptance));
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
@@ -428,11 +393,10 @@ namespace ScreenChecker.ViewModels.MeasurementPage
             RefreshPendingReports();
             SelectDeviceConfigurationCommand = new RelayCommand(ExecuteSelectDeviceConfiguration, CanExecuteSelectDeviceConfiguration);
 
-            _colorMeasurementService.StatusMessage += ColorMeasurementService_StatusMessage;
+            _analyzer.StatusMessage += ColorMeasurementService_StatusMessage;
             _fileService.StatusMessage += FileService_StatusMessage;
-            _colorMeasurementService.ConnectionStatusChanged += ColorMeasurementService_ConnectionStatusChanged;
-            _colorMeasurementService.CalibrationStatusChanged += ColorMeasurementService_CalibrationStatusChanged;
-            _colorMeasurementService.CurrentChannelChanged += ColorMeasurementService_CurrentChannelChanged;
+            _analyzer.PropertyChanged += Analyzer_PropertyChanged;
+            _analyzer.StateRefreshed += Analyzer_StateRefreshed;
             _uploadService.StatusMessage += UploadService_StatusMessage;
             _localizationService.LanguageChanged += LocalizationService_LanguageChanged;
 
@@ -544,142 +508,42 @@ namespace ScreenChecker.ViewModels.MeasurementPage
             }
 
         /// <summary>
-        /// Attempts to establish a connection with the measurement device.
-        /// </summary>
-        /// <returns>True if connection was successful, false otherwise.</returns>
-        private async Task<bool> ExecuteConnectAsync()
-            {
-            if (!CanExecuteConnect()) return false;
-
-            try
-                {
-                _isDeviceConnecting = true;
-                bool connected = await _colorMeasurementService.ConnectAsync();
-                if (!connected)
-                    ExecuteDisconnect(force: true);
-                return connected;
-                }
-            catch
-                {
-                ExecuteDisconnect(force: true);
-                return false;
-                }
-            finally
-                {
-                _isDeviceConnecting = false;
-                }
-            }
-
-        /// <summary>
-        /// Disconnects the measurement device and updates the UI state.
-        /// </summary>
-        /// <param name="force">If true, bypasses state checks for error recovery scenarios.</param>
-        private void ExecuteDisconnect(bool force = false)
-            {
-            if (!force && !CanExecuteDisconnect()) return;
-
-            try
-                {
-                _colorMeasurementService.Disconnect();
-                }
-            catch (Exception ex)
-                {
-                _dialogService.ShowMessage($"{ErrUnexpected}: {ex.Message}", $"{Err}");
-                }
-            UpdateUIState();
-            }
-
-        /// <summary>
-        /// Performs zero calibration on the connected device.
+        /// Performs zero calibration on the connected device; the analyzer session reports how the run ended.
         /// </summary>
         /// <param name="parameter">Command parameter (unused).</param>
         private async Task ExecuteZeroCalibrationAsync(object parameter)
             {
             if (!CanExecuteZeroCalibration(parameter)) return;
 
-            try
-                {
-                // Use return value directly to avoid race condition with event-based property updates
-                bool isConnected = _colorMeasurementService.IsDeviceConnected;
-                if (!isConnected)
-                    isConnected = await ExecuteConnectAsync();
-
-                if (isConnected)
-                    {
-                    _isDeviceCalibrating = true;
-                    if (!await _colorMeasurementService.CalibrateZeroAsync())
-                        {
-                        ExecuteDisconnect(force: true);
-                        Flash(ZeroCalibrationFeedback, false);
-                        _dialogService.ShowMessage($"{ErrAtCalibration}", $"{Err}");
-                        return;
-                        }
-                    if (!ConfirmActiveChannel())
-                        {
-                        ExecuteDisconnect(force: true);
-                        FlashCanceled(ZeroCalibrationFeedback);
-                        return;
-                        }
-                    Flash(ZeroCalibrationFeedback, true);
-                    }
-                else
-                    {
-                    Flash(ZeroCalibrationFeedback, false);
-                    }
-                }
-            catch
-                {
-                // Force disconnect on error to cleanup COM objects
-                if (_colorMeasurementService.IsDeviceConnected)
-                    ExecuteDisconnect(force: true);
-                Flash(ZeroCalibrationFeedback, false);
-                _dialogService.ShowMessage($"{ErrAtCalibration}", $"{Err}");
-                }
-            finally
-                {
-                _isDeviceCalibrating = false;
-                UpdateUIState();
-                }
+            await _analyzer.CalibrateAsync(ShowCalibrationOutcome);
             }
 
         /// <summary>
-        /// Reconciles the channel currently set on the probe with the last channel registered for it.
-        /// On mismatch the inspector picks one of the two; the confirmed channel is stored in the registry and in the settings.
+        /// Shows how a zero calibration run ended: the feedback of the button and, for a failure, the error message.
         /// </summary>
-        /// <returns>True when a channel was confirmed; false when the inspector dismissed the dialog.</returns>
-        private bool ConfirmActiveChannel()
+        private void ShowCalibrationOutcome(CalibrationOutcome outcome)
             {
-            string probeSN = _colorMeasurementService.ProbeSN;
-            int channel = _colorMeasurementService.CurrentChannel;
-
-            if (_analyzerRegistryService.GetLastChannel(probeSN) is int lastChannel && lastChannel != channel)
+            switch (outcome)
                 {
-                int? choice = _dialogService.ShowChoice(
-                    string.Format(ChannelMismatchMessage, lastChannel, channel),
-                    ChannelMismatchTitle,
-                    string.Format(UseProbeChannel, channel),
-                    string.Format(UseLastChannel, lastChannel));
+                case CalibrationOutcome.Ready:
+                    if (_currentDevice != null) _currentDevice.Colorimeter = _analyzer.Colorimeter;
+                    Flash(ZeroCalibrationFeedback, true);
+                    break;
 
-                if (choice is null) return false;
+                case CalibrationOutcome.ConnectFailed:
+                    Flash(ZeroCalibrationFeedback, false);
+                    break;
 
-                if (choice == 1)
-                    {
-                    _colorMeasurementService.CurrentChannel = lastChannel;
-                    channel = lastChannel;
-                    }
+                case CalibrationOutcome.CalibrationFailed:
+                case CalibrationOutcome.Faulted:
+                    Flash(ZeroCalibrationFeedback, false);
+                    _dialogService.ShowMessage($"{ErrAtCalibration}", $"{Err}");
+                    break;
+
+                case CalibrationOutcome.ChannelNotConfirmed:
+                    FlashCanceled(ZeroCalibrationFeedback);
+                    break;
                 }
-
-            _analyzerRegistryService.Update(probeSN, _colorMeasurementService.Model, channel);
-            _settingsService.UpdateChannel(channel);
-            string channelName = _colorMeasurementService.ChannelName;
-            _colorimeter = new ColorimeterInfo(
-                _colorMeasurementService.Model.ToDisplayName(),
-                probeSN,
-                channel,
-                string.IsNullOrWhiteSpace(channelName) ? null : channelName);
-            if (_currentDevice != null) _currentDevice.Colorimeter = _colorimeter;
-            IsChannelConfirmed = true;
-            return true;
             }
 
         /// <summary>
@@ -788,7 +652,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
                 if (!EnsureDeviceInitialized(measurementLocation, ref messageWithMeasuredValues))
                     return;
 
-                var measurement = await _colorMeasurementService.MeasureAsync(_measurementTime);
+                var measurement = await _analyzer.MeasureAsync(_measurementTime);
 
                 if (measurement != null && measurement.IsValid)
                     {
@@ -843,7 +707,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
                 {
                 try
                     {
-                    _currentDevice = new DeviceUnderTest(SerialNumber) { Colorimeter = _colorimeter };
+                    _currentDevice = new DeviceUnderTest(SerialNumber) { Colorimeter = _analyzer.Colorimeter };
                     ResetMeasurementStatuses();
                     RequestSpecCheck();
                     }
@@ -974,7 +838,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
                     return false;
                     }
 
-                _currentDevice = new DeviceUnderTest(SerialNumber) { Colorimeter = _colorimeter };
+                _currentDevice = new DeviceUnderTest(SerialNumber) { Colorimeter = _analyzer.Colorimeter };
                 Log(TestStartInfo, [_currentDevice.SerialNumber]);
                 ResetMeasurementStatuses();
                 UpdateMeasurementStatus(location, null, $"{Measuring}");
@@ -1206,14 +1070,12 @@ namespace ScreenChecker.ViewModels.MeasurementPage
             }
 
         // CanExecute predicates
-        private bool CanExecuteConnect() => !IsDeviceConnected && !_isDeviceCalibrating && !_isDeviceConnecting;
-        private bool CanExecuteDisconnect() => !_isDeviceCalibrating && !_isDeviceConnecting;
-        private bool CanExecuteZeroCalibration(object parameter) => !_isDeviceConnecting && !_isDeviceCalibrating;
+        private bool CanExecuteZeroCalibration(object parameter) => !_analyzer.IsConnecting && !_analyzer.IsCalibrating;
         private bool CanExecuteSaveResults(object parameter) => HasSelectedDeviceConfiguration && _currentDevice != null && !string.IsNullOrWhiteSpace(_currentDevice.SerialNumber) && _currentDevice.Measurements.Count > 0;
         private bool CanExecuteNewDeviceUnderTest(object parameter) => CanExecuteSaveResults(parameter);
         private bool CanExecuteClearFields(object parameter) => true;
         private bool CanExecuteSwitchLanguage(object parameter) => parameter is string code && !string.IsNullOrWhiteSpace(code);
-        private bool CanExecuteMeasure(object parameter) => IsDeviceConnected && !_isDeviceCalibrating && !_isDeviceConnecting && IsDeviceCalibrated && !string.IsNullOrWhiteSpace(SerialNumber) && MeasurementTime > 0;
+        private bool CanExecuteMeasure(object parameter) => IsDeviceConnected && !_analyzer.IsCalibrating && !_analyzer.IsConnecting && IsDeviceCalibrated && !string.IsNullOrWhiteSpace(SerialNumber) && MeasurementTime > 0;
         private bool CanExecuteApplySerialNumber(object parameter) => !string.IsNullOrWhiteSpace(parameter as string);
         private bool CanExecuteReportGenerateCommand(object parameter) => true;
         private bool CanExecuteUploadReportsAsync(object parameter) => true;
@@ -1228,16 +1090,15 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         public void Dispose()
             {
             Log(ViewModelClearing);
-            _colorMeasurementService.StatusMessage -= ColorMeasurementService_StatusMessage;
+            _analyzer.StatusMessage -= ColorMeasurementService_StatusMessage;
             _fileService.StatusMessage -= FileService_StatusMessage;
-            _colorMeasurementService.ConnectionStatusChanged -= ColorMeasurementService_ConnectionStatusChanged;
-            _colorMeasurementService.CalibrationStatusChanged -= ColorMeasurementService_CalibrationStatusChanged;
-            _colorMeasurementService.CurrentChannelChanged -= ColorMeasurementService_CurrentChannelChanged;
+            _analyzer.PropertyChanged -= Analyzer_PropertyChanged;
+            _analyzer.StateRefreshed -= Analyzer_StateRefreshed;
             _uploadService.StatusMessage -= UploadService_StatusMessage;
             _localizationService.LanguageChanged -= LocalizationService_LanguageChanged;
             _specCheck.Cancel();
 
-            ( _colorMeasurementService as IDisposable )?.Dispose();
+            _analyzer.Dispose();
             ( _fileService as IDisposable )?.Dispose();
             ( _dialogService as IDisposable )?.Dispose();
 
@@ -1245,8 +1106,6 @@ namespace ScreenChecker.ViewModels.MeasurementPage
             _currentDevice = null;
             _serialNumber = string.Empty;
             _measurementTime = 2;
-            _isDeviceConnected = false;
-            _isDeviceCalibrated = false;
             _isSerialNumberConfirmed = false;
             _isMeasurementButtonsEnabled = false;
 
@@ -1285,14 +1144,39 @@ namespace ScreenChecker.ViewModels.MeasurementPage
                 : LogSeverity.Info;
             }
 
-        private void ColorMeasurementService_CalibrationStatusChanged(object? sender, bool isCalibrated) =>
-            ExecuteThreadInUI(() => { IsDeviceCalibrated = isCalibrated; UpdateUIState(); });
+        /// <summary>
+        /// Raises the notifications of the page properties that mirror the state of the analyzer session.
+        /// </summary>
+        private void Analyzer_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+            {
+            switch (e.PropertyName)
+                {
+                case nameof(IAnalyzerSession.IsConnected):
+                    OnPropertyChanged(nameof(IsDeviceConnected));
+                    UpdateUIState();
+                    OnPropertyChanged(nameof(DeviceStateText));
+                    break;
 
-        private void ColorMeasurementService_ConnectionStatusChanged(object? sender, bool isConnected) =>
-            ExecuteThreadInUI(() => { IsDeviceConnected = isConnected; UpdateUIState(); });
+                case nameof(IAnalyzerSession.IsCalibrated):
+                    OnPropertyChanged(nameof(IsDeviceCalibrated));
+                    UpdateUIState();
+                    OnPropertyChanged(nameof(DeviceStateText));
+                    break;
 
-        private void ColorMeasurementService_CurrentChannelChanged(object? sender, int channel) =>
-            ExecuteThreadInUI(() => OnPropertyChanged(nameof(DeviceActiveChannelStatusText)));
+                case nameof(IAnalyzerSession.IsChannelConfirmed):
+                    OnPropertyChanged(nameof(IsChannelConfirmed));
+                    OnPropertyChanged(nameof(DeviceModelName));
+                    OnPropertyChanged(nameof(DeviceActiveChannelStatusText));
+                    OnPropertyChanged(nameof(DeviceProbeSerialText));
+                    break;
+
+                case nameof(IAnalyzerSession.CurrentChannel):
+                    OnPropertyChanged(nameof(DeviceActiveChannelStatusText));
+                    break;
+                }
+            }
+
+        private void Analyzer_StateRefreshed(object? sender, EventArgs e) => UpdateUIState();
 
         #endregion
 
