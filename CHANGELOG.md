@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.5] - 2026-11-25
+
+### Changed
+- The report upload runs the Nextcloud CLI through the same process runner as the report generator: the arguments are passed as a list (no hand-made quotes), the output of the CLI is read as UTF-8 and the unused `-f` flag of the `upload` action is no longer passed. The error text of a failed upload is the output of the CLI as before. Needs the Nextcloud CLI 1.1.1, which writes its output in UTF-8
+- After a successful upload the archive is moved to `uploaded_reports` and the result files are deleted through the file system abstraction like the rest of the service
+
 ## [1.4.4] - 2026-11-25
 
 ### Changed

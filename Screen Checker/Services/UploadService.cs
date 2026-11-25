@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.IO.Abstractions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -16,6 +15,7 @@ namespace ScreenChecker.Services
         {
         private readonly IFileSystem _fileSystem;
         private readonly IPathProvider _pathProvider;
+        private readonly IProcessRunner _processRunner;
         private readonly LogHandler _logHandler;
 
         private const string UploadCliName = ExternalApps.NextcloudCli;
@@ -35,10 +35,12 @@ namespace ScreenChecker.Services
         /// <param name="fileSystem">File system abstraction for file operations.</param>
         /// <param name="pathProvider">Path provider for application directories.</param>
         /// <param name="localizationService">Service for localized messages.</param>
-        public UploadService(IFileSystem fileSystem, IPathProvider pathProvider, ILocalizationService localizationService)
+        /// <param name="processRunner">Runs the Nextcloud CLI.</param>
+        public UploadService(IFileSystem fileSystem, IPathProvider pathProvider, ILocalizationService localizationService, IProcessRunner processRunner)
             {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _pathProvider = pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
+            _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
 
             if (localizationService == null) throw new ArgumentNullException(nameof(localizationService));
 
@@ -279,54 +281,29 @@ namespace ScreenChecker.Services
         /// </summary>
         /// <param name="localPathArg">Local file path to upload.</param>
         /// <param name="remoteDir">Remote directory path.</param>
-        /// <returns>True if upload succeeded, false otherwise.</returns>
         /// <param name="cancellationToken">Kills the CLI process and throws <see cref="OperationCanceledException"/> when canceled.</param>
-        private async Task<bool> ExecuteSingleFileUploadAsync(string localPathArg, string remoteDir, CancellationToken cancellationToken)
+        /// <returns>True if upload succeeded, false otherwise.</returns>
+        internal async Task<bool> ExecuteSingleFileUploadAsync(string localPathArg, string remoteDir, CancellationToken cancellationToken)
             {
             var fileName = _fileSystem.Path.GetFileName(localPathArg);
             var remoteFullPath = remoteDir + fileName;
             var cleanRemoteFullPath = remoteFullPath.Replace('\\', '/');
-            var arguments = $"upload -l \"{localPathArg}\" -r \"{cleanRemoteFullPath}\" -f";
+            string[] arguments = ["upload", "-l", localPathArg, "-r", cleanRemoteFullPath];
 
             ReportStatus(StartingUploadOf, [fileName]);
 
             try
                 {
-                using var process = new Process
-                    {
-                    StartInfo = new ProcessStartInfo
-                        {
-                        FileName = UploadCliName,
-                        Arguments = arguments,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        CreateNoWindow = true
-                        }
-                    };
+                var result = await _processRunner.RunAsync(UploadCliName, arguments, _pathProvider.BaseDirectory, string.Empty, Timeout.InfiniteTimeSpan, cancellationToken);
 
-                await Task.Run(() => process.Start());
-                try
-                    {
-                    await process.WaitForExitAsync(cancellationToken);
-                    }
-                catch (OperationCanceledException)
-                    {
-                    if (!process.HasExited) process.Kill(true);
-                    throw;
-                    }
-
-                if (process.ExitCode == 0)
+                if (result.ExitCode == 0)
                     {
                     ReportStatus(UploadSuccessfulFor, [fileName]);
                     return true;
                     }
-                else
-                    {
-                    string errorOutput = await process.StandardError.ReadToEndAsync();
-                    ReportStatus(CLI_ErrorFor, [fileName, process.ExitCode, errorOutput]);
-                    return false;
-                    }
+
+                ReportStatus(CLI_ErrorFor, [fileName, result.ExitCode, result.StandardError]);
+                return false;
                 }
             catch (OperationCanceledException)
                 {

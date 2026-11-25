@@ -50,7 +50,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 | ISettingsService | App configuration (singleton) |
 | ILocalizationService | Runtime language switching (singleton) |
 | IFileService | File I/O abstraction, JSON/CSV export |
-| IUploadService | Parallel report upload to Nextcloud |
+| IUploadService | Parallel report upload to Nextcloud: runs `Nextcloud CLI.exe` through `IProcessRunner`, moves uploaded archives through `IFileSystem` |
 | IDialogService | File dialogs, message boxes |
 | IMeasurementStatusService | Measurement state tracking |
 | IAttemptCounter | Rejected measurement attempts per point (instance state, no statics) |
@@ -98,7 +98,7 @@ Device test specifications are YAML files in `Screen Checker/config/device_confi
 
 ## Version
 
-Current version: **1.4.4** (set in `Screen Checker\Screen Checker.csproj` — `AssemblyVersion` / `FileVersion`). See [CHANGELOG.md](CHANGELOG.md) for history.
+Current version: **1.4.5** (set in `Screen Checker\Screen Checker.csproj` — `AssemblyVersion` / `FileVersion`). See [CHANGELOG.md](CHANGELOG.md) for history.
 
 ## Localization
 

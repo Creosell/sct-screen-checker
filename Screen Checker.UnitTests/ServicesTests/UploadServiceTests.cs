@@ -13,6 +13,7 @@ namespace ScreenChecker.UnitTests.ServicesTests
         private MockFileSystem _mockFileSystem;
         private Mock<IPathProvider> _mockPathProvider;
         private Mock<ILocalizationService> _mockLocalizationService;
+        private Mock<IProcessRunner> _processRunner;
         private UploadService _uploadService;
         private string _testBaseDirectory;
         private List<string> _statusMessages;
@@ -23,6 +24,7 @@ namespace ScreenChecker.UnitTests.ServicesTests
             _mockFileSystem = new MockFileSystem();
             _mockPathProvider = new Mock<IPathProvider>();
             _mockLocalizationService = new Mock<ILocalizationService>();
+            _processRunner = new Mock<IProcessRunner>();
             _statusMessages = new List<string>();
 
             // Setup localization service
@@ -52,7 +54,7 @@ namespace ScreenChecker.UnitTests.ServicesTests
             _testBaseDirectory = "C:\\TestApp\\";
             _mockPathProvider.Setup(p => p.BaseDirectory).Returns(_testBaseDirectory);
 
-            _uploadService = new UploadService(_mockFileSystem, _mockPathProvider.Object, _mockLocalizationService.Object);
+            _uploadService = new UploadService(_mockFileSystem, _mockPathProvider.Object, _mockLocalizationService.Object, _processRunner.Object);
             _uploadService.StatusMessage += (sender, message) => _statusMessages.Add(message);
         }
 
@@ -62,7 +64,7 @@ namespace ScreenChecker.UnitTests.ServicesTests
         public void Constructor_WithDependencies_InitializesCorrectly()
         {
             // Act
-            var service = new UploadService(_mockFileSystem, _mockPathProvider.Object, _mockLocalizationService.Object);
+            var service = new UploadService(_mockFileSystem, _mockPathProvider.Object, _mockLocalizationService.Object, _processRunner.Object);
 
             // Assert
             Assert.That(service, Is.Not.Null);
@@ -73,7 +75,7 @@ namespace ScreenChecker.UnitTests.ServicesTests
         {
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() =>
-                new UploadService(_mockFileSystem, _mockPathProvider.Object, null!));
+                new UploadService(_mockFileSystem, _mockPathProvider.Object, null!, _processRunner.Object));
         }
 
 
@@ -304,28 +306,101 @@ namespace ScreenChecker.UnitTests.ServicesTests
 
         #region ExecuteSingleFileUploadAsync Tests
 
-        // Note: ExecuteSingleFileUploadAsync is a private method that creates Process instances directly.
-        // To properly test this method with different scenarios (success, failure, exceptions),
-        // the code would need to be refactored to inject an IProcess or IProcessFactory interface.
-        //
-        // Current limitations:
-        // 1. Cannot mock Process creation
-        // 2. Cannot test exit code handling without actual Nextcloud CLI
-        // 3. Cannot test exception handling in process execution
-        // 4. Cannot verify argument formatting without real execution
-        //
-        // Recommended refactoring:
-        // - Extract IProcess interface with Start(), WaitForExitAsync(), ExitCode, StandardError
-        // - Inject IProcessFactory to create IProcess instances
-        // - This would enable full test coverage of all upload scenarios
+        private const string CliName = "Nextcloud CLI.exe";
+
+        private void GivenCliResult(int exitCode, string error = "")
+        {
+            _processRunner.Setup(r => r.RunAsync(CliName, It.IsAny<IReadOnlyList<string>>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new ProcessResult(exitCode, string.Empty, error));
+        }
 
         [Test]
-        public void ExecuteSingleFileUploadAsync_RequiresRefactoringForTestability()
+        public async Task ExecuteSingleFileUploadAsync_PassesTheArgumentsAsAList()
         {
-            // This test documents the testability limitation
-            Assert.Pass("ExecuteSingleFileUploadAsync cannot be fully tested without refactoring " +
-                       "to use IProcess or IProcessFactory for dependency injection. " +
-                       "See code comments for recommended approach.");
+            GivenCliResult(0);
+
+            await _uploadService.ExecuteSingleFileUploadAsync("C:\\TestApp\\report archive\\Dev_20230115_1430.zip", "SCT/Dev/General/20230115/", CancellationToken.None);
+
+            _processRunner.Verify(r => r.RunAsync(
+                CliName,
+                It.Is<IReadOnlyList<string>>(a => a.SequenceEqual(new[] { "upload", "-l", "C:\\TestApp\\report archive\\Dev_20230115_1430.zip", "-r", "SCT/Dev/General/20230115/Dev_20230115_1430.zip" })),
+                _testBaseDirectory,
+                string.Empty,
+                Timeout.InfiniteTimeSpan,
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Test]
+        public async Task ExecuteSingleFileUploadAsync_ExitCodeZero_ReportsSuccess()
+        {
+            GivenCliResult(0);
+
+            bool result = await _uploadService.ExecuteSingleFileUploadAsync("C:\\a\\f.zip", "SCT/x/", CancellationToken.None);
+
+            Assert.That(result, Is.True);
+            Assert.That(_statusMessages, Has.Some.Contains("Loc_UploadSuccessfulFor f.zip"));
+        }
+
+        [Test]
+        public async Task ExecuteSingleFileUploadAsync_NonZeroExitCode_ReportsTheErrorOutput()
+        {
+            GivenCliResult(1, "Upload failed: 404");
+
+            bool result = await _uploadService.ExecuteSingleFileUploadAsync("C:\\a\\f.zip", "SCT/x/", CancellationToken.None);
+
+            Assert.That(result, Is.False);
+            Assert.That(_statusMessages, Has.Some.Contains("Loc_CLI_ErrorFor f.zip (Exit: 1): Upload failed: 404"));
+        }
+
+        [Test]
+        public async Task ExecuteSingleFileUploadAsync_RunnerFailure_ReportsItAndFails()
+        {
+            _processRunner.Setup(r => r.RunAsync(It.IsAny<string>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new System.ComponentModel.Win32Exception("not found"));
+
+            bool result = await _uploadService.ExecuteSingleFileUploadAsync("C:\\a\\f.zip", "SCT/x/", CancellationToken.None);
+
+            Assert.That(result, Is.False);
+            Assert.That(_statusMessages, Has.Some.Contains("Loc_FailedToExecuteCLI f.zip: not found"));
+        }
+
+        [Test]
+        public void ExecuteSingleFileUploadAsync_Cancellation_IsNotSwallowed()
+        {
+            _processRunner.Setup(r => r.RunAsync(It.IsAny<string>(), It.IsAny<IReadOnlyList<string>>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+                .ThrowsAsync(new OperationCanceledException());
+
+            Assert.ThrowsAsync<OperationCanceledException>(() => _uploadService.ExecuteSingleFileUploadAsync("C:\\a\\f.zip", "SCT/x/", CancellationToken.None));
+        }
+
+        [Test]
+        public async Task UploadReportsAsync_SuccessfulUpload_MovesTheArchiveAndDeletesTheResults()
+        {
+            var archive = "C:\\TestApp\\report_archive\\Device_General_20230115_1430.zip";
+            var result = "C:\\TestApp\\results\\Device_General_20230115_1430.json";
+            _mockFileSystem.AddFile(archive, new MockFileData("zip"));
+            _mockFileSystem.AddFile(result, new MockFileData("{}"));
+            GivenCliResult(0);
+
+            bool uploaded = await _uploadService.UploadReportsAsync();
+
+            Assert.That(uploaded, Is.True);
+            Assert.That(_mockFileSystem.File.Exists(archive), Is.False);
+            Assert.That(_mockFileSystem.File.Exists(result), Is.False);
+            Assert.That(_mockFileSystem.File.Exists("C:\\TestApp\\uploaded_reports\\Device_General_20230115_1430.zip"), Is.True);
+        }
+
+        [Test]
+        public async Task UploadReportsAsync_FailedUpload_KeepsTheFiles()
+        {
+            var archive = "C:\\TestApp\\report_archive\\Device_General_20230115_1430.zip";
+            _mockFileSystem.AddFile(archive, new MockFileData("zip"));
+            GivenCliResult(1, "boom");
+
+            bool uploaded = await _uploadService.UploadReportsAsync();
+
+            Assert.That(uploaded, Is.False);
+            Assert.That(_mockFileSystem.File.Exists(archive), Is.True);
         }
 
         #endregion
