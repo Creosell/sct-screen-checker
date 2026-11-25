@@ -349,6 +349,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         /// <param name="deviceConfigurationService">Service discovering the device configuration files.</param>
         /// <param name="reportGenerationService">Service running the report generator.</param>
         /// <param name="logService">Application log.</param>
+        /// <param name="spec">Device info panel showing the specification check.</param>
         public MeasurementViewModel(
             IAnalyzerSession analyzer,
             IFileService fileService,
@@ -362,7 +363,8 @@ namespace ScreenChecker.ViewModels.MeasurementPage
             IMeasurementAcceptance acceptance,
             IDeviceConfigurationService deviceConfigurationService,
             IReportGenerationService reportGenerationService,
-            ILogService logService)
+            ILogService logService,
+            SpecSummaryViewModel spec)
             {
             _analyzer = analyzer ?? throw new ArgumentNullException(nameof(analyzer));
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
@@ -377,7 +379,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
             _reportGenerationService = reportGenerationService ?? throw new ArgumentNullException(nameof(reportGenerationService));
             _logService = logService ?? throw new ArgumentNullException(nameof(logService));
-            Spec = new SpecSummaryViewModel(_measurementStatusService, _logService.Append);
+            Spec = spec ?? throw new ArgumentNullException(nameof(spec));
             Results = new(( _measurementStatusService.AllMeasurementButtonStatuses ?? [] ).Select(status => new MeasurementResultRow(status)));
 
             ZeroCalibrationCommand = new RelayCommand(ExecuteZeroCalibrationAsync, CanExecuteZeroCalibration);

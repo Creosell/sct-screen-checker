@@ -60,6 +60,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests
             services.AddSingleton(mockPathProvider.Object);
             services.AddSingleton(new Mock<IReportGenerationService>().Object);
             services.AddSingleton<ILogService, LogService>();
+            services.AddTransient(provider => new SpecSummaryViewModel(
+                provider.GetRequiredService<IMeasurementStatusService>(), provider.GetRequiredService<ILogService>().Append));
             services.AddTransient<ISpecCheckCoordinator, SpecCheckCoordinator>();
             services.AddSingleton<IDeviceConfigurationService>(new DeviceConfigurationService(new System.IO.Abstractions.TestingHelpers.MockFileSystem(), mockPathProvider.Object));
 

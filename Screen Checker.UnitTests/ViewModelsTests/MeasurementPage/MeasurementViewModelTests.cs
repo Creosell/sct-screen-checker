@@ -72,6 +72,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
             // Примечание: Setup для GetString(key, args) больше не нужен,
             // так как новый LogHandler его не использует.
 
+            var logService = new LogService(_mockLocalizationService.Object, _mockDispatcher.Object);
             _viewModel = new MeasurementViewModel(
                 new AnalyzerSession(_mockColorMeasurementService.Object, _mockAnalyzerRegistryService.Object, _mockDialogService.Object, _mockSettingsService.Object, _mockDispatcher.Object),
                 _mockFileService.Object,
@@ -85,7 +86,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
                 new MeasurementAcceptance(new AttemptCounter()),
                 new DeviceConfigurationService(new System.IO.Abstractions.TestingHelpers.MockFileSystem(), _mockPathProvider.Object),
                 _mockReportGenerationService.Object,
-                new LogService(_mockLocalizationService.Object, _mockDispatcher.Object)
+                logService,
+                new SpecSummaryViewModel(_mockMeasurementStatusService.Object, logService.Append)
             );
             }
 
@@ -1889,6 +1891,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
 
             _mockPathProvider.Setup(p => p.ConfigDirectory).Returns(_configTestDirectory);
 
+            var logService = new LogService(_mockLocalizationService.Object, _mockDispatcher.Object);
             var viewModel = new MeasurementViewModel(
                 new AnalyzerSession(_mockColorMeasurementService.Object, _mockAnalyzerRegistryService.Object, _mockDialogService.Object, _mockSettingsService.Object, _mockDispatcher.Object),
                 _mockFileService.Object,
@@ -1902,7 +1905,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
                 new MeasurementAcceptance(new AttemptCounter()),
                 new DeviceConfigurationService(new System.IO.Abstractions.FileSystem(), _mockPathProvider.Object),
                 _mockReportGenerationService.Object,
-                new LogService(_mockLocalizationService.Object, _mockDispatcher.Object));
+                logService,
+                new SpecSummaryViewModel(_mockMeasurementStatusService.Object, logService.Append));
             return viewModel;
             }
 

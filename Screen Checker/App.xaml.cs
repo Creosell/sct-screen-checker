@@ -67,6 +67,8 @@ namespace ScreenChecker
             AddService<IReportGenerationService, ReportGenerationService>(services);
             services.AddSingleton<ILogService, LogService>();
             services.AddTransient<ISpecCheckCoordinator, SpecCheckCoordinator>();
+            services.AddTransient(provider => new SpecSummaryViewModel(
+                provider.GetRequiredService<IMeasurementStatusService>(), provider.GetRequiredService<ILogService>().Append));
 
             // ViewModels
             AddViewModel<MainWindowViewModel>(services);
