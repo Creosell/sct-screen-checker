@@ -49,6 +49,17 @@ namespace WPF_LCD_Test.Wrappers
             set => Ca410Sdk.Check(Memory.put_ChannelNO(value), nameof(ChannelNO));
             }
 
+        /// <inheritdoc/>
+        public string ChannelID
+            {
+            get
+                {
+                string name = string.Empty;
+                Ca410Sdk.Check(Memory.get_ChannelID(ref name), nameof(ChannelID));
+                return name?.Trim() ?? string.Empty;
+                }
+            }
+
         private CASDK2Memory Memory => _memory ?? throw new ObjectDisposedException(nameof(Ca410MemoryWrapper));
 
         /// <inheritdoc/>

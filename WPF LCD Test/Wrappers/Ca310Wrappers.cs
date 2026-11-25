@@ -35,6 +35,16 @@ namespace WPF_LCD_Test.Wrappers
             }
         }
 
+        /// <inheritdoc/>
+        public string ChannelID
+        {
+            get
+            {
+                if (_memoryInstance == null) throw new ObjectDisposedException(nameof(Ca310MemoryWrapper));
+                return _memoryInstance.ChannelID?.Trim() ?? string.Empty;
+            }
+        }
+
         /// <summary>
         /// Releases COM reference.
         /// </summary>

@@ -56,6 +56,9 @@ namespace WPF_LCD_Test.DebugTools
         public string ProbeSN => _options.ProbeSerialNumber;
 
         /// <inheritdoc/>
+        public string ChannelName => "Simulated";
+
+        /// <inheritdoc/>
         public int CurrentChannel
             {
             get => _channel;

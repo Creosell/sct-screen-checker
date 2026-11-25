@@ -131,5 +131,10 @@ namespace WPF_LCD_Test.Interfaces
         /// Gets or sets the channel number (0-99).
         /// </summary>
         int ChannelNO { get; set; }
+
+        /// <summary>
+        /// Gets the user-defined name of the current channel, or an empty string when none is set.
+        /// </summary>
+        string ChannelID { get; }
     }
 }

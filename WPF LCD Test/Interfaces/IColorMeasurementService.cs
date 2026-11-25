@@ -33,6 +33,11 @@ namespace WPF_LCD_Test.Interfaces
         string ProbeSN { get; }
 
         /// <summary>
+        /// Gets the user-defined name of the current analyzer channel, or an empty string when none is set or it cannot be read.
+        /// </summary>
+        string ChannelName { get; }
+
+        /// <summary>
         /// Asynchronously connects to the color measurement device.
         /// </summary>
         /// <returns>True if connection successful; otherwise, false.</returns>

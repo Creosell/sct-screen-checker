@@ -368,9 +368,20 @@ namespace WPF_LCD_Test.ViewModels
         /// while it is being re-confirmed, empty before the first confirmation (the card does not show it then).
         /// </summary>
         public string DeviceActiveChannelStatusText =>
-            _isChannelConfirmed ? string.Format(ActiveChannelStatus, _colorMeasurementService.CurrentChannel)
-            : _colorimeter != null ? string.Format(ActiveChannelStatus, _colorimeter.Channel)
+            _isChannelConfirmed ? FormatChannel(_colorMeasurementService.CurrentChannel, _colorMeasurementService.ChannelName)
+            : _colorimeter != null ? FormatChannel(_colorimeter.Channel, _colorimeter.ChannelName)
             : string.Empty;
+
+        /// <summary>
+        /// Formats the channel label, appending the user-defined channel name in parentheses when it is set.
+        /// </summary>
+        /// <param name="channel">Channel number.</param>
+        /// <param name="channelName">User-defined channel name; may be null or empty.</param>
+        /// <returns>The label, e.g. "Channel 2 (Lab TV)".</returns>
+        private static string FormatChannel(int channel, string? channelName) =>
+            string.IsNullOrWhiteSpace(channelName)
+                ? string.Format(ActiveChannelStatus, channel)
+                : $"{string.Format(ActiveChannelStatus, channel)} ({channelName})";
 
         /// <summary>
         /// Gets the probe serial number label: the last confirmed probe, empty before the first confirmation.
@@ -761,7 +772,12 @@ namespace WPF_LCD_Test.ViewModels
 
             _analyzerRegistryService.Update(probeSN, _colorMeasurementService.Model, channel);
             _settingsService.UpdateChannel(channel);
-            _colorimeter = new ColorimeterInfo(_colorMeasurementService.Model.ToDisplayName(), probeSN, channel);
+            string channelName = _colorMeasurementService.ChannelName;
+            _colorimeter = new ColorimeterInfo(
+                _colorMeasurementService.Model.ToDisplayName(),
+                probeSN,
+                channel,
+                string.IsNullOrWhiteSpace(channelName) ? null : channelName);
             if (_currentDevice != null) _currentDevice.Colorimeter = _colorimeter;
             IsChannelConfirmed = true;
             return true;

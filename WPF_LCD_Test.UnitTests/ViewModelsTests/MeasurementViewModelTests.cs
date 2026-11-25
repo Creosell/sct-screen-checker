@@ -458,6 +458,21 @@ namespace WPF_LCD_Test.UnitTests.ViewModelsTests
             }
 
         [Test]
+        public async Task ExecuteZeroCalibrationAsync_NamedChannel_ShowsNameInChannelLabel()
+            {
+            // Arrange
+            SetupCalibratedProbe("81026182", 2);
+            _mockColorMeasurementService.SetupGet(s => s.ChannelName).Returns("Lab TV");
+            _mockAnalyzerRegistryService.Setup(r => r.GetLastChannel("81026182")).Returns((int?)null);
+
+            // Act
+            await ((RelayCommand)_viewModel.ZeroCalibrationCommand).ExecuteAsync(null);
+
+            // Assert
+            StringAssert.EndsWith("2 (Lab TV)", _viewModel.DeviceActiveChannelStatusText);
+            }
+
+        [Test]
         public async Task ExecuteZeroCalibrationAsync_UnknownProbe_RegistersChannelWithoutDialog()
             {
             // Arrange

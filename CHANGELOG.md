@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.3] - 2026-11-25
+
+### Added
+- The user-defined channel name stored in the analyzer (`ChannelID`, CA-310 and CA-410) is shown on the device card after the channel number (`Channel 2 (Lab TV)`) and saved as `ChannelName` in the `Colorimeter` object of the measurement JSON; omitted when the name is empty.
+
 ## [1.4.2] - 2026-11-24
 
 ### Changed

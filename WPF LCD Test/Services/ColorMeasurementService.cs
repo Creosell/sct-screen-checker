@@ -82,6 +82,24 @@ namespace WPF_LCD_Test.Services
             }
 
         /// <summary>
+        /// Gets the user-defined name of the current analyzer channel, or an empty string when none is set or it cannot be read.
+        /// </summary>
+        public string ChannelName
+            {
+            get
+                {
+                try
+                    {
+                    return _objMemory?.ChannelID ?? string.Empty;
+                    }
+                catch (Exception)
+                    {
+                    return string.Empty;
+                    }
+                }
+            }
+
+        /// <summary>
         /// Gets or sets the current measurement channel (0-99).
         /// </summary>
         public int CurrentChannel
