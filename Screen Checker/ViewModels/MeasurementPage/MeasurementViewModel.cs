@@ -12,7 +12,7 @@ using ScreenChecker.Models;
 using ScreenChecker.Services;
 using static ScreenChecker.Resources.Resources;
 
-namespace ScreenChecker.ViewModels
+namespace ScreenChecker.ViewModels.MeasurementPage
     {
     public partial class MeasurementViewModel : BaseViewModel, IDisposable
         {

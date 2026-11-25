@@ -1,9 +1,9 @@
 using System.Globalization;
 using ScreenChecker.Models;
 using ScreenChecker.Services;
-using ScreenChecker.ViewModels;
+using ScreenChecker.ViewModels.MeasurementPage;
 
-namespace ScreenChecker.UnitTests.ViewModelsTests
+namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
     {
     [TestFixture]
     public class SpecSummaryViewModelTests

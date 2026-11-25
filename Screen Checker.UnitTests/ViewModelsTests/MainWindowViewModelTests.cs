@@ -4,8 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using ScreenChecker.Interfaces;
 using ScreenChecker.Services;
 using ScreenChecker.ViewModels;
+using ScreenChecker.ViewModels.MeasurementPage;
+using ScreenChecker.ViewModels.SettingsPage;
 
-namespace ScreenChecker.UnitTests.ViewModels
+namespace ScreenChecker.UnitTests.ViewModelsTests
 {
     [TestFixture]
     public class MainWindowViewModelTests

@@ -8,7 +8,7 @@ using ScreenChecker.Interfaces;
 using ScreenChecker.Models;
 using static ScreenChecker.Resources.Resources;
 
-namespace ScreenChecker.ViewModels
+namespace ScreenChecker.ViewModels.SettingsPage
     {
     // ViewModel для страницы настроек приложения
     public class SettingsViewModel : BaseViewModel, IDisposable

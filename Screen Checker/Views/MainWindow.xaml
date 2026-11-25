@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:resources="clr-namespace:ScreenChecker.Resources"
     xmlns:view="clr-namespace:ScreenChecker.Views"
-    xmlns:viewmodel="clr-namespace:ScreenChecker.ViewModels"
+    xmlns:viewmodel="clr-namespace:ScreenChecker.ViewModels.SettingsPage"
     Title="Screen Checker"
     Width="1000"
     Height="600"

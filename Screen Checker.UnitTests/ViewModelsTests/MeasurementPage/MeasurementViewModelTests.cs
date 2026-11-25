@@ -3,12 +3,12 @@ using ScreenChecker.Commands;
 using ScreenChecker.Interfaces;
 using ScreenChecker.Models;
 using ScreenChecker.Services; // Доступ к MeasurementStatusService
-using ScreenChecker.ViewModels;
+using ScreenChecker.ViewModels.MeasurementPage;
 
 // Для доступа к ключам ресурсов (RunExternalAppNotFoundErr и др.)
 using static ScreenChecker.Resources.Resources;
 
-namespace ScreenChecker.UnitTests.ViewModelsTests
+namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
     {
     [TestFixture]
     public class MeasurementViewModelTests

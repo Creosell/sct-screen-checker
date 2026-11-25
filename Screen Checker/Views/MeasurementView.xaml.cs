@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using ScreenChecker.Interfaces;
 using ScreenChecker.Models;
-using ScreenChecker.ViewModels; // Убедись, что используешь пространство имен твоего ViewModel
+using ScreenChecker.ViewModels.MeasurementPage;
 
 namespace ScreenChecker.Views
 {

@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:ScreenChecker.Models"
     xmlns:services="clr-namespace:ScreenChecker.Services"
-    xmlns:viewmodels="clr-namespace:ScreenChecker.ViewModels"
+    xmlns:viewmodels="clr-namespace:ScreenChecker.ViewModels.MeasurementPage"
     d:DataContext="{d:DesignInstance Type=viewmodels:MeasurementViewModel}"
     Background="{DynamicResource AppPageBackground}"
     Focusable="True"

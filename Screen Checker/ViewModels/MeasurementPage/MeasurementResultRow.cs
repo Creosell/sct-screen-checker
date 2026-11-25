@@ -1,7 +1,7 @@
 using MvvmHelpers;
 using ScreenChecker.Models;
 
-namespace ScreenChecker.ViewModels
+namespace ScreenChecker.ViewModels.MeasurementPage
     {
     /// <summary>
     /// How the attempts counter of a point is colored.

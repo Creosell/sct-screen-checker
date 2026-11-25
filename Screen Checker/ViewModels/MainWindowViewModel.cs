@@ -2,6 +2,8 @@
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using ScreenChecker.Commands;
+using ScreenChecker.ViewModels.MeasurementPage;
+using ScreenChecker.ViewModels.SettingsPage;
 
 namespace ScreenChecker.ViewModels
 {

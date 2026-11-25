@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using ScreenChecker.Interfaces;
 using ScreenChecker.Models;
 
-namespace ScreenChecker.ViewModels
+namespace ScreenChecker.ViewModels.MeasurementPage
     {
     /// <summary>
     /// A remark against the specification for the confirmation of saving.

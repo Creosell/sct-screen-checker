@@ -10,6 +10,8 @@ using ScreenChecker.Interfaces;
 using ScreenChecker.Models;
 using ScreenChecker.Services;
 using ScreenChecker.ViewModels;
+using ScreenChecker.ViewModels.MeasurementPage;
+using ScreenChecker.ViewModels.SettingsPage;
 using ScreenChecker.Views;
 using ScreenChecker.Wrappers;
 

@@ -1,6 +1,6 @@
 using ScreenChecker.Models;
 
-namespace ScreenChecker.ViewModels
+namespace ScreenChecker.ViewModels.MeasurementPage
     {
     /// <summary>
     /// One row of the device info table: a metric with its value, specification and status.

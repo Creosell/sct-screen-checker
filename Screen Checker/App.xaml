@@ -5,7 +5,8 @@
     xmlns:local="clr-namespace:ScreenChecker"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:v="clr-namespace:ScreenChecker.Views"
-    xmlns:vm="clr-namespace:ScreenChecker.ViewModels"
+    xmlns:vmm="clr-namespace:ScreenChecker.ViewModels.MeasurementPage"
+    xmlns:vms="clr-namespace:ScreenChecker.ViewModels.SettingsPage"
     Startup="Application_Startup">
     <Application.Resources>
         <ResourceDictionary>
@@ -20,11 +21,11 @@
                 <ResourceDictionary Source="/Resources/Styles/FieldStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <DataTemplate DataType="{x:Type vm:MeasurementViewModel}">
+            <DataTemplate DataType="{x:Type vmm:MeasurementViewModel}">
                 <v:MeasurementView />
             </DataTemplate>
 
-            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <DataTemplate DataType="{x:Type vms:SettingsViewModel}">
                 <v:SettingsView />
             </DataTemplate>
         </ResourceDictionary>

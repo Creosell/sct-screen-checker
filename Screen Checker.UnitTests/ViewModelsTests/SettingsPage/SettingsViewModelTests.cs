@@ -1,9 +1,9 @@
 ﻿using Moq;
 using ScreenChecker.Interfaces;
 using ScreenChecker.Models;
-using ScreenChecker.ViewModels;
+using ScreenChecker.ViewModels.SettingsPage;
 
-namespace ScreenChecker.UnitTests.ViewModels
+namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
     {
     [TestFixture]
     public class SettingsViewModelTests
