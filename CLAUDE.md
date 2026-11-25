@@ -34,7 +34,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 **Key Layers:**
 
 - **Views/** - XAML UI (MainWindow, MeasurementView, SettingsView)
-- **ViewModels/** - Presentation logic with RelayCommand for UI binding
+- **ViewModels/** - Presentation logic with RelayCommand for UI binding; the files of a window live in its subfolder (`Measurement/`, `Settings/`; the namespace stays `ScreenChecker.ViewModels`), the tests mirror it in `ViewModelsTests/`
 - **Models/** - Data classes (Measurement, DeviceUnderTest, AppSettings)
 - **Services/** - Business logic, all interface-based for testability
 - **Wrappers/** - Abstractions over system dependencies (COM device, file system, dispatcher)
