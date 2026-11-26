@@ -34,6 +34,12 @@ namespace ScreenChecker.Views
 
         private readonly DeviceCardTransition _deviceCard;
 
+        /// <summary>
+        /// Gets or sets how much faster than real time the analyzer card changes between its states (1: as the operator sees it).
+        /// The layout tests raise it, so they look at the card after the change without waiting for the animation.
+        /// </summary>
+        internal static double TransitionSpeed { get; set; } = 1;
+
         private void DeviceConfigurationButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.ContextMenu != null)
@@ -357,7 +363,7 @@ namespace ScreenChecker.Views
                 _isTransitioning = true;
                 double fromWidth = _card.ActualWidth;
 
-                var fadeOut = new DoubleAnimation(0, FadeOutDuration) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn } };
+                var fadeOut = new DoubleAnimation(0, FadeOutDuration) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }, SpeedRatio = TransitionSpeed };
                 fadeOut.Completed += (_, _) =>
                 {
                     Show(_requested);
@@ -369,17 +375,19 @@ namespace ScreenChecker.Views
 
                     var resize = new DoubleAnimation(fromWidth, toWidth, ResizeDuration)
                     {
-                        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut },
+                        SpeedRatio = TransitionSpeed
                     };
                     resize.Completed += (_, _) => _card.BeginAnimation(FrameworkElement.WidthProperty, null);
                     _card.BeginAnimation(FrameworkElement.WidthProperty, resize);
 
-                    _card.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(OpacityOf(_shown), ResizeDuration));
+                    _card.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(OpacityOf(_shown), ResizeDuration) { SpeedRatio = TransitionSpeed });
 
                     var fadeIn = new DoubleAnimation(0, 1, FadeInDuration)
                     {
                         BeginTime = TimeSpan.FromMilliseconds(60),
-                        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+                        SpeedRatio = TransitionSpeed
                     };
                     fadeIn.Completed += (_, _) =>
                     {

@@ -56,7 +56,7 @@ namespace ScreenChecker.DebugTools
         public string ProbeSN => _options.ProbeSerialNumber;
 
         /// <inheritdoc/>
-        public string ChannelName => "Simulated";
+        public string ChannelName => _options.ChannelName;
 
         /// <inheritdoc/>
         public int CurrentChannel

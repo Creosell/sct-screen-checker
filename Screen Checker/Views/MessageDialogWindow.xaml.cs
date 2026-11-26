@@ -8,6 +8,9 @@ namespace ScreenChecker.Views
     /// </summary>
     public partial class MessageDialogWindow : Window
         {
+        /// <summary>The tallest the dialog gets, so it fits a full HD screen: a longer message scrolls.</summary>
+        private const double MaxDialogHeight = 900;
+
         private readonly MessageBoxResult _primaryResult;
         private readonly MessageBoxResult _secondaryResult;
 
@@ -26,6 +29,7 @@ namespace ScreenChecker.Views
             {
             InitializeComponent();
             Title = caption;
+            MaxHeight = Math.Min(SystemParameters.WorkArea.Height - 40, MaxDialogHeight);
             ShowMessage(message);
 
             if (buttons == MessageBoxButton.YesNo)

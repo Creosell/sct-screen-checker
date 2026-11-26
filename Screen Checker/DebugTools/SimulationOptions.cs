@@ -26,16 +26,18 @@ namespace ScreenChecker.DebugTools
 
     /// <summary>
     /// Options of the simulated color analyzer, read from the command line of a Debug build:
-    /// <c>--simulate[=ca410|ca310] [--scenario=ok|retry|fail|reject|uniformity] [--probe-sn=NUMBER]</c>.
+    /// <c>--simulate[=ca410|ca310] [--scenario=ok|retry|fail|reject|uniformity] [--probe-sn=NUMBER] [--channel-name=NAME]</c>.
     /// </summary>
     /// <param name="Model">Analyzer family the simulator reports.</param>
     /// <param name="Scenario">Values the simulator measures.</param>
     /// <param name="ProbeSerialNumber">Serial number of the simulated probe.</param>
-    public sealed record SimulationOptions(ColorAnalyzerModel Model, SimulationScenario Scenario, string ProbeSerialNumber)
+    /// <param name="ChannelName">User-defined channel name the simulated analyzer reports (the real ones keep up to 10 characters).</param>
+    public sealed record SimulationOptions(ColorAnalyzerModel Model, SimulationScenario Scenario, string ProbeSerialNumber, string ChannelName = "Simulated")
         {
         private const string SimulateFlag = "--simulate";
         private const string ScenarioFlag = "--scenario=";
         private const string ProbeFlag = "--probe-sn=";
+        private const string ChannelNameFlag = "--channel-name=";
 
         /// <summary>
         /// Reads the simulation options from the command line.
@@ -51,7 +53,7 @@ namespace ScreenChecker.DebugTools
             var model = simulate.EndsWith("=ca310", StringComparison.OrdinalIgnoreCase) ? ColorAnalyzerModel.CA310 : ColorAnalyzerModel.CA410;
             var scenario = Enum.TryParse(Value(list, ScenarioFlag), ignoreCase: true, out SimulationScenario parsed) ? parsed : SimulationScenario.Ok;
             string probe = Value(list, ProbeFlag) ?? "12345678";
-            return new SimulationOptions(model, scenario, probe);
+            return new SimulationOptions(model, scenario, probe, Value(list, ChannelNameFlag) ?? "Simulated");
             }
 
         private static string? Value(List<string> args, string flag) =>

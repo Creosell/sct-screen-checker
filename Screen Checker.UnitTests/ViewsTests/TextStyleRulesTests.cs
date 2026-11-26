@@ -130,6 +130,64 @@ namespace ScreenChecker.UnitTests.ViewsTests
             Assert.That(labels, Is.Empty, "a label column is as wide as its widest label: put the labels into one SharedSizeGroup instead of a fixed Width");
             }
 
+        /// <summary>
+        /// The widths of the fixed columns of the pages that were reviewed on purpose (the numeric columns of the Results table: x, y, Lv, T);
+        /// a column of any other fixed width is a new decision, the layout tests have to show the longest text of every language fits it.
+        /// </summary>
+        private static readonly Dictionary<string, int> AllowedFixedColumns = new()
+            {
+            ["MeasurementView.xaml|45"] = 6,
+            ["MeasurementView.xaml|50"] = 2
+            };
+
+        /// <summary>Texts that stay as wide as they are on purpose: the value of a check keeps a minimum width so that the values line up.</summary>
+        private static readonly string[] AllowedMinWidths = ["MeasurementView.xaml|44"];
+
+        [Test]
+        public void TextBlocks_AreNotSizedByAFixedWidth()
+            {
+            // A text that is given a width of its own does not give way when another text next to it grows (a longer translation, a longer
+            // value): they run over each other. A text takes a star column and wraps, or sits in a column that is as wide as it needs.
+            var fixedTexts = Pages()
+                .SelectMany(p => p.Document.Descendants().Where(e => e.Name.LocalName == "TextBlock").Select(e => (p.File, Element: e)))
+                .SelectMany(t => new[] { "Width", "MaxWidth", "MinWidth" }
+                    .Select(property => (t.File, Property: property, Value: (string?)t.Element.Attribute(property), t.Element))
+                    .Where(x => x.Value != null && double.TryParse(x.Value, System.Globalization.CultureInfo.InvariantCulture, out _)))
+                .Where(x => x.Property != "MinWidth" || !AllowedMinWidths.Contains($"{x.File}|{x.Value}"))
+                .Select(x => $"{x.File}: {x.Property}={x.Value} on \"{x.Element.Attribute("Text")?.Value}\"");
+
+            Assert.That(fixedTexts, Is.Empty, "let the text take a star column and wrap (TextWrapping=\"Wrap\") or an Auto column (SharedSizeGroup for a table) instead of a fixed width");
+            }
+
+        [Test]
+        public void FixedWidthColumns_AreTheReviewedOnes()
+            {
+            var found = Pages()
+                .SelectMany(p => p.Document.Descendants().Where(e => e.Name.LocalName == "ColumnDefinition").Select(e => (p.File, Width: (string?)e.Attribute("Width"))))
+                .Where(c => c.Width != null && double.TryParse(c.Width, System.Globalization.CultureInfo.InvariantCulture, out _))
+                .GroupBy(c => $"{c.File}|{c.Width}")
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var unexpected = found.Where(f => !AllowedFixedColumns.TryGetValue(f.Key, out int allowed) || f.Value > allowed).Select(f => f.Key);
+
+            Assert.That(unexpected, Is.Empty, "a column of a fixed width cuts or hides the text of a longer language: use Auto (SharedSizeGroup) or a star, or add the width to AllowedFixedColumns after the layout tests show every language fits");
+            }
+
+        [Test]
+        public void TrimmedTexts_CanBeReadInAToolTip()
+            {
+            // A text that is cut with an ellipsis must be readable whole somewhere: the tooltip of the text or of the control around it.
+            // The fixed hints of the analyzer card are short constants that the layout tests keep whole.
+            string[] fixedHints = ["{DynamicResource DeviceCardNoAnalyzer}", "{DynamicResource DeviceCardPressCalibration}", "{DynamicResource DeviceCardCalibrating}"];
+            var trimmed = Pages()
+                .SelectMany(p => p.Document.Descendants().Where(e => e.Name.LocalName == "TextBlock" && e.Attribute("TextTrimming") != null).Select(e => (p.File, Element: e)))
+                .Where(t => !fixedHints.Contains((string?)t.Element.Attribute("Text") ?? ""))
+                .Where(t => t.Element.AncestorsAndSelf().All(a => a.Attribute("ToolTip") == null))
+                .Select(t => $"{t.File}: {t.Element.Attribute("Text")?.Value}");
+
+            Assert.That(trimmed, Is.Empty, "give the text (or the control it is in) a ToolTip with the whole text");
+            }
+
         [Test]
         public void TemplatesThatReserveRoomForSeveralTexts_CenterTheShownText()
             {

@@ -12,19 +12,31 @@
     ShowInTaskbar="False"
     SizeToContent="WidthAndHeight"
     WindowStartupLocation="CenterOwner">
-    <StackPanel Margin="20">
-        <TextBlock
-            x:Name="MessageText"
-            Margin="0,0,0,20"
-            TextWrapping="Wrap" />
-        <Separator x:Name="QuestionSeparator" Margin="0,0,0,12" Visibility="Collapsed" />
-        <TextBlock
-            x:Name="QuestionText"
-            Margin="0,0,0,20"
-            FontWeight="SemiBold"
-            TextWrapping="Wrap"
-            Visibility="Collapsed" />
-        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <!--  The message scrolls when it does not fit the screen (the confirmation of saving lists every remark), the buttons stay in view  -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock
+                    x:Name="MessageText"
+                    Margin="0,0,0,20"
+                    TextWrapping="Wrap" />
+                <Separator x:Name="QuestionSeparator" Margin="0,0,0,12" Visibility="Collapsed" />
+                <TextBlock
+                    x:Name="QuestionText"
+                    Margin="0,0,0,20"
+                    FontWeight="SemiBold"
+                    TextWrapping="Wrap"
+                    Visibility="Collapsed" />
+            </StackPanel>
+        </ScrollViewer>
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
             <Button
                 x:Name="PrimaryButton"
                 MinWidth="80"
@@ -37,5 +49,5 @@
                 Click="SecondaryButton_Click"
                 IsCancel="True" />
         </StackPanel>
-    </StackPanel>
+    </Grid>
 </Window>

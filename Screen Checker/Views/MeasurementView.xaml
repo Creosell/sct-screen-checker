@@ -669,8 +669,8 @@
 
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="45*" />
-                <ColumnDefinition Width="55*" />
+                <ColumnDefinition Width="47*" />
+                <ColumnDefinition Width="53*" />
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0" Grid.IsSharedSizeScope="True">
@@ -766,28 +766,22 @@
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            FontWeight="SemiBold"
-                                            Foreground="{DynamicResource AppTextPrimary}"
-                                            Text="{Binding DeviceModelName}" />
-                                        <TextBlock
-                                            Grid.Column="1"
-                                            Margin="6,0,0,0"
-                                            Foreground="{DynamicResource AppTextSecondary}"
-                                            Text="{Binding DeviceActiveChannelStatusText}"
-                                            TextTrimming="CharacterEllipsis"
-                                            ToolTip="{Binding DeviceActiveChannelStatusText}" />
-                                    </Grid>
+                                    <TextBlock
+                                        FontWeight="SemiBold"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{Binding DeviceModelName}" />
+                                    <TextBlock
+                                        FontSize="{DynamicResource FontSizeCaption}"
+                                        Foreground="{DynamicResource AppTextSecondary}"
+                                        Text="{Binding DeviceActiveChannelStatusText}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip="{Binding DeviceActiveChannelStatusText}" />
                                     <TextBlock
                                         FontSize="{DynamicResource FontSizeCaption}"
                                         Foreground="{DynamicResource AppTextSecondary}"
                                         Text="{Binding DeviceProbeSerialText}"
-                                        TextTrimming="CharacterEllipsis" />
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip="{Binding DeviceProbeSerialText}" />
                                 </StackPanel>
                             </Grid>
                         </Grid>
@@ -817,7 +811,8 @@
                                 VerticalAlignment="Center"
                                 Click="DeviceConfigurationButton_Click"
                                 Style="{StaticResource UnderlinedDropdownButtonStyle}"
-                                Tag="{Binding}">
+                                Tag="{Binding}"
+                                ToolTip="{Binding SelectedDeviceConfigurationDisplayName}">
                                 <Button.ContextMenu>
                                     <ContextMenu
                                         DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
@@ -1199,8 +1194,8 @@
             MinHeight="200"
             Margin="0,5,5,5">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="45*" />
-                <ColumnDefinition Width="55*" />
+                <ColumnDefinition Width="47*" />
+                <ColumnDefinition Width="53*" />
             </Grid.ColumnDefinitions>
             <TabControl
                 Grid.Column="0"
@@ -1270,11 +1265,11 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="ResultName" />
-                                <ColumnDefinition Width="40" />
-                                <ColumnDefinition Width="40" />
-                                <ColumnDefinition Width="40" />
+                                <ColumnDefinition Width="45" />
+                                <ColumnDefinition Width="45" />
                                 <ColumnDefinition Width="45" />
                                 <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="ResultTries" />
                             </Grid.ColumnDefinitions>
                             <Ellipse
                                 Width="10"
@@ -1315,7 +1310,7 @@
                                 TextAlignment="Center" />
                             <TextBlock
                                 Grid.Column="6"
-                                Margin="0,0,6,0"
+                                Margin="0,0,2,0"
                                 FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource ResultsColumnTries}"
@@ -1348,16 +1343,16 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="Auto" SharedSizeGroup="ResultName" />
-                                                    <ColumnDefinition Width="40" />
-                                                    <ColumnDefinition Width="40" />
-                                                    <ColumnDefinition Width="40" />
+                                                    <ColumnDefinition Width="45" />
+                                                    <ColumnDefinition Width="45" />
                                                     <ColumnDefinition Width="45" />
                                                     <ColumnDefinition Width="50" />
+                                                    <ColumnDefinition Width="Auto" SharedSizeGroup="ResultTries" />
                                                 </Grid.ColumnDefinitions>
                                                 <Ellipse Style="{StaticResource ResultDotStyle}" />
                                                 <TextBlock
                                                     Grid.Column="1"
-                                                    Margin="0,0,6,0"
+                                                    Margin="0,0,3,0"
                                                     VerticalAlignment="Center"
                                                     FontSize="{DynamicResource FontSizeBody}"
                                                     Text="{Binding Name}" />
@@ -1391,7 +1386,7 @@
                                                     TextAlignment="Center" />
                                                 <TextBlock
                                                     Grid.Column="6"
-                                                    Margin="0,0,6,0"
+                                                    Margin="0,0,2,0"
                                                     VerticalAlignment="Center"
                                                     FontSize="13"
                                                     Style="{StaticResource TriesTextStyle}"
@@ -1538,7 +1533,6 @@
                                             <Ellipse Style="{StaticResource SpecDotStyle}" />
                                             <TextBlock
                                                 Grid.Column="1"
-                                                MinWidth="120"
                                                 VerticalAlignment="Center"
                                                 FontSize="{DynamicResource FontSizeSpecName}"
                                                 Text="{Binding Name}"

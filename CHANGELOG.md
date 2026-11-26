@@ -9,7 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.5] - 2026-11-26
 
+### Changed
+- The Device info table lets the name of a metric wrap to a second line instead of keeping a minimum width of 120 px: in Chinese the name of the metric was cut by the value next to it. The left and the right block of the page share the width 47/53 (was 45/55) so the results table keeps its air in Russian
+- The device configuration button shows the whole name in its tooltip
+- Layout tests (`Category("Ui")`): the real main window, the measurement and settings pages and every dialog are drawn at the smallest window size in English, Russian and Chinese with the longest data and audited for cut, overlapping and covered texts, texts that run out of their area and dialogs taller than a screen. The tests export before/after pictures when `SCT_UI_SHOTS` names a folder
+- The x, y, Lv and T columns of the Results table are 5 px wider (45, 45, 45 and 50 px), so the values with the longest text (the luminance of the black point, `0.0729`) are no longer cut off
+- The simulated analyzer of the Debug build takes `--channel-name=NAME` to try a channel name of any length
+
 ### Fixed
+- The message dialog (the confirmation of saving lists every remark of the specification) was as tall as its text, up to 1450 px, and pushed its buttons off the screen: it is 900 px at most now, the message scrolls and the buttons stay in view
+- The Results table is shown whole in every language at the smallest window: the Tries column takes the width of its longest text (the header in Russian and Chinese, `99/3` for a point measured many times) instead of a fixed 50 px, and the cell margins are tighter, so the column no longer runs under the scroll bar of the list in Russian
+- The user-defined channel name on the analyzer card is no longer cut off with an ellipsis: the card has three lines now (the model, the channel with its name in the small type of the serial number, the probe serial number), and the channel line fits the longest name in every language. The analyzers store the name in up to 10 characters (CA-SDK2: `ChannelID` is 10 characters at most); a longer text is trimmed with an ellipsis and stays in the tooltip
 - The "Channel mismatch" dialog came up at the calibration again and again: the channel changed in the settings was written to the analyzer and to `appsettings.json`, but not to the registry of the analyzers, so the registry kept an old channel while the probe held the new one. The channel is a property of the probe and lives only in the registry of the analyzers now (`analyzers.json`): it is no longer kept in `appsettings.json` (an older file with it is still read, the key disappears at the next save), the channel of the probe used last is shown at the start, a channel chosen in the settings is stored in the registry (the field is editable only while the analyzer is connected), and the calibration warns only when the probe holds another channel than the registry says
 
 ## [1.4.4] - 2026-11-25
