@@ -12,7 +12,7 @@ namespace ScreenChecker.UnitTests.ViewsTests
     public class TextStyleRulesTests
         {
         private static readonly int[] FontSizeScale = [10, 11, 12, 13, 14, 15, 16, 18, 20];
-        private static readonly string[] FontFamilies = ["Segoe UI", "Segoe UI Symbol", "Consolas"];
+        private static readonly string[] FontFamilies = ["Segoe UI Symbol", "Consolas"];
         private static readonly string[] ColorProperties = ["Foreground", "Background", "BorderBrush", "Fill", "Stroke"];
 
         /// <summary>Colors that are not from the theme on purpose: the title bar, the selected tab, the text on a colored fill.</summary>
@@ -91,7 +91,22 @@ namespace ScreenChecker.UnitTests.ViewsTests
                 .Where(v => !v.Value.StartsWith('{') && !FontFamilies.Contains(v.Value))
                 .Select(v => $"{v.File}: {v.Value}");
 
-            Assert.That(families, Is.Empty, $"the fonts are {string.Join(", ", FontFamilies)}");
+            Assert.That(families, Is.Empty, $"the text font is the resource AppFontFamily (a language may bring its own); other fonts: {string.Join(", ", FontFamilies)}");
+            }
+
+        [Test]
+        public void Windows_TakeTheFontAndTheTextSizeFromTheTypographyResources()
+            {
+            // The font and the size of the main window are not inherited by the dialogs (windows of their own): a window without the font of
+            // the language draws hanzi with a fallback font that gives some glyphs a bold and some a regular weight, and one without the size
+            // gets the 12 points of the system. The main window takes its size from the pages.
+            var windows = Pages()
+                .Where(p => p.Document.Root?.Name.LocalName == "Window")
+                .Where(p => (string?)p.Document.Root!.Attribute("FontFamily") != "{DynamicResource AppFontFamily}"
+                    || p.File != "MainWindow.xaml" && (string?)p.Document.Root!.Attribute("FontSize") != "{DynamicResource AppFontSize}")
+                .Select(p => p.File);
+
+            Assert.That(windows, Is.Empty, "set FontFamily=\"{DynamicResource AppFontFamily}\" (and FontSize=\"{DynamicResource AppFontSize}\" on a dialog) on the window");
             }
 
         [Test]

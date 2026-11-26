@@ -24,7 +24,10 @@ namespace ScreenChecker.Views.Behaviors
         Overlay,
 
         /// <summary>A colored glow around the element pulses; works on elements whose own background carries a status color.</summary>
-        Glow
+        Glow,
+
+        /// <summary>A border laid over a row breathes as a translucent plate; it is transparent at rest. Keeps the timing of <see cref="Glow"/>.</summary>
+        Tint
     }
 
     /// <summary>
@@ -46,6 +49,14 @@ namespace ScreenChecker.Views.Behaviors
         /// <summary>How the element shows the outcome.</summary>
         public static readonly DependencyProperty ModeProperty = DependencyProperty.RegisterAttached(
             "Mode", typeof(ActionFeedbackMode), typeof(ActionFeedbackBehavior), new PropertyMetadata(ActionFeedbackMode.Fill));
+
+        /// <summary>Whether the element scrolls into view, with the next sibling below it, when the signal arrives.</summary>
+        public static readonly DependencyProperty RevealProperty = DependencyProperty.RegisterAttached(
+            "Reveal", typeof(bool), typeof(ActionFeedbackBehavior), new PropertyMetadata(false));
+
+        public static bool GetReveal(DependencyObject element) => (bool)element.GetValue(RevealProperty);
+
+        public static void SetReveal(DependencyObject element, bool value) => element.SetValue(RevealProperty, value);
 
         public static ActionFeedbackSignal? GetSignal(DependencyObject element) => (ActionFeedbackSignal?)element.GetValue(SignalProperty);
 
@@ -81,8 +92,13 @@ namespace ScreenChecker.Views.Behaviors
 
         private static void Play(FrameworkElement element, ActionFeedback feedback)
         {
+            if (GetReveal(element)) element.BringIntoView(new Rect(0, 0, element.ActualWidth, element.ActualHeight * 2));
+
             switch (GetMode(element))
             {
+                case ActionFeedbackMode.Tint when element is Border plate:
+                    GlowBreathing.PlayTint(plate, feedback);
+                    break;
                 case ActionFeedbackMode.Overlay when element is Border line:
                     UnderlineBreathing.PlayOverlay(line, feedback);
                     break;
@@ -251,6 +267,20 @@ namespace ScreenChecker.Views.Behaviors
         private static readonly TimeSpan ExhaleEnd = TimeSpan.FromMilliseconds(1300);
         private const double PeakRadius = 16;
         private const double PeakOpacity = 0.85;
+        private const double PeakTintOpacity = 0.4;
+
+        /// <summary>
+        /// Starts the translucent plate on a border laid over a row; it breathes with the timing of the glow of a button.
+        /// </summary>
+        /// <param name="plate">The overlay border, transparent at rest.</param>
+        /// <param name="feedback">The outcome that selects the color.</param>
+        public static void PlayTint(Border plate, ActionFeedback feedback)
+        {
+            if (feedback == ActionFeedback.None) return;
+
+            plate.Background = new SolidColorBrush(FeedbackPalette.Line(plate, feedback));
+            plate.BeginAnimation(UIElement.OpacityProperty, Pulse(PeakTintOpacity));
+        }
 
         /// <summary>
         /// Starts the glow on the element; a running one is restarted.

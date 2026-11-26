@@ -1,0 +1,18 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--
+        Typography of the Chinese interface: the glyphs are denser than latin letters, so the labels and values are two points larger
+        than the default scale of FieldStyles.xaml and are set in a font made for reading hanzi on a screen. The base size of the pages
+        (AppFontSize: fields and settings) is large enough and stays as it is. The table of the specification is tight and takes one point.
+    -->
+    <FontFamily x:Key="AppFontFamily">Microsoft YaHei UI</FontFamily>
+    <sys:Double x:Key="FontSizeCaption">14</sys:Double>
+    <sys:Double x:Key="FontSizeBody">15</sys:Double>
+    <sys:Double x:Key="FontSizeBodyLarge">16</sys:Double>
+    <sys:Double x:Key="FontSizeEmphasis">17</sys:Double>
+    <sys:Double x:Key="FontSizeSpecName">15</sys:Double>
+    <sys:Double x:Key="FontSizeSpecValue">16</sys:Double>
+    <sys:Double x:Key="FontSizeSpecBounds">13</sys:Double>
+</ResourceDictionary>

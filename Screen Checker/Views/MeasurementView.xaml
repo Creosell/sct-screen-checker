@@ -12,7 +12,7 @@
     d:DataContext="{d:DesignInstance Type=viewmodels:MeasurementViewModel}"
     Background="{DynamicResource AppPageBackground}"
     Focusable="True"
-    FontSize="{StaticResource AppFontSize}"
+    FontSize="{DynamicResource AppFontSize}"
     Foreground="{DynamicResource AppTextPrimary}"
     PreviewKeyDown="UserControl_PreviewKeyDown"
     PreviewMouseDown="UserControl_PreviewMouseDown"
@@ -278,8 +278,8 @@
 
         <Style x:Key="DeviceConfigMenuItemStyle" TargetType="MenuItem">
             <Setter Property="Template" Value="{StaticResource DeviceConfigMenuItemTemplate}" />
-            <Setter Property="FontFamily" Value="Segoe UI" />
-            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeBodyLarge}" />
             <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
             <Setter Property="TextOptions.TextRenderingMode" Value="Grayscale" />
@@ -321,8 +321,8 @@
                                 x:Name="Glyph"
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                FontFamily="Segoe UI"
-                                FontSize="13"
+                                FontFamily="{DynamicResource AppFontFamily}"
+                                FontSize="{DynamicResource FontSizeBody}"
                                 FontWeight="Bold"
                                 Foreground="#1E1E1E"
                                 Text="!" />
@@ -377,16 +377,143 @@
             <Setter Property="CornerRadius" Value="4" />
             <Setter Property="Background" Value="Transparent" />
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Status.IsPassed}" Value="False">
+                <DataTrigger Binding="{Binding Verdict}" Value="False">
                     <Setter Property="Background" Value="{DynamicResource StatusErrPlate}" />
                 </DataTrigger>
-                <DataTrigger Binding="{Binding Status.IsPassed}" Value="{x:Null}">
+                <DataTrigger Binding="{Binding Verdict}" Value="{x:Null}">
                     <Setter Property="Opacity" Value="0.6" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsAvailable}" Value="False">
                     <Setter Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
             </Style.Triggers>
+        </Style>
+
+        <!--  Fade of a scroll hint: opaque at the edge of the list, transparent toward its center  -->
+        <LinearGradientBrush x:Key="ScrollHintFadeDown" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Offset="0" Color="Black" />
+            <GradientStop Offset="1" Color="Transparent" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="ScrollHintFadeUp" StartPoint="0,1" EndPoint="0,0">
+            <GradientStop Offset="0" Color="Black" />
+            <GradientStop Offset="1" Color="Transparent" />
+        </LinearGradientBrush>
+
+        <!--
+            Hint at the edge of a list that rows with a remark are scrolled out of view: a strip in the color of the strongest
+            hidden status (Tag: Warning or Fail) fades toward the list; it is collapsed without a remark
+        -->
+        <Style x:Key="ScrollHintBaseStyle" TargetType="Border">
+            <Setter Property="Height" Value="9" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Warning">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Background" Value="{DynamicResource StatusWarnDot}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Fail">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Background" Value="{DynamicResource StatusErrDot}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--  The hint of a list whose rows ask for an action now (the results): it breathes slowly as long as it is shown  -->
+        <Style
+            x:Key="ScrollHintStyle"
+            BasedOn="{StaticResource ScrollHintBaseStyle}"
+            TargetType="Border">
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation
+                                AutoReverse="True"
+                                RepeatBehavior="Forever"
+                                Storyboard.TargetProperty="Opacity"
+                                From="0.1"
+                                To="0.45"
+                                Duration="0:0:1.2">
+                                <DoubleAnimation.EasingFunction>
+                                    <SineEase EasingMode="EaseInOut" />
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--
+            The hint of a list whose remarks stay until they are fixed (the device info): it breathes three times when it appears or
+            changes its level, then rests at a calm opacity
+        -->
+        <Style
+            x:Key="ScrollHintOnceStyle"
+            BasedOn="{StaticResource ScrollHintBaseStyle}"
+            TargetType="Border">
+            <Setter Property="Opacity" Value="0.45" />
+            <Style.Resources>
+                <Storyboard x:Key="ScrollHintBreathing">
+                    <DoubleAnimation
+                        AutoReverse="True"
+                        RepeatBehavior="3x"
+                        Storyboard.TargetProperty="Opacity"
+                        From="0.45"
+                        To="0.9"
+                        Duration="0:0:0.7">
+                        <DoubleAnimation.EasingFunction>
+                            <SineEase EasingMode="EaseInOut" />
+                        </DoubleAnimation.EasingFunction>
+                    </DoubleAnimation>
+                </Storyboard>
+            </Style.Resources>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Warning">
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard Storyboard="{StaticResource ScrollHintBreathing}" />
+                    </DataTrigger.EnterActions>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="Fail">
+                    <DataTrigger.EnterActions>
+                        <BeginStoryboard Storyboard="{StaticResource ScrollHintBreathing}" />
+                    </DataTrigger.EnterActions>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style
+            x:Key="ScrollHintTopStyle"
+            BasedOn="{StaticResource ScrollHintStyle}"
+            TargetType="Border">
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="OpacityMask" Value="{StaticResource ScrollHintFadeDown}" />
+        </Style>
+
+        <Style
+            x:Key="ScrollHintBottomStyle"
+            BasedOn="{StaticResource ScrollHintStyle}"
+            TargetType="Border">
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="OpacityMask" Value="{StaticResource ScrollHintFadeUp}" />
+        </Style>
+
+        <Style
+            x:Key="ScrollHintOnceTopStyle"
+            BasedOn="{StaticResource ScrollHintOnceStyle}"
+            TargetType="Border">
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="OpacityMask" Value="{StaticResource ScrollHintFadeDown}" />
+        </Style>
+
+        <Style
+            x:Key="ScrollHintOnceBottomStyle"
+            BasedOn="{StaticResource ScrollHintOnceStyle}"
+            TargetType="Border">
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="OpacityMask" Value="{StaticResource ScrollHintFadeUp}" />
         </Style>
 
         <!--  Attempts counter: dim dash, amber below three attempts, green from three  -->
@@ -409,10 +536,10 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Fill" Value="{DynamicResource AppTextMuted}" />
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Status.IsPassed}" Value="True">
+                <DataTrigger Binding="{Binding Verdict}" Value="True">
                     <Setter Property="Fill" Value="{DynamicResource StatusOkDot}" />
                 </DataTrigger>
-                <DataTrigger Binding="{Binding Status.IsPassed}" Value="False">
+                <DataTrigger Binding="{Binding Verdict}" Value="False">
                     <Setter Property="Fill" Value="{DynamicResource StatusErrDot}" />
                 </DataTrigger>
             </Style.Triggers>
@@ -514,8 +641,8 @@
             x:Key="MeasurementButtonsStyle"
             BasedOn="{StaticResource MaterialDesignFlatDarkBgButton}"
             TargetType="Button">
-            <Setter Property="FontFamily" Value="Segoe UI" />
-            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeBodyLarge}" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="Padding" Value="5" />
             <Setter Property="Margin" Value="5" />
@@ -553,7 +680,11 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
                     <Button
                         behaviors:ActionFeedbackBehavior.Signal="{Binding ZeroCalibrationFeedback}"
                         behaviors:ActionFeedbackBehavior.SuccessText="FeedbackCalibrated"
@@ -562,9 +693,11 @@
                         Style="{StaticResource ZeroCalibrationButtonStyle}" />
                     <Border
                         x:Name="DeviceCard"
-                        Height="52"
+                        Grid.Column="1"
+                        MinHeight="52"
                         Margin="10,5,10,5"
                         Padding="14,8"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Background="{DynamicResource AppCardBackground}"
                         BorderBrush="{DynamicResource AppCardBorder}"
@@ -572,10 +705,15 @@
                         ClipToBounds="True"
                         CornerRadius="12"
                         ToolTip="{Binding DeviceStateText}">
-                        <StackPanel Orientation="Horizontal">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
                             <Ellipse Style="{StaticResource StatusDotStyle}" />
                             <Grid
                                 x:Name="DeviceCardContent"
+                                Grid.Column="1"
                                 VerticalAlignment="Center"
                                 Tag="NotConnected">
                                 <!--  Not connected: hint what to do  -->
@@ -590,14 +728,21 @@
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
-                                    <TextBlock Foreground="{DynamicResource AppTextPrimary}" Text="{DynamicResource DeviceCardNoAnalyzer}" />
                                     <TextBlock
-                                        FontSize="12"
+                                        Foreground="{DynamicResource AppTextPrimary}"
+                                        Text="{DynamicResource DeviceCardNoAnalyzer}"
+                                        TextTrimming="CharacterEllipsis" />
+                                    <TextBlock
+                                        FontSize="{DynamicResource FontSizeCaption}"
                                         Foreground="{DynamicResource AppTextSecondary}"
-                                        Text="{DynamicResource DeviceCardPressCalibration}" />
+                                        Text="{DynamicResource DeviceCardPressCalibration}"
+                                        TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                                 <!--  Connected, the channel is not confirmed yet  -->
-                                <TextBlock Foreground="{DynamicResource AppTextSecondary}" Text="{DynamicResource DeviceCardCalibrating}">
+                                <TextBlock
+                                    Foreground="{DynamicResource AppTextSecondary}"
+                                    Text="{DynamicResource DeviceCardCalibrating}"
+                                    TextTrimming="CharacterEllipsis">
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="Visibility" Value="Collapsed" />
@@ -621,25 +766,33 @@
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
-                                    <StackPanel Orientation="Horizontal">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
                                         <TextBlock
                                             FontWeight="SemiBold"
                                             Foreground="{DynamicResource AppTextPrimary}"
                                             Text="{Binding DeviceModelName}" />
                                         <TextBlock
+                                            Grid.Column="1"
                                             Margin="6,0,0,0"
                                             Foreground="{DynamicResource AppTextSecondary}"
-                                            Text="{Binding DeviceActiveChannelStatusText}" />
-                                    </StackPanel>
+                                            Text="{Binding DeviceActiveChannelStatusText}"
+                                            TextTrimming="CharacterEllipsis"
+                                            ToolTip="{Binding DeviceActiveChannelStatusText}" />
+                                    </Grid>
                                     <TextBlock
-                                        FontSize="12"
+                                        FontSize="{DynamicResource FontSizeCaption}"
                                         Foreground="{DynamicResource AppTextSecondary}"
-                                        Text="{Binding DeviceProbeSerialText}" />
+                                        Text="{Binding DeviceProbeSerialText}"
+                                        TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Grid>
-                        </StackPanel>
+                        </Grid>
                     </Border>
-                </StackPanel>
+                </Grid>
                 <Grid Grid.Row="1" Margin="0,10,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -1061,7 +1214,7 @@
                     <!--  Tab headers: white text, a purple line under the selected one, a thin light line on hover  -->
                     <Style TargetType="TabItem">
                         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
-                        <Setter Property="FontSize" Value="14" />
+                        <Setter Property="FontSize" Value="{DynamicResource FontSizeBodyLarge}" />
                         <Setter Property="Cursor" Value="Hand" />
                         <Setter Property="Margin" Value="6,4,0,2" />
                         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -1106,7 +1259,7 @@
 
                 <TabItem>
                     <TabItem.Header>
-                        <TextBlock FontSize="14" Text="{DynamicResource ResultsTab}" />
+                        <TextBlock FontSize="{DynamicResource FontSizeBodyLarge}" Text="{DynamicResource ResultsTab}" />
                     </TabItem.Header>
                     <Grid Margin="0,4,0,6" Grid.IsSharedSizeScope="True">
                         <Grid.RowDefinitions>
@@ -1129,50 +1282,68 @@
                                 Fill="Transparent" />
                             <TextBlock
                                 Grid.Column="1"
-                                FontSize="12"
+                                FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource ResultsColumnPoint}" />
                             <TextBlock
                                 Grid.Column="2"
                                 Margin="0,0,6,0"
-                                FontSize="12"
+                                FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="x"
                                 TextAlignment="Center" />
                             <TextBlock
                                 Grid.Column="3"
                                 Margin="0,0,6,0"
-                                FontSize="12"
+                                FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="y"
                                 TextAlignment="Center" />
                             <TextBlock
                                 Grid.Column="4"
                                 Margin="0,0,6,0"
-                                FontSize="12"
+                                FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="Lv"
                                 TextAlignment="Center" />
                             <TextBlock
                                 Grid.Column="5"
                                 Margin="0,0,6,0"
-                                FontSize="12"
+                                FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="T"
                                 TextAlignment="Center" />
                             <TextBlock
                                 Grid.Column="6"
                                 Margin="0,0,6,0"
-                                FontSize="12"
+                                FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="{DynamicResource ResultsColumnTries}"
                                 TextAlignment="Center" />
                         </Grid>
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <Grid Grid.Row="1">
+                        <ScrollViewer
+                            x:Name="ResultsScroll"
+                            behaviors:ScrollAttentionBehavior.IsEnabled="True"
+                            VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding Results}">
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="behaviors:ScrollAttentionBehavior.Level" Value="{Binding Attention}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource ResultRowStyle}">
+                                            <Grid>
+                                            <Border
+                                                Margin="-6,-2"
+                                                behaviors:ActionFeedbackBehavior.Mode="Tint"
+                                                behaviors:ActionFeedbackBehavior.Reveal="True"
+                                                behaviors:ActionFeedbackBehavior.Signal="{Binding Status.Feedback}"
+                                                CornerRadius="4"
+                                                IsHitTestVisible="False"
+                                                Opacity="0" />
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
@@ -1188,7 +1359,7 @@
                                                     Grid.Column="1"
                                                     Margin="0,0,6,0"
                                                     VerticalAlignment="Center"
-                                                    FontSize="13"
+                                                    FontSize="{DynamicResource FontSizeBody}"
                                                     Text="{Binding Name}" />
                                                 <TextBlock
                                                     Grid.Column="2"
@@ -1227,18 +1398,28 @@
                                                     Text="{Binding Tries}"
                                                     TextAlignment="Center" />
                                             </Grid>
+                                            </Grid>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
+                        <Border
+                            Width="{Binding ViewportWidth, ElementName=ResultsScroll}"
+                            Style="{StaticResource ScrollHintTopStyle}"
+                            Tag="{Binding (behaviors:ScrollAttentionBehavior.AttentionAbove), ElementName=ResultsScroll}" />
+                        <Border
+                            Width="{Binding ViewportWidth, ElementName=ResultsScroll}"
+                            Style="{StaticResource ScrollHintBottomStyle}"
+                            Tag="{Binding (behaviors:ScrollAttentionBehavior.AttentionBelow), ElementName=ResultsScroll}" />
+                        </Grid>
                     </Grid>
                 </TabItem>
 
                 <TabItem>
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock FontSize="14" Text="{DynamicResource LogTab}" />
+                            <TextBlock FontSize="{DynamicResource FontSizeBodyLarge}" Text="{DynamicResource LogTab}" />
                             <Border Style="{StaticResource UnreadBadgeStyle}">
                                 <TextBlock
                                     HorizontalAlignment="Center"
@@ -1272,12 +1453,12 @@
                                             <TextBlock
                                                 Margin="0,0,10,0"
                                                 FontFamily="Consolas"
-                                                FontSize="13"
+                                                FontSize="{DynamicResource FontSizeBody}"
                                                 Foreground="{DynamicResource AppTextMuted}"
                                                 Text="{Binding TimeText}" />
                                             <TextBlock
                                                 Grid.Column="1"
-                                                FontSize="14"
+                                                FontSize="{DynamicResource FontSizeBodyLarge}"
                                                 Style="{StaticResource LogMessageStyle}"
                                                 Text="{Binding Message}"
                                                 TextWrapping="Wrap" />
@@ -1311,7 +1492,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock
                             VerticalAlignment="Center"
-                            FontSize="15"
+                            FontSize="{DynamicResource FontSizeEmphasis}"
                             FontWeight="SemiBold"
                             Text="{DynamicResource SpecPanelTitle}" />
                         <Border
@@ -1319,7 +1500,7 @@
                             Margin="14,0,0,0"
                             Style="{StaticResource SpecVerdictChipStyle}">
                             <TextBlock
-                                FontSize="13"
+                                FontSize="{DynamicResource FontSizeBody}"
                                 Foreground="{DynamicResource AppTextPrimary}"
                                 Text="{Binding Spec.VerdictText}" />
                         </Border>
@@ -1327,16 +1508,23 @@
                             Grid.Column="2"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
-                            FontSize="13"
+                            FontSize="{DynamicResource FontSizeBody}"
                             Foreground="{DynamicResource AppTextSecondary}"
                             Text="{Binding Spec.ProgressText}" />
                     </Grid>
 
+                    <Grid Grid.Row="1">
                     <ScrollViewer
-                        Grid.Row="1"
+                        x:Name="SpecScroll"
+                        behaviors:ScrollAttentionBehavior.IsEnabled="True"
                         Grid.IsSharedSizeScope="True"
                         VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding Spec.Rows}">
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="behaviors:ScrollAttentionBehavior.Level" Value="{Binding Status}" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Style="{StaticResource SpecRowStyle}" ToolTip="{Binding ToolTip}">
@@ -1352,7 +1540,7 @@
                                                 Grid.Column="1"
                                                 MinWidth="120"
                                                 VerticalAlignment="Center"
-                                                FontSize="14"
+                                                FontSize="{DynamicResource FontSizeSpecName}"
                                                 Text="{Binding Name}"
                                                 TextWrapping="Wrap" />
                                             <TextBlock
@@ -1360,14 +1548,14 @@
                                                 MinWidth="44"
                                                 Margin="8,0"
                                                 VerticalAlignment="Center"
-                                                FontSize="15"
+                                                FontSize="{DynamicResource FontSizeSpecValue}"
                                                 FontWeight="Bold"
                                                 Text="{Binding ValueText}"
                                                 TextAlignment="Right" />
                                             <TextBlock
                                                 Grid.Column="3"
                                                 VerticalAlignment="Center"
-                                                FontSize="12"
+                                                FontSize="{DynamicResource FontSizeSpecBounds}"
                                                 Foreground="{DynamicResource AppTextSecondary}"
                                                 Text="{Binding SpecText}" />
                                         </Grid>
@@ -1376,11 +1564,20 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </ScrollViewer>
+                    <Border
+                        Width="{Binding ViewportWidth, ElementName=SpecScroll}"
+                        Style="{StaticResource ScrollHintOnceTopStyle}"
+                        Tag="{Binding (behaviors:ScrollAttentionBehavior.AttentionAbove), ElementName=SpecScroll}" />
+                    <Border
+                        Width="{Binding ViewportWidth, ElementName=SpecScroll}"
+                        Style="{StaticResource ScrollHintOnceBottomStyle}"
+                        Tag="{Binding (behaviors:ScrollAttentionBehavior.AttentionBelow), ElementName=SpecScroll}" />
+                    </Grid>
 
                     <TextBlock
                         Grid.Row="2"
                         Margin="4,6,4,0"
-                        FontSize="13"
+                        FontSize="{DynamicResource FontSizeBody}"
                         Foreground="{DynamicResource AppTextSecondary}"
                         Text="{Binding Spec.HintText}"
                         TextWrapping="Wrap" />

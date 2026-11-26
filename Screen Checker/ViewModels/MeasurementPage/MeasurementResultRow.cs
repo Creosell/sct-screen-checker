@@ -47,6 +47,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         private bool _isAvailable = true;
         private string _tries = Dash;
         private TriesLevel _triesLevel = TriesLevel.None;
+        private bool? _verdict;
 
         /// <summary>
         /// Initializes a new instance of MeasurementResultRow.
@@ -55,6 +56,15 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         public MeasurementResultRow(MeasurementStatus status)
             {
             Status = status;
+            UpdateVerdict();
+            Status.PropertyChanged += (_, e) =>
+                {
+                if (e.PropertyName is nameof(MeasurementStatus.IsPassed) or nameof(MeasurementStatus.MeasuredValuesString) or nameof(MeasurementStatus.SpecRemark))
+                    {
+                    UpdateVerdict();
+                    OnPropertyChanged(nameof(Attention));
+                    }
+                };
             RefreshName();
             }
 
@@ -62,6 +72,26 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         /// Gets the status of the measurement point.
         /// </summary>
         public MeasurementStatus Status { get; }
+
+        /// <summary>
+        /// Gets the last verdict of the point: it stays while the point is measured again, so the row keeps its color until the new
+        /// verdict arrives, and it is cleared when the point is reset (null: not measured yet).
+        /// </summary>
+        public bool? Verdict
+            {
+            get => _verdict;
+            private set => SetProperty(ref _verdict, value);
+            }
+
+        /// <summary>
+        /// Gets how much the point asks for the attention of the operator: <see cref="SpecStatus.Fail"/> for a rejected measurement
+        /// or a remark outside min/max, <see cref="SpecStatus.Warning"/> for a remark below typ, otherwise <see cref="SpecStatus.Pass"/>.
+        /// A remark of a point that has the expected attempts (<see cref="TriesLevel.Enough"/>) asks for nothing more: there is no action left.
+        /// </summary>
+        public SpecStatus Attention =>
+            Verdict == false ? SpecStatus.Fail
+            : Verdict == true && TriesLevel != TriesLevel.Enough && Status.SpecRemark is SpecStatus.Warning or SpecStatus.Fail ? Status.SpecRemark
+            : SpecStatus.Pass;
 
         /// <summary>
         /// Gets the measurement location identifier.
@@ -120,7 +150,11 @@ namespace ScreenChecker.ViewModels.MeasurementPage
         public TriesLevel TriesLevel
             {
             get => _triesLevel;
-            private set => SetProperty(ref _triesLevel, value);
+            private set
+                {
+                if (SetProperty(ref _triesLevel, value))
+                    OnPropertyChanged(nameof(Attention));
+                }
             }
 
         /// <summary>
@@ -164,6 +198,16 @@ namespace ScreenChecker.ViewModels.MeasurementPage
 
             Tries = $"{info.Count}/{EnoughAttempts}";
             TriesLevel = isClean || info.Count >= EnoughAttempts ? TriesLevel.Enough : TriesLevel.Few;
+            }
+
+        /// <summary>
+        /// Takes a new verdict of the point; a point that is measured again (no verdict yet, but a status text) keeps the old one,
+        /// a point that was reset (no verdict, no text) loses it.
+        /// </summary>
+        private void UpdateVerdict()
+            {
+            if (Status.IsPassed is bool passed) Verdict = passed;
+            else if (string.IsNullOrEmpty(Status.MeasuredValuesString)) Verdict = null;
             }
 
         /// <summary>

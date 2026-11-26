@@ -4,6 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     MinWidth="320"
     Background="{DynamicResource MaterialDesign.Brush.Background}"
+    FontFamily="{DynamicResource AppFontFamily}"
+    FontSize="{DynamicResource AppFontSize}"
     TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
     MaxWidth="520"
     ResizeMode="NoResize"

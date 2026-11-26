@@ -15,6 +15,7 @@
     MinHeight="600"
     d:DataContext="{d:DesignInstance Type=viewmodel:SettingsViewModel}"
     AllowsTransparency="True"
+    FontFamily="{DynamicResource AppFontFamily}"
     Background="{DynamicResource AppWindowBackground}"
     ResizeMode="CanResizeWithGrip"
     WindowStartupLocation="CenterScreen"
@@ -33,7 +34,7 @@
             <Setter Property="Padding" Value="0" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
-            <Setter Property="FontFamily" Value="Segoe UI" />
+            <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
             <Setter Property="FontSize" Value="18" />
             <Setter Property="MinHeight" Value="50" />
             <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -166,7 +167,7 @@
                 Grid.Column="1"
                 Margin="5,0,0,0"
                 VerticalAlignment="Center"
-                FontSize="14"
+                FontSize="{DynamicResource FontSizeBodyLarge}"
                 Foreground="White"
                 Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}" />
 

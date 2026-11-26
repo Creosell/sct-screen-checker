@@ -9,12 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.4] - 2026-11-25
 
+### Added
+- The Results tab follows the measurement: when a measurement of a point ends, its row scrolls into view (with the next row below it) and breathes as a translucent green or red plate with the timing of the glow of the measurement button. A breathing strip at the top or bottom edge of the list (amber: below typ, red: rejected or outside min/max) tells that rows with a remark are scrolled out of view in that direction; a point whose remark is left with the expected three attempts no longer asks for attention. The device info table has the same strips, but they breathe only three times when they appear or change their level and then rest, as its remarks stay until they are fixed
+- The Chinese interface is set in Microsoft YaHei UI and is larger (the labels and values two points, the base size of the pages stays) so the hanzi stay readable; the font and the type scale are resources now (`AppFontFamily`, `AppFontSize`, `FontSizeCaption|Body|BodyLarge|Emphasis` in `FieldStyles.xaml`) that `Resources/Typography.zh-Hans.xaml` overrides when the language is switched
+
 ### Changed
 - The attempts of a point are kept only from its first measurement with a remark against the specification (a value below typ or outside min/max). Until then a repeated measurement replaces the earlier one, so a measurement taken with the probe at a wrong point can no longer outrank the right one as the "best" attempt. The measurement with the first remark replaces the held one and starts the series of the point; the next measurements are added to it and the report generator picks the best as before. The series lasts until the device is changed; a point that never deviated is saved without the `Attempts` list in the JSON.
 - The report upload runs the Nextcloud CLI through the same process runner as the report generator: the arguments are passed as a list (no hand-made quotes), the output of the CLI is read as UTF-8 and the unused `-f` flag of the `upload` action is no longer passed. The error text of a failed upload is the output of the CLI as before. Needs the Nextcloud CLI 1.1.1, which writes its output in UTF-8
 - After a successful upload the archive is moved to `uploaded_reports` and the result files are deleted through the file system abstraction like the rest of the service
 
 ### Fixed
+- After the channel was changed in the settings, the card of the analyzer showed the name of the previous channel and the report header (`Colorimeter`) kept the previous channel and name: the change was announced before the channel was written to the analyzer. The change is announced after the write now, and a confirmed analyzer reads the channel and its user-defined name again
 - A measurement whose iteration failed (an error of the analyzer in one of the repeated readings) counted that iteration as zero in the average, so the brightness and the coordinates came out too low. The average is taken over the successful iterations only; a measurement where no iteration succeeded is reported as invalid instead of being recorded as zeros
 
 ## [1.4.3] - 2026-11-25

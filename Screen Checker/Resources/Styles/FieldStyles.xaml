@@ -17,11 +17,23 @@
     <!--  The text size of the pages  -->
     <sys:Double x:Key="AppFontSize">15</sys:Double>
 
+    <!--  The type scale of the labels, values and headers of the pages and the font of the text; a language may override them (Typography.<language>.xaml)  -->
+    <FontFamily x:Key="AppFontFamily">Segoe UI</FontFamily>
+    <sys:Double x:Key="FontSizeCaption">12</sys:Double>
+    <sys:Double x:Key="FontSizeBody">13</sys:Double>
+    <sys:Double x:Key="FontSizeBodyLarge">14</sys:Double>
+    <sys:Double x:Key="FontSizeEmphasis">15</sys:Double>
+    <!--  The table of the specification is tight: its sizes are of their own so a language can shrink it without the rest of the page  -->
+    <sys:Double x:Key="FontSizeSpecName">14</sys:Double>
+    <sys:Double x:Key="FontSizeSpecValue">15</sys:Double>
+    <sys:Double x:Key="FontSizeSpecBounds">12</sys:Double>
+
     <!--  A rounded button of an action (Save, Create report, ...): no outline, so the breathing fill is not framed by the purple border of Material  -->
     <Style
         x:Key="ActionButtonStyle"
         BasedOn="{StaticResource {x:Type Button}}"
         TargetType="Button">
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         <Setter Property="Margin" Value="5" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="MaterialDesign:ButtonAssist.CornerRadius" Value="15" />
@@ -29,7 +41,7 @@
 
     <!--  A text field on an underline: on hover and on focus a line of the primary color of the theme grows over the underline from its center  -->
     <Style x:Key="UnderlinedTextBoxStyle" TargetType="TextBox">
-        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Padding" Value="0,4" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -153,7 +165,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource AppFieldLine}" />
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -161,6 +173,7 @@
                     <Grid>
                         <Border
                             x:Name="Underline"
+                            Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="0,0,0,1">
                             <ContentPresenter Margin="0,0,0,4" />
@@ -223,7 +236,7 @@
 
     <!--  A drop-down list on an underline as wide as its widest item (a fixed Width overrides it; the items come from ItemsSource and DisplayMemberPath)  -->
     <Style x:Key="UnderlinedComboBoxStyle" TargetType="ComboBox">
-        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         <Setter Property="Foreground" Value="{DynamicResource AppTextPrimary}" />
         <Setter Property="Padding" Value="0,4" />
         <Setter Property="Cursor" Value="Hand" />

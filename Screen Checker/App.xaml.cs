@@ -194,8 +194,9 @@ namespace ScreenChecker
                 {
                 var oldDictionaries = Application.Current.Resources.MergedDictionaries
                     .Where(d => d.Source != null &&
+                               ( d.Source.OriginalString.Contains("/Resources/Typography", StringComparison.OrdinalIgnoreCase) ||
                                d.Source.OriginalString.Contains("/Resources/StringResources", StringComparison.OrdinalIgnoreCase) &&
-                               !d.Source.OriginalString.Equals(new Uri(defaultResourcePath, UriKind.RelativeOrAbsolute).OriginalString, StringComparison.OrdinalIgnoreCase))
+                               !d.Source.OriginalString.Equals(new Uri(defaultResourcePath, UriKind.RelativeOrAbsolute).OriginalString, StringComparison.OrdinalIgnoreCase) ))
                     .ToList();
 
                 foreach (var oldDict in oldDictionaries)
@@ -205,6 +206,10 @@ namespace ScreenChecker
 
                 ResourceDictionary newLanguageDictionary = new() { Source = new Uri(resourcePath, UriKind.RelativeOrAbsolute) };
                 Application.Current.Resources.MergedDictionaries.Add(newLanguageDictionary);
+
+                // The language may bring its own font and type scale on top of the defaults of FieldStyles.xaml
+                if (cultureCode == "zh-Hans")
+                    Application.Current.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("/Resources/Typography.zh-Hans.xaml", UriKind.RelativeOrAbsolute) });
                 }
             catch (Exception ex)
                 {

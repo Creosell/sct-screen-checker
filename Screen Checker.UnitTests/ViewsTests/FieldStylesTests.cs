@@ -284,6 +284,26 @@ namespace ScreenChecker.UnitTests.ViewsTests
             }
 
         [TestCase(3)]
+        [TestCase(60)]
+        [TestCase(100)]
+        [TestCase(150)]
+        [TestCase(197)]
+        public void DropdownButton_EveryPointOfTheFieldIsClickable(double x)
+            {
+            Ui(() =>
+                {
+                // A short text in the middle of a wide button, as when the button is as wide as the longest caption it can show
+                var button = new Button { Style = (Style)_resources["UnderlinedDropdownButtonStyle"], Width = 200, Content = new TextBlock { Text = "Choose", HorizontalAlignment = HorizontalAlignment.Center } };
+                var window = Show(button);
+
+                var hit = VisualTreeHelper.HitTest(button, new Point(x, button.ActualHeight / 2))?.VisualHit;
+                window.Close();
+
+                Assert.That(hit, Is.Not.Null, $"a click at x={x} reaches the button");
+                });
+            }
+
+        [TestCase(3)]
         [TestCase(40)]
         [TestCase(100)]
         [TestCase(160)]
