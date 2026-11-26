@@ -93,6 +93,12 @@ namespace ScreenChecker.DebugTools
             {
             _options = options;
             _statusService = statusService;
+            foreach (var status in statusService.AllMeasurementButtonStatuses ?? [])
+                status.PropertyChanged += (_, e) =>
+                    {
+                    if (e.PropertyName == nameof(MeasurementStatus.MeasuredValuesString) && string.IsNullOrEmpty(status.MeasuredValuesString))
+                        _attempts.Remove(status.Location);
+                    };
             }
 
         /// <inheritdoc/>

@@ -131,6 +131,24 @@ namespace ScreenChecker.UnitTests.ServicesTests
             }
 
         [Test]
+        public async Task RejectScenario_AfterThePointIsReset_RefusesTheFirstAttemptAgain()
+            {
+            var service = await CalibratedServiceAsync(SimulationScenario.Reject);
+            StartMeasuring(MeasurementLocation.Center);
+            await service.MeasureAsync(1);
+            StartMeasuring(MeasurementLocation.Center);
+            await service.MeasureAsync(1);
+
+            var status = _statuses.First(s => s.Location == nameof(MeasurementLocation.Center));
+            status.IsPassed = null;
+            status.MeasuredValuesString = "";
+            StartMeasuring(MeasurementLocation.Center);
+            var afterReset = await service.MeasureAsync(1);
+
+            Assert.That(afterReset.Lv, Is.LessThan(5));
+            }
+
+        [Test]
         public async Task UniformityScenario_MakesTheTopRightPointBrighterWithEveryAttempt()
             {
             var service = await CalibratedServiceAsync(SimulationScenario.Uniformity);
