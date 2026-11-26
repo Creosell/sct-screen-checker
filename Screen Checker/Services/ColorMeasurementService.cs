@@ -314,20 +314,21 @@ namespace ScreenChecker.Services
                 return;
 
             _channel = channel;
+
+            if (_isDeviceConnected && _objMemory != null)
+                {
+                try
+                    {
+                    _objMemory.ChannelNO = channel;
+                    StatusMessage?.Invoke(this, string.Format(ChannelChanged, channel));
+                    }
+                catch (Exception ex)
+                    {
+                    StatusMessage?.Invoke(this, string.Format(ErrAtChangeChannel, Describe(ex)));
+                    }
+                }
+
             CurrentChannelChanged?.Invoke(this, _channel);
-
-            if (!_isDeviceConnected || _objMemory == null)
-                return;
-
-            try
-                {
-                _objMemory.ChannelNO = channel;
-                StatusMessage?.Invoke(this, string.Format(ChannelChanged, channel));
-                }
-            catch (Exception ex)
-                {
-                StatusMessage?.Invoke(this, string.Format(ErrAtChangeChannel, Describe(ex)));
-                }
             }
 
         /// <summary>

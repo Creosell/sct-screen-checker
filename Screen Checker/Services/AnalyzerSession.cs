@@ -214,14 +214,24 @@ namespace ScreenChecker.Services
 
             _registry.Update(probeSN, _device.Model, channel);
             _settingsService.UpdateChannel(channel);
+            Colorimeter = ReadColorimeter(probeSN, channel);
+            IsChannelConfirmed = true;
+            return true;
+            }
+
+        /// <summary>
+        /// Describes the connected analyzer with the channel and the user-defined channel name read from it now.
+        /// </summary>
+        /// <param name="probeSN">Serial number of the probe.</param>
+        /// <param name="channel">Active channel number.</param>
+        private ColorimeterInfo ReadColorimeter(string probeSN, int channel)
+            {
             string channelName = _device.ChannelName;
-            Colorimeter = new ColorimeterInfo(
+            return new ColorimeterInfo(
                 _device.Model.ToDisplayName(),
                 probeSN,
                 channel,
                 string.IsNullOrWhiteSpace(channelName) ? null : channelName);
-            IsChannelConfirmed = true;
-            return true;
             }
 
         private void Device_StatusMessage(object? sender, string message) => StatusMessage?.Invoke(this, message);
@@ -232,8 +242,16 @@ namespace ScreenChecker.Services
         private void Device_CalibrationStatusChanged(object? sender, bool isCalibrated) =>
             RunOnUiThread(() => { IsCalibrated = isCalibrated; StateRefreshed?.Invoke(this, EventArgs.Empty); });
 
+        /// <summary>
+        /// Re-reads the channel and its name for the report header when the channel of a confirmed analyzer changes (for example in the settings).
+        /// </summary>
         private void Device_CurrentChannelChanged(object? sender, int channel) =>
-            RunOnUiThread(() => OnPropertyChanged(nameof(CurrentChannel)));
+            RunOnUiThread(() =>
+                {
+                if (IsChannelConfirmed && Colorimeter != null)
+                    Colorimeter = ReadColorimeter(Colorimeter.ProbeSN, channel);
+                OnPropertyChanged(nameof(CurrentChannel));
+                });
 
         private void RunOnUiThread(Action action)
             {

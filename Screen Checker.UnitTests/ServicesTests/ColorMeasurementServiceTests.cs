@@ -474,6 +474,19 @@ namespace ScreenChecker.Tests
             }
 
         [Test]
+        public async Task CurrentChannel_SetWhileConnected_RaisesEventAfterTheChannelIsWrittenToTheAnalyzer()
+            {
+            await _service.ConnectAsync();
+            var order = new List<string>();
+            _mockMemory.SetupSet(m => m.ChannelNO = 10).Callback<int>(_ => order.Add("written"));
+            _service.CurrentChannelChanged += (sender, channel) => order.Add("raised");
+
+            _service.CurrentChannel = 10;
+
+            Assert.That(order, Is.EqualTo(new[] { "written", "raised" }));
+            }
+
+        [Test]
         public void CurrentChannel_SetInvalidValue_DoesNotRaiseEvent()
             {
             var service = new ColorMeasurementService();

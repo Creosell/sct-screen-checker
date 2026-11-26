@@ -58,6 +58,27 @@ namespace ScreenChecker.UnitTests.ServicesTests
         }
 
         [Test]
+        public async Task ChannelChanged_AfterConfirmation_ReadsTheChannelAndItsNameAgain()
+        {
+            GivenConnected();
+            await _session.CalibrateAsync(_outcomes.Add);
+            _device.Setup(d => d.CurrentChannel).Returns(5);
+            _device.Setup(d => d.ChannelName).Returns("Factory");
+
+            _device.Raise(d => d.CurrentChannelChanged += null, _device.Object, 5);
+
+            Assert.That(_session.Colorimeter, Is.EqualTo(new ColorimeterInfo("CA-410", "PROBE1", 5, "Factory")));
+        }
+
+        [Test]
+        public void ChannelChanged_BeforeConfirmation_KeepsTheColorimeterEmpty()
+        {
+            _device.Raise(d => d.CurrentChannelChanged += null, _device.Object, 5);
+
+            Assert.That(_session.Colorimeter, Is.Null);
+        }
+
+        [Test]
         public async Task CalibrateAsync_WhenTheAnalyzerIsAlreadyConnected_DoesNotConnectAgain()
         {
             _device.Setup(d => d.IsDeviceConnected).Returns(true);
