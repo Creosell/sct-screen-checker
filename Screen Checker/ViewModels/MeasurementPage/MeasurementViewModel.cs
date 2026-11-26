@@ -998,7 +998,11 @@ namespace ScreenChecker.ViewModels.MeasurementPage
             {
             OnPropertyChanged(nameof(SelectedDeviceConfigurationDisplayName));
             OnPropertyChanged(nameof(DeviceConfigurationCaptions));
+            OnPropertyChanged(nameof(DeviceStateText));
+            OnPropertyChanged(nameof(DeviceActiveChannelStatusText));
+            OnPropertyChanged(nameof(DeviceProbeSerialText));
             Spec.Refresh();
+            RequestSpecCheck();
             RefreshResults();
             }
 

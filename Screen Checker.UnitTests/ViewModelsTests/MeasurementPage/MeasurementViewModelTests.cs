@@ -530,6 +530,19 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
             }
 
         [Test]
+        public void LanguageChanged_RefreshesTheTextsOfTheAnalyzerCard()
+            {
+            var raised = new List<string?>();
+            _viewModel.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+            _mockLocalizationService.Raise(s => s.LanguageChanged += null, EventArgs.Empty);
+
+            Assert.That(raised, Does.Contain(nameof(MeasurementViewModel.DeviceStateText)));
+            Assert.That(raised, Does.Contain(nameof(MeasurementViewModel.DeviceActiveChannelStatusText)));
+            Assert.That(raised, Does.Contain(nameof(MeasurementViewModel.DeviceProbeSerialText)));
+            }
+
+        [Test]
         public async Task ExecuteZeroCalibrationAsync_UnknownProbe_RegistersChannelWithoutDialog()
             {
             // Arrange
