@@ -67,6 +67,36 @@ namespace ScreenChecker.Services
                 }
             }
 
+        /// <inheritdoc/>
+        public int? GetLastUsedChannel()
+            {
+            lock (_sync)
+                {
+                return LastUsed(Load())?.LastChannel;
+                }
+            }
+
+        /// <inheritdoc/>
+        public void UpdateLastUsed(int channel)
+            {
+            lock (_sync)
+                {
+                var entries = Load();
+                if (LastUsed(entries) is not { } entry || entry.LastChannel == channel) return;
+
+                entry.LastChannel = channel;
+                Save(entries);
+                }
+            }
+
+        /// <summary>
+        /// Finds the entry of the probe that was confirmed most recently.
+        /// </summary>
+        /// <param name="entries">Registry entries.</param>
+        /// <returns>The entry, or null for an empty registry.</returns>
+        private static AnalyzerRegistryEntry? LastUsed(List<AnalyzerRegistryEntry> entries) =>
+            entries.OrderByDescending(e => e.LastSeenUtc).FirstOrDefault();
+
         /// <summary>
         /// Finds the entry of the given probe, ignoring serial number case.
         /// </summary>

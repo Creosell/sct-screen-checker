@@ -14,7 +14,6 @@ namespace ScreenChecker.Services
         private readonly IColorMeasurementService _device;
         private readonly IAnalyzerRegistryService _registry;
         private readonly IDialogService _dialogService;
-        private readonly ISettingsService _settingsService;
         private readonly IDispatcher _dispatcher;
         private bool _isConnected;
         private bool _isCalibrated;
@@ -28,14 +27,12 @@ namespace ScreenChecker.Services
         /// <param name="device">The color analyzer.</param>
         /// <param name="registry">Registry of the last confirmed channel per probe.</param>
         /// <param name="dialogService">Service asking the inspector which channel to use and reporting errors.</param>
-        /// <param name="settingsService">Service storing the confirmed channel in the settings.</param>
         /// <param name="dispatcher">Dispatcher delivering the analyzer events on the UI thread.</param>
-        public AnalyzerSession(IColorMeasurementService device, IAnalyzerRegistryService registry, IDialogService dialogService, ISettingsService settingsService, IDispatcher dispatcher)
+        public AnalyzerSession(IColorMeasurementService device, IAnalyzerRegistryService registry, IDialogService dialogService, IDispatcher dispatcher)
             {
             _device = device ?? throw new ArgumentNullException(nameof(device));
             _registry = registry ?? throw new ArgumentNullException(nameof(registry));
             _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
-            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
 
             _device.StatusMessage += Device_StatusMessage;
@@ -213,7 +210,6 @@ namespace ScreenChecker.Services
                 }
 
             _registry.Update(probeSN, _device.Model, channel);
-            _settingsService.UpdateChannel(channel);
             Colorimeter = ReadColorimeter(probeSN, channel);
             IsChannelConfirmed = true;
             return true;

@@ -74,7 +74,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
 
             var logService = new LogService(_mockLocalizationService.Object, _mockDispatcher.Object);
             _viewModel = new MeasurementViewModel(
-                new AnalyzerSession(_mockColorMeasurementService.Object, _mockAnalyzerRegistryService.Object, _mockDialogService.Object, _mockSettingsService.Object, _mockDispatcher.Object),
+                new AnalyzerSession(_mockColorMeasurementService.Object, _mockAnalyzerRegistryService.Object, _mockDialogService.Object, _mockDispatcher.Object),
                 _mockFileService.Object,
                 _mockDialogService.Object,
                 _mockLocalizationService.Object,
@@ -555,7 +555,6 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
             // Assert
             _mockDialogService.Verify(d => d.ShowChoice(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             _mockAnalyzerRegistryService.Verify(r => r.Update("81026182", ColorAnalyzerModel.CA410, 2), Times.Once);
-            _mockSettingsService.Verify(s => s.UpdateChannel(2), Times.Once);
             Assert.That(_viewModel.IsChannelConfirmed, Is.True);
             StringAssert.Contains("81026182", _viewModel.DeviceProbeSerialText);
             Assert.That(_viewModel.DeviceModelName, Is.EqualTo("CA-410"));
@@ -674,7 +673,6 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
             // Assert
             _mockColorMeasurementService.VerifySet(s => s.CurrentChannel = 5, Times.Once);
             _mockAnalyzerRegistryService.Verify(r => r.Update("81026182", ColorAnalyzerModel.CA410, 5), Times.Once);
-            _mockSettingsService.Verify(s => s.UpdateChannel(5), Times.Once);
             }
 
         [Test]
@@ -692,7 +690,6 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
 
             // Assert
             _mockAnalyzerRegistryService.Verify(r => r.Update(It.IsAny<string>(), It.IsAny<ColorAnalyzerModel>(), It.IsAny<int>()), Times.Never);
-            _mockSettingsService.Verify(s => s.UpdateChannel(It.IsAny<int>()), Times.Never);
             _mockColorMeasurementService.Verify(s => s.Disconnect(), Times.Once);
             Assert.That(_viewModel.IsChannelConfirmed, Is.False);
             }
@@ -1906,7 +1903,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
 
             var logService = new LogService(_mockLocalizationService.Object, _mockDispatcher.Object);
             var viewModel = new MeasurementViewModel(
-                new AnalyzerSession(_mockColorMeasurementService.Object, _mockAnalyzerRegistryService.Object, _mockDialogService.Object, _mockSettingsService.Object, _mockDispatcher.Object),
+                new AnalyzerSession(_mockColorMeasurementService.Object, _mockAnalyzerRegistryService.Object, _mockDialogService.Object, _mockDispatcher.Object),
                 _mockFileService.Object,
                 _mockDialogService.Object,
                 _mockLocalizationService.Object,

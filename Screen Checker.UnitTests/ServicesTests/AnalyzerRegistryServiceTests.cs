@@ -60,6 +60,49 @@ namespace ScreenChecker.UnitTests.ServicesTests
             }
 
         [Test]
+        public void GetLastUsedChannel_EmptyRegistry_ReturnsNull()
+            {
+            Assert.That(_service.GetLastUsedChannel(), Is.Null);
+            }
+
+        [Test]
+        public void GetLastUsedChannel_ReturnsTheChannelOfTheProbeConfirmedLast()
+            {
+            _fileSystem.AddFile(RegistryPath, new MockFileData("""
+                [
+                  { "ProbeSN": "A", "Model": "CA310", "LastChannel": 4, "LastSeenUtc": "2026-11-20T10:00:00Z" },
+                  { "ProbeSN": "B", "Model": "CA410", "LastChannel": 7, "LastSeenUtc": "2026-11-26T10:00:00Z" }
+                ]
+                """));
+
+            Assert.That(_service.GetLastUsedChannel(), Is.EqualTo(7));
+            }
+
+        [Test]
+        public void UpdateLastUsed_ChangesOnlyTheProbeUsedLast()
+            {
+            _fileSystem.AddFile(RegistryPath, new MockFileData("""
+                [
+                  { "ProbeSN": "A", "Model": "CA310", "LastChannel": 4, "LastSeenUtc": "2026-11-20T10:00:00Z" },
+                  { "ProbeSN": "B", "Model": "CA410", "LastChannel": 7, "LastSeenUtc": "2026-11-26T10:00:00Z" }
+                ]
+                """));
+
+            _service.UpdateLastUsed(9);
+
+            Assert.That(_service.GetLastChannel("A"), Is.EqualTo(4));
+            Assert.That(_service.GetLastChannel("B"), Is.EqualTo(9));
+            }
+
+        [Test]
+        public void UpdateLastUsed_EmptyRegistry_CreatesNothing()
+            {
+            _service.UpdateLastUsed(3);
+
+            Assert.That(_fileSystem.File.Exists(RegistryPath), Is.False);
+            }
+
+        [Test]
         public void GetLastChannel_CorruptFile_ReturnsNullAndUpdateRecovers()
             {
             _fileSystem.AddFile(RegistryPath, new MockFileData("{ not json"));

@@ -58,7 +58,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
 
             Assert.That(savedSettings, Is.Not.Null);
             Assert.That(savedSettings.LanguageCultureCode, Is.EqualTo(""));
-            Assert.That(savedSettings.ColorAnalyzerChannel, Is.EqualTo("0"));
             Assert.That(savedSettings.MeasurementSpeed, Is.EqualTo(MeasurementSpeed.Slow));
             }
 
@@ -68,7 +67,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
             var expectedSettings = new AppSettings
                 {
                 LanguageCultureCode = "fr",
-                ColorAnalyzerChannel = "3",
                 MeasurementSpeed = MeasurementSpeed.Fast
                 };
             string jsonContent = JsonSerializer.Serialize(expectedSettings, new JsonSerializerOptions { WriteIndented = true });
@@ -78,7 +76,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
 
             Assert.That(loadedSettings, Is.Not.Null);
             Assert.That(loadedSettings.LanguageCultureCode, Is.EqualTo(expectedSettings.LanguageCultureCode));
-            Assert.That(loadedSettings.ColorAnalyzerChannel, Is.EqualTo(expectedSettings.ColorAnalyzerChannel));
             Assert.That(loadedSettings.MeasurementSpeed, Is.EqualTo(expectedSettings.MeasurementSpeed));
             }
 
@@ -92,7 +89,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
 
             Assert.That(loadedSettings, Is.Not.Null);
             Assert.That(loadedSettings.LanguageCultureCode, Is.EqualTo(""));
-            Assert.That(loadedSettings.ColorAnalyzerChannel, Is.EqualTo("0"));
             Assert.That(loadedSettings.MeasurementSpeed, Is.EqualTo(MeasurementSpeed.Slow));
             }
 
@@ -102,7 +98,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
             var settingsToSave = new AppSettings
                 {
                 LanguageCultureCode = "de",
-                ColorAnalyzerChannel = "5",
                 MeasurementSpeed = MeasurementSpeed.Fast
                 };
 
@@ -115,7 +110,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
 
             Assert.That(loadedSettings, Is.Not.Null);
             Assert.That(loadedSettings.LanguageCultureCode, Is.EqualTo(settingsToSave.LanguageCultureCode));
-            Assert.That(loadedSettings.ColorAnalyzerChannel, Is.EqualTo(settingsToSave.ColorAnalyzerChannel));
             Assert.That(loadedSettings.MeasurementSpeed, Is.EqualTo(settingsToSave.MeasurementSpeed));
             }
 
@@ -131,17 +125,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
             Assert.That(File.Exists(_testFilePath), Is.False);
             }
 
-        [Test]
-        public void UpdateChannel_UpdatesChannelInFile()
-            {
-            var initialSettings = new AppSettings { ColorAnalyzerChannel = "0" };
-            _settingsService.SaveSettings(initialSettings);
-
-            _settingsService.UpdateChannel(5);
-
-            var loadedSettings = _settingsService.LoadSettings();
-            Assert.That(loadedSettings.ColorAnalyzerChannel, Is.EqualTo("5"));
-            }
 
 
         }

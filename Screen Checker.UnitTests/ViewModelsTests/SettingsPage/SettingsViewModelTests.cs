@@ -27,11 +27,11 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
             _mockSettingsService.Setup(s => s.LoadSettings()).Returns(new AppSettings
                 {
                 LanguageCultureCode = "",
-                ColorAnalyzerChannel = "1",
                 MeasurementSpeed = MeasurementSpeed.Slow
                 });
 
             _mockColorMeasurementService.Setup(s => s.CurrentChannel).Returns(1);
+            _mockColorMeasurementService.Setup(s => s.IsDeviceConnected).Returns(true);
 
             _viewModel = new SettingsViewModel(
                 _mockSettingsService.Object,
@@ -201,8 +201,7 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
             _viewModel.SaveSettingsCommand.Execute(null);
 
             _mockSettingsService.Verify(s => s.SaveSettings(It.Is<AppSettings>(
-                settings => settings.ColorAnalyzerChannel == "3" &&
-                            settings.MeasurementSpeed == MeasurementSpeed.Fast
+                settings => settings.MeasurementSpeed == MeasurementSpeed.Fast
             )), Times.Once());
             }
 
@@ -244,6 +243,18 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
             }
 
         [Test]
+        public void SaveSettingsCommand_Execute_StoresTheChosenChannelInTheAnalyzerRegistry()
+            {
+            var registry = new Mock<IAnalyzerRegistryService>();
+            using var viewModel = new SettingsViewModel(_mockSettingsService.Object, _mockDialogService.Object, _mockColorMeasurementService.Object, _mockLocalizationService.Object, _mockThemeService.Object, registry.Object);
+            viewModel.ColorAnalyzerChannel = "3";
+
+            viewModel.SaveSettingsCommand.Execute(null);
+
+            registry.Verify(r => r.UpdateLastUsed(3), Times.Once);
+            }
+
+        [Test]
         public void SaveSettingsCommand_Execute_HandlesException()
             {
             _mockSettingsService.Setup(s => s.SaveSettings(It.IsAny<AppSettings>()))
@@ -272,12 +283,9 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
             }
 
         [Test]
-        public void ColorAnalyzerChannel_LoadsFromSettings()
+        public void ColorAnalyzerChannel_LoadsFromTheAnalyzer()
             {
-            _mockSettingsService.Setup(s => s.LoadSettings()).Returns(new AppSettings
-                {
-                ColorAnalyzerChannel = "5"
-                });
+            _mockColorMeasurementService.Setup(s => s.CurrentChannel).Returns(5);
 
             var viewModel = new SettingsViewModel(
                 _mockSettingsService.Object,
@@ -328,16 +336,31 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
             }
 
         [Test]
-        public void SaveSettings_WithChangedChannel_PersistsChannelValue()
+        public void SaveSettings_WithoutAConnectedAnalyzer_LeavesTheChannelAlone()
             {
-            _mockColorMeasurementService.Setup(s => s.CurrentChannel).Returns(7);
-            _viewModel.ColorAnalyzerChannel = "7";
+            var registry = new Mock<IAnalyzerRegistryService>();
+            _mockColorMeasurementService.Setup(s => s.IsDeviceConnected).Returns(false);
+            _mockColorMeasurementService.SetupProperty(s => s.CurrentChannel);
+            using var viewModel = new SettingsViewModel(_mockSettingsService.Object, _mockDialogService.Object, _mockColorMeasurementService.Object, _mockLocalizationService.Object, _mockThemeService.Object, registry.Object);
+            viewModel.ColorAnalyzerChannel = "7";
 
-            _viewModel.SaveSettingsCommand.Execute(null);
+            viewModel.SaveSettingsCommand.Execute(null);
 
-            _mockSettingsService.Verify(s => s.SaveSettings(It.Is<AppSettings>(
-                settings => settings.ColorAnalyzerChannel == "7"
-            )), Times.Once());
+            _mockColorMeasurementService.VerifySet(s => s.CurrentChannel = 7, Times.Never());
+            registry.Verify(r => r.UpdateLastUsed(It.IsAny<int>()), Times.Never);
+            }
+
+        [Test]
+        public void IsChannelEditable_FollowsTheConnectionOfTheAnalyzer()
+            {
+            var changed = new List<string?>();
+            _viewModel.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+            _mockColorMeasurementService.Setup(s => s.IsDeviceConnected).Returns(false);
+
+            _mockColorMeasurementService.Raise(s => s.ConnectionStatusChanged += null, this, false);
+
+            Assert.That(_viewModel.IsChannelEditable, Is.False);
+            Assert.That(changed, Does.Contain(nameof(SettingsViewModel.IsChannelEditable)));
             }
 
         [Test]
@@ -354,11 +377,6 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
         [Test]
         public void ExecuteChangeChannel_InvalidChannel_ShowsErrorAndRestoresDefault()
             {
-            _mockSettingsService.Setup(s => s.LoadSettings()).Returns(new AppSettings
-                {
-                ColorAnalyzerChannel = "5"
-                });
-
             // Используем двузначное число вне диапазона (setter примет, GetChannel отклонит)
             _mockColorMeasurementService.Setup(s => s.CurrentChannel).Returns(5);
 
@@ -384,11 +402,6 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
         [Test]
         public void ExecuteChangeChannel_InvalidFormat_ShowsError()
             {
-            _mockSettingsService.Setup(s => s.LoadSettings()).Returns(new AppSettings
-                {
-                ColorAnalyzerChannel = "3"
-                });
-
             // Имитируем ситуацию через рефлексию или используем внутреннее поле
             var fieldInfo = typeof(SettingsViewModel).GetField("_colorAnalyzerChannel",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -403,12 +416,8 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
             }
 
         [Test]
-        public void LoadSettings_AppliesChannelFromFile()
+        public void LoadSettings_AppliesTheChannelOfTheAnalyzer()
             {
-            _mockSettingsService.Setup(s => s.LoadSettings()).Returns(new AppSettings
-                {
-                ColorAnalyzerChannel = "15"
-                });
             _mockColorMeasurementService.Setup(s => s.CurrentChannel).Returns(15);
 
             var viewModel = new SettingsViewModel(

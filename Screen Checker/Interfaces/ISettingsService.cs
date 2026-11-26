@@ -25,12 +25,6 @@ namespace ScreenChecker.Interfaces
         void SaveSettings(AppSettings settings);
 
         /// <summary>
-        /// Updates the color analyzer channel in settings.
-        /// </summary>
-        /// <param name="channel">Channel number to save.</param>
-        void UpdateChannel(int channel);
-
-        /// <summary>
         /// Updates only the application language in settings and persists changes.
         /// </summary>
         /// <param name="cultureCode">Language culture code to save.</param>

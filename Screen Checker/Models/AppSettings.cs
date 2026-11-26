@@ -15,12 +15,6 @@ namespace ScreenChecker.Models
         public string LanguageCultureCode { get; set; } = "";
 
         /// <summary>
-        /// Gets or sets the color analyzer channel number (0-99).
-        /// </summary>
-        [JsonPropertyName("colorAnalyzerChannel")]
-        public string ColorAnalyzerChannel { get; set; } = "0";
-
-        /// <summary>
         /// Gets or sets the measurement speed applied to the color analyzer during zero calibration.
         /// </summary>
         [JsonPropertyName("measurementSpeed")]

@@ -181,7 +181,6 @@ main_tests:
 
 Settings are stored in `%AppData%\WPF_LCD_Test\settings.json`:
 
-- **ColorAnalyzerChannel**: Measurement channel (0-99)
 - **LanguageCultureCode**: UI language ("" for default / "zh-Hans" for Chinese Simplified)
 - **MeasurementSpeed**: Analyzer measurement speed ("Slow" by default / "Fast" / "Auto")
 - **SyncMode**: Synchronization mode ("Universal" by default / "Ntsc" / "Pal" / "Ext" / "Internal" / "Manual" (CA-410 only))

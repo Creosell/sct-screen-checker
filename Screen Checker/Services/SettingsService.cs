@@ -121,17 +121,6 @@ namespace ScreenChecker.Services
             }
 
         /// <summary>
-        /// Updates the color analyzer channel in settings and persists changes.
-        /// </summary>
-        /// <param name="channel">Channel number to save.</param>
-        public void UpdateChannel(int channel)
-            {
-            var settings = LoadSettings();
-            settings.ColorAnalyzerChannel = channel.ToString();
-            SaveSettings(settings);
-            }
-
-        /// <summary>
         /// Updates the application language in settings and persists changes.
         /// </summary>
         /// <param name="cultureCode">Language culture code to save.</param>

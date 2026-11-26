@@ -18,6 +18,7 @@ namespace ScreenChecker.ViewModels.SettingsPage
         private readonly IColorMeasurementService _colorMeasurementService;
         private readonly IDialogService _dialogService;
         private readonly IThemeService? _themeService;
+        private readonly IAnalyzerRegistryService? _analyzerRegistry;
         private string _colorAnalyzerChannel;
 
         public string ColorAnalyzerChannel
@@ -31,6 +32,13 @@ namespace ScreenChecker.ViewModels.SettingsPage
                     }
                 }
             }
+
+        /// <summary>
+        /// Gets whether the channel can be changed: it is a property of the probe, so it is edited only while the analyzer is connected
+        /// (the registry of the analyzers is the only place that stores it).
+        /// </summary>
+        public bool IsChannelEditable => _colorMeasurementService.IsDeviceConnected;
+
         private MeasurementSpeed _measurementSpeed;
         public MeasurementSpeed MeasurementSpeed
             {
@@ -214,8 +222,9 @@ namespace ScreenChecker.ViewModels.SettingsPage
         public ICommand ResetToDefaultCommand { get; }
 
         // Конструктор: инициализация сервисов, команд, языков и загрузка настроек
-        public SettingsViewModel(ISettingsService settingsService, IDialogService dialogService, IColorMeasurementService colorMeasurementService, ILocalizationService localizationService, IThemeService? themeService = null) : base()
+        public SettingsViewModel(ISettingsService settingsService, IDialogService dialogService, IColorMeasurementService colorMeasurementService, ILocalizationService localizationService, IThemeService? themeService = null, IAnalyzerRegistryService? analyzerRegistry = null) : base()
             {
+            _analyzerRegistry = analyzerRegistry;
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
             _colorMeasurementService = colorMeasurementService ?? throw new ArgumentNullException(nameof(colorMeasurementService));
             _localizationService = localizationService ?? throw new ArgumentNullException(nameof(localizationService));
@@ -252,7 +261,11 @@ namespace ScreenChecker.ViewModels.SettingsPage
             ColorAnalyzerChannel = _colorMeasurementService.CurrentChannel.ToString();
             }
 
-        private void ColorMeasurementService_ConnectionStatusChanged(object sender, bool e) => RefreshSyncOptions();
+        private void ColorMeasurementService_ConnectionStatusChanged(object sender, bool e)
+            {
+            OnPropertyChanged(nameof(IsChannelEditable));
+            RefreshSyncOptions();
+            }
 
         // Ограничивает список режимов синхронизации возможностями подключённого прибора
         private void RefreshSyncOptions()
@@ -289,7 +302,7 @@ namespace ScreenChecker.ViewModels.SettingsPage
                         SelectedLanguage = AvailableLanguages.First();
                         }
                     }
-                ColorAnalyzerChannel = currentSettings.ColorAnalyzerChannel;
+                ColorAnalyzerChannel = _colorMeasurementService.CurrentChannel.ToString();
                 MeasurementSpeed = currentSettings.MeasurementSpeed;
                 SyncMode = currentSettings.SyncMode;
                 SyncFrequency = FormatValue(currentSettings.SyncFrequency ?? AnalyzerCapabilities.DefaultFrequency);
@@ -322,13 +335,12 @@ namespace ScreenChecker.ViewModels.SettingsPage
             {
             _validationFailed = false;
 
-            ExecuteChangeChannel(ColorAnalyzerChannel);
+            if (IsChannelEditable) ExecuteChangeChannel(ColorAnalyzerChannel);
 
             var saved = _settingsService.LoadSettings();
             AppSettings settingsToSave = new()
                 {
                 LanguageCultureCode = LanguageCultureCode,
-                ColorAnalyzerChannel = ColorAnalyzerChannel,
                 MeasurementSpeed = MeasurementSpeed,
                 SyncMode = SyncMode,
                 SyncFrequency = IsSyncFrequencyVisible
@@ -388,9 +400,7 @@ namespace ScreenChecker.ViewModels.SettingsPage
                         : string.Format(AvailableChannels, AppConstants.ColorAnalyzer.MinChannel, AppConstants.ColorAnalyzer.MaxChannel),
                     Err);
 
-                return int.TryParse(_settingsService.LoadSettings().ColorAnalyzerChannel, out int fallback)
-                    ? fallback
-                    : AppConstants.ColorAnalyzer.MinChannel;
+                return _colorMeasurementService.CurrentChannel;
                 }
 
             return result;
@@ -404,6 +414,7 @@ namespace ScreenChecker.ViewModels.SettingsPage
             ColorAnalyzerChannel = channelInt.ToString();
 
             _colorMeasurementService.CurrentChannel = channelInt;
+            _analyzerRegistry?.UpdateLastUsed(channelInt);
             }
 
         private bool CanExecuteSaveSettings(object parameter) => true;

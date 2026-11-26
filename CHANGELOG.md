@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.5] - 2026-11-26
+
+### Fixed
+- The "Channel mismatch" dialog came up at the calibration again and again: the channel changed in the settings was written to the analyzer and to `appsettings.json`, but not to the registry of the analyzers, so the registry kept an old channel while the probe held the new one. The channel is a property of the probe and lives only in the registry of the analyzers now (`analyzers.json`): it is no longer kept in `appsettings.json` (an older file with it is still read, the key disappears at the next save), the channel of the probe used last is shown at the start, a channel chosen in the settings is stored in the registry (the field is editable only while the analyzer is connected), and the calibration warns only when the probe holds another channel than the registry says
+
 ## [1.4.4] - 2026-11-25
 
 ### Added

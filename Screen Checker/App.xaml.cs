@@ -155,7 +155,8 @@ namespace ScreenChecker
             localizationService.LanguageChanged += LocalizationService_LanguageChanged;
             localizationService.SetLanguage(appSettings.LanguageCultureCode);
 
-            if (int.TryParse(appSettings.ColorAnalyzerChannel, out int channel))
+            // The channel is a property of the probe: the one of the probe used last comes from the registry of the analyzers
+            if (_serviceProvider.GetRequiredService<IAnalyzerRegistryService>().GetLastUsedChannel() is int channel)
                 {
                 colorMeasurementService.CurrentChannel = channel;
                 }

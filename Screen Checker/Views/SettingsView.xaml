@@ -98,6 +98,7 @@
                     Style="{StaticResource UnderlinedTextBoxStyle}"
                     x:Name="ColorAnalyzerChannelTextBox"
                     MinWidth="30"
+                    IsEnabled="{Binding IsChannelEditable}"
                     Margin="0,5"
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Center"

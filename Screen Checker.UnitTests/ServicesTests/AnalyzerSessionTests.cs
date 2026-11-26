@@ -11,7 +11,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
         private Mock<IColorMeasurementService> _device;
         private Mock<IAnalyzerRegistryService> _registry;
         private Mock<IDialogService> _dialog;
-        private Mock<ISettingsService> _settings;
         private Mock<IDispatcher> _dispatcher;
         private AnalyzerSession _session;
         private List<CalibrationOutcome> _outcomes;
@@ -26,10 +25,9 @@ namespace ScreenChecker.UnitTests.ServicesTests
             _device.Setup(d => d.Model).Returns(ColorAnalyzerModel.CA410);
             _registry = new Mock<IAnalyzerRegistryService>();
             _dialog = new Mock<IDialogService>();
-            _settings = new Mock<ISettingsService>();
             _dispatcher = new Mock<IDispatcher>();
             _dispatcher.Setup(d => d.CheckAccess()).Returns(true);
-            _session = new AnalyzerSession(_device.Object, _registry.Object, _dialog.Object, _settings.Object, _dispatcher.Object);
+            _session = new AnalyzerSession(_device.Object, _registry.Object, _dialog.Object, _dispatcher.Object);
             _outcomes = [];
         }
 
@@ -54,7 +52,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
             Assert.That(_session.IsChannelConfirmed, Is.True);
             Assert.That(_session.Colorimeter, Is.EqualTo(new ColorimeterInfo("CA-410", "PROBE1", 2, "Lab")));
             _registry.Verify(r => r.Update("PROBE1", ColorAnalyzerModel.CA410, 2), Times.Once);
-            _settings.Verify(s => s.UpdateChannel(2), Times.Once);
         }
 
         [Test]
@@ -182,7 +179,6 @@ namespace ScreenChecker.UnitTests.ServicesTests
 
             int expected = choice == 1 ? lastChannel : 3;
             _registry.Verify(r => r.Update("PROBE1", ColorAnalyzerModel.CA410, expected), Times.Once);
-            _settings.Verify(s => s.UpdateChannel(expected), Times.Once);
             _device.VerifySet(d => d.CurrentChannel = lastChannel, choice == 1 ? Times.Once() : Times.Never());
         }
 

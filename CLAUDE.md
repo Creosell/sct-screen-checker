@@ -46,7 +46,7 @@ dotnet test --filter "FullyQualifiedName~TestClassName.TestMethodName"
 |---------|---------|
 | IColorMeasurementService | Color analyzer device access: CA-410 via CA-SDK2, CA-310 via COM |
 | IAnalyzerSession | The work with the analyzer for the measurement page (singleton): connection state, zero calibration with the channel confirmation (`CalibrateAsync` reports a typed `CalibrationOutcome` while the run is still in progress), measuring; wraps `IColorMeasurementService`, `IAnalyzerRegistryService` and the channel dialog |
-| IAnalyzerRegistryService | Last confirmed channel per probe serial number (`analyzers.json` next to the exe) |
+| IAnalyzerRegistryService | Last confirmed channel per probe serial number (`analyzers.json` next to the exe): the only place the channel is stored (not in `appsettings.json`); the channel of the probe used last is applied at the start, a channel chosen in the settings is written back, the calibration warns when the probe holds another one |
 | ISettingsService | App configuration (singleton) |
 | ILocalizationService | Runtime language switching (singleton) |
 | IFileService | File I/O abstraction, JSON/CSV export |
@@ -100,7 +100,7 @@ Device test specifications are YAML files in `Screen Checker/config/device_confi
 
 ## Version
 
-Current version: **1.4.4** (set in `Screen Checker\Screen Checker.csproj` — `AssemblyVersion` / `FileVersion`). See [CHANGELOG.md](CHANGELOG.md) for history.
+Current version: **1.4.5** (set in `Screen Checker\Screen Checker.csproj` — `AssemblyVersion` / `FileVersion`). See [CHANGELOG.md](CHANGELOG.md) for history.
 
 ## Localization
 
