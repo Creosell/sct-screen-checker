@@ -82,18 +82,14 @@ namespace ScreenChecker.Commands
         {
             if (!CanExecute(parameter))
             {
-#if DEBUG
                 DebugTools.RelayCommandTrace.Refused((Delegate?)_execute ?? _executeAsync, parameter);
-#endif
                 return;
             }
 
             _isExecuting = true;
             RaiseCanExecuteChanged();
-#if DEBUG
             var trace = DebugTools.RelayCommandTrace.Begin((Delegate?)_execute ?? _executeAsync, parameter);
             Exception? failure = null;
-#endif
 
             try
             {
@@ -104,18 +100,14 @@ namespace ScreenChecker.Commands
             }
             catch (Exception ex)
             {
-#if DEBUG
                 failure = ex;
-#endif
                 System.Diagnostics.Debug.WriteLine($"Command execution error: {ex.Message}");
             }
             finally
             {
                 _isExecuting = false;
                 RaiseCanExecuteChanged();
-#if DEBUG
                 trace.End(failure);
-#endif
             }
         }
 

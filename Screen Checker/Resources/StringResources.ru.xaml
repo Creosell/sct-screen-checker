@@ -63,7 +63,7 @@
     <system:String x:Key="ResultsColumnPoint">Точка</system:String>
 
     <!--  Device info panel  -->
-    <system:String x:Key="SpecPanelTitle">Устройство</system:String>
+    <system:String x:Key="SpecPanelTitle">Спецификация</system:String>
     <system:String x:Key="SpecColumnParameter">Параметр</system:String>
     <system:String x:Key="SpecColumnValue">Значение</system:String>
     <system:String x:Key="SpecColumnSpec">Спец.</system:String>

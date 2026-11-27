@@ -1,4 +1,3 @@
-#if DEBUG
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -197,4 +196,3 @@ namespace ScreenChecker.DebugTools
             }
         }
     }
-#endif

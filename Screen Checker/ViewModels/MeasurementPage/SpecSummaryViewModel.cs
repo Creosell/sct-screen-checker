@@ -248,7 +248,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
                 }
 
             Verdict = evaluation.Verdict;
-            VerdictText = string.Format(Text("SpecVerdictFormat"), VerdictName(evaluation));
+            VerdictText = VerdictName(evaluation);
             ProgressText = string.Format(Text("SpecPointsProgress"), _measuredPoints, _totalPoints);
             HintText = string.Empty;
             ApplyBadges(evaluation);

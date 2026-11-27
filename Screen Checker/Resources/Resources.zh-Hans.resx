@@ -507,11 +507,8 @@
   <data name="DeviceStateConnectedCalibrated" xml:space="preserve">
     <value>已连接（已校准）</value>
   </data>
-  <data name="SpecVerdictFormat" xml:space="preserve">
-    <value>规格：{0}</value>
-  </data>
   <data name="SpecVerdictPass" xml:space="preserve">
-    <value>通过</value>
+    <value>无问题</value>
   </data>
   <data name="SpecVerdictWarn" xml:space="preserve">
     <value>警告</value>

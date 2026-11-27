@@ -65,10 +65,10 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.MeasurementPage
             Assert.That(_summary.Rows.Select(r => r.ToolTip), Is.All.Null);
             }
 
-        [TestCase(SpecVerdict.Fail, true, "Spec: FAIL")]
-        [TestCase(SpecVerdict.Warn, false, "Spec: WARN")]
-        [TestCase(SpecVerdict.Pass, true, "Spec: PASS")]
-        [TestCase(SpecVerdict.Pass, false, "Spec: no issues yet")]
+        [TestCase(SpecVerdict.Fail, true, "Fail")]
+        [TestCase(SpecVerdict.Warn, false, "Warning")]
+        [TestCase(SpecVerdict.Pass, true, "No issues")]
+        [TestCase(SpecVerdict.Pass, false, "No issues yet")]
         public void Show_BuildsTheVerdictText(SpecVerdict verdict, bool complete, string expected)
             {
             _summary.Show(Evaluation(verdict, complete), 0, 13);

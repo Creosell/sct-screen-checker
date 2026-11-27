@@ -3,9 +3,7 @@ using System.IO.Abstractions;
 using System.Windows;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
-#if DEBUG
 using ScreenChecker.DebugTools;
-#endif
 using ScreenChecker.Interfaces;
 using ScreenChecker.Models;
 using ScreenChecker.Services;
@@ -79,30 +77,22 @@ namespace ScreenChecker
             }
 
         /// <summary>
-        /// Registers a singleton service. In the Debug configuration every call of the service is traced.
+        /// Registers a singleton service; every call of the service is traced.
         /// </summary>
         private static void AddService<TService, TImplementation>(IServiceCollection services)
             where TService : class
             where TImplementation : class, TService
             {
-#if DEBUG
             services.AddSingleton<TService>(provider => TracingProxy.Wrap<TService>(ActivatorUtilities.CreateInstance<TImplementation>(provider)));
-#else
-            services.AddSingleton<TService, TImplementation>();
-#endif
             }
 
         /// <summary>
-        /// Registers a transient view model. In the Debug configuration every property change of the view model is traced.
+        /// Registers a transient view model; every property change of the view model is traced.
         /// </summary>
         private static void AddViewModel<TViewModel>(IServiceCollection services)
             where TViewModel : class, System.ComponentModel.INotifyPropertyChanged
             {
-#if DEBUG
             services.AddTransient<TViewModel>(provider => ViewModelTracer.Watch(ActivatorUtilities.CreateInstance<TViewModel>(provider)));
-#else
-            services.AddTransient<TViewModel>();
-#endif
             }
 
         /// <summary>
@@ -133,13 +123,13 @@ namespace ScreenChecker
         /// <param name="e">Startup event arguments.</param>
         private void Application_Startup(object sender, StartupEventArgs e)
             {
-#if DEBUG
             DebugTrace.Start();
             UiEventTracer.Install();
+            DebugTrace.Write("app", $"Screen Checker {typeof(App).Assembly.GetName().Version}, {Environment.OSVersion}, {Environment.ProcessorCount} cores, base directory {AppContext.BaseDirectory}");
+#if DEBUG
             _simulation = SimulationOptions.Parse(e.Args);
             if (_simulation is not null)
                 DebugTrace.Write("app", $"Simulated color analyzer: {_simulation}");
-            DebugTrace.Write("app", $"Screen Checker {typeof(App).Assembly.GetName().Version}, {Environment.OSVersion}, {Environment.ProcessorCount} cores, base directory {AppContext.BaseDirectory}");
 #endif
             HideFocusVisuals();
             ConfigureServices();

@@ -1,4 +1,3 @@
-#if DEBUG
 using System.Diagnostics;
 
 namespace ScreenChecker.DebugTools
@@ -46,4 +45,3 @@ namespace ScreenChecker.DebugTools
             DebugTrace.Write(error == null ? "command" : "error", $"{_name} {(error == null ? "finished" : $"failed: {DebugTrace.Format(error)}")} in {_clock.ElapsedMilliseconds} ms");
         }
     }
-#endif

@@ -507,20 +507,17 @@
   <data name="DeviceStateConnectedCalibrated" xml:space="preserve">
     <value>Connected (calibrated)</value>
   </data>
-  <data name="SpecVerdictFormat" xml:space="preserve">
-    <value>Spec: {0}</value>
-  </data>
   <data name="SpecVerdictPass" xml:space="preserve">
-    <value>PASS</value>
+    <value>No issues</value>
   </data>
   <data name="SpecVerdictWarn" xml:space="preserve">
-    <value>WARN</value>
+    <value>Warning</value>
   </data>
   <data name="SpecVerdictFail" xml:space="preserve">
-    <value>FAIL</value>
+    <value>Fail</value>
   </data>
   <data name="SpecNoIssuesYet" xml:space="preserve">
-    <value>no issues yet</value>
+    <value>No issues yet</value>
   </data>
   <data name="SpecPointsProgress" xml:space="preserve">
     <value>{0} of {1} points</value>

@@ -127,7 +127,7 @@
     <system:String x:Key="ResultsColumnPoint">Point</system:String>
 
     <!--  Device info panel  -->
-    <system:String x:Key="SpecPanelTitle">Device info</system:String>
+    <system:String x:Key="SpecPanelTitle">Specification</system:String>
     <system:String x:Key="SpecColumnParameter">Parameter</system:String>
     <system:String x:Key="SpecColumnValue">Value</system:String>
     <system:String x:Key="SpecColumnSpec">Spec</system:String>

@@ -125,7 +125,7 @@
     <system:String x:Key="ResultsColumnPoint">点位</system:String>
 
     <!--  Device info panel  -->
-    <system:String x:Key="SpecPanelTitle">设备信息</system:String>
+    <system:String x:Key="SpecPanelTitle">规格</system:String>
     <system:String x:Key="SpecColumnParameter">参数</system:String>
     <system:String x:Key="SpecColumnValue">值</system:String>
     <system:String x:Key="SpecColumnSpec">规格</system:String>

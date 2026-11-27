@@ -1512,15 +1512,6 @@ namespace ScreenChecker.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Spec: {0}.
-        /// </summary>
-        public static string SpecVerdictFormat {
-            get {
-                return ResourceManager.GetString("SpecVerdictFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to PASS.
         /// </summary>
         public static string SpecVerdictPass {

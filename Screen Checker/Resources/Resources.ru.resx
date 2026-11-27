@@ -507,20 +507,17 @@
   <data name="DeviceStateConnectedCalibrated" xml:space="preserve">
     <value>Откалиброван</value>
   </data>
-  <data name="SpecVerdictFormat" xml:space="preserve">
-    <value>Спец.: {0}</value>
-  </data>
   <data name="SpecVerdictPass" xml:space="preserve">
-    <value>ПРОЙДЕНА</value>
+    <value>Замечаний нет</value>
   </data>
   <data name="SpecVerdictWarn" xml:space="preserve">
-    <value>ВНИМАНИЕ</value>
+    <value>Внимание</value>
   </data>
   <data name="SpecVerdictFail" xml:space="preserve">
-    <value>ПРОВАЛ</value>
+    <value>Провал</value>
   </data>
   <data name="SpecNoIssuesYet" xml:space="preserve">
-    <value>замечаний нет</value>
+    <value>Замечаний пока нет</value>
   </data>
   <data name="SpecPointsProgress" xml:space="preserve">
     <value>{0} из {1}</value>

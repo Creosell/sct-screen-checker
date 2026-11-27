@@ -1,5 +1,4 @@
-#if DEBUG
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -7,9 +6,9 @@ using System.Text;
 namespace ScreenChecker.DebugTools
     {
     /// <summary>
-    /// Debug-build trace of everything that happens in the application: one timestamped line per event, written to
-    /// <c>logs/debug_yyyyMMdd_HHmmss.log</c> next to the executable and to the debugger output. Compiled only in the Debug
-    /// configuration. The events come from a few cross-cutting hooks (<see cref="UiEventTracer"/>, <see cref="ViewModelTracer"/>,
+    /// Trace of everything that happens in the application: one timestamped line per event, written to
+    /// <c>logs/app_yyyyMMdd_HHmmss.log</c> next to the executable (the last ten runs are kept) and to the debugger output. It runs in
+    /// every configuration. The events come from a few cross-cutting hooks (<see cref="UiEventTracer"/>, <see cref="ViewModelTracer"/>,
     /// <see cref="TracingProxy"/>, <see cref="RelayCommandTrace"/>), so the code of the application carries no log calls of its own.
     /// </summary>
     public static class DebugTrace
@@ -37,10 +36,10 @@ namespace ScreenChecker.DebugTools
                     {
                     string folder = Path.Combine(AppContext.BaseDirectory, "logs");
                     Directory.CreateDirectory(folder);
-                    FilePath = Path.Combine(folder, $"debug_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+                    FilePath = Path.Combine(folder, $"app_{DateTime.Now:yyyyMMdd_HHmmss}.log");
                     _file = new StreamWriter(FilePath, append: false, new UTF8Encoding(false)) { AutoFlush = true };
 
-                    foreach (var old in Directory.GetFiles(folder, "debug_*.log").OrderByDescending(f => f).Skip(KeptFiles))
+                    foreach (var old in Directory.GetFiles(folder, "app_*.log").OrderByDescending(f => f).Skip(KeptFiles))
                         {
                         try { File.Delete(old); } catch (IOException) { }
                         }
@@ -120,4 +119,3 @@ namespace ScreenChecker.DebugTools
             type.GetMethod(nameof(ToString), Type.EmptyTypes)?.DeclaringType != typeof(object);
         }
     }
-#endif
