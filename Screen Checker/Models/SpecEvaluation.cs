@@ -82,6 +82,15 @@ namespace ScreenChecker.Models
         public IReadOnlyDictionary<string, SpecAttemptInfo> Attempts { get; init; } = new Dictionary<string, SpecAttemptInfo>();
 
         /// <summary>
+        /// Tells whether any check that uses the point (a metric of the point itself or a composite one such as the gamut)
+        /// has a warning or a failure.
+        /// </summary>
+        /// <param name="location">Measurement location identifier.</param>
+        /// <returns>True when the point has a remark against the specification.</returns>
+        public bool HasRemark(string location) =>
+            Checks.Any(check => check.Status is SpecStatus.Warning or SpecStatus.Fail && check.Locations.Contains(location));
+
+        /// <summary>
         /// Parses the JSON printed by the report generator in the evaluate mode.
         /// </summary>
         /// <param name="json">Generator output.</param>

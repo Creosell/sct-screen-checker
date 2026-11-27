@@ -989,8 +989,7 @@ namespace ScreenChecker.ViewModels.MeasurementPage
             RefreshResults();
             foreach (var row in Results)
                 {
-                bool isClean = !evaluation.Checks.Any(check => check.Status is SpecStatus.Warning or SpecStatus.Fail && check.Locations.Contains(row.Location));
-                row.ShowAttempts(evaluation.Attempts.GetValueOrDefault(row.Location), isClean);
+                row.ShowAttempts(evaluation.Attempts.GetValueOrDefault(row.Location), !evaluation.HasRemark(row.Location));
                 }
             }
 

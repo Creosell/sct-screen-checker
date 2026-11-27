@@ -107,6 +107,20 @@ namespace ScreenChecker.UnitTests.ModelsTests
             }
 
         [Test]
+        public void ApplyAttemptChoices_PointInAFailedCompositeCheckStartsASeriesEvenWhenItsOwnMetricsPass()
+            {
+            var device = new DeviceUnderTest("SN1");
+            device.RecordAttempt(Attempt("RedColor", 80));
+            var gamut = new SpecCheck("Cg_dcip3", 86, 95, null, null, SpecStatus.Fail, ["RedColor", "GreenColor", "BlueColor"], []);
+            var evaluation = new SpecEvaluation(SpecVerdict.Fail, true, [gamut]) { Attempts = new Dictionary<string, SpecAttemptInfo> { ["RedColor"] = new(1, 0, false) } };
+
+            device.ApplyAttemptChoices(evaluation);
+            device.RecordAttempt(Attempt("RedColor", 78));
+
+            Assert.That(device.AttemptCount("RedColor"), Is.EqualTo(2));
+            }
+
+        [Test]
         public void ApplyAttemptChoices_AnswerForAnOlderStateOfThePointIsNotApplied()
             {
             var device = new DeviceUnderTest("SN1");

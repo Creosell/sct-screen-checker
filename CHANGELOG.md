@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The maximize button of the title bar shows the restore icon (two squares) and the tooltip "Restore" while the window is maximized, and the maximize icon otherwise
 
 ### Fixed
+- A point that takes part in a failed composite check (the gamut) but has no remark of its own (red and blue at their typical coordinates) showed the attempts counter, yet its repeated measurement replaced the first one and the counter stayed at 1/3. Such a point starts the series of attempts now, by the same rule that shows its counter (`SpecEvaluation.HasRemark`)
 - Drop-down lists, context menus (the list of device configurations) and tooltips are drawn at the interface size of the settings: they are windows of their own and did not take the scale of the window
 - Save in Settings reset the stored theme to dark (the file was rewritten without it); it keeps the theme and the interface size now
 
