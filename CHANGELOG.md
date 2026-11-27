@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.5] - 2026-11-26
 
 ### Changed
+- The window keeps within the screen at any display scale: its smallest size and its starting size are the design size 1100x600 but never more than the work area, and the page is shrunk in proportion (`MinimumSizeViewbox`, never enlarged) when the room is less than the design size. A full HD display at 200% leaves 960x520, at 300% 640x347: the window used to be larger than the screen and part of the page was out of reach, now the whole page is on the screen, drawn at 87% and 58% of the layout
+- The application is Per-Monitor DPI aware (v2, `app.manifest`): it is drawn at the display scale of the monitor it is on and redrawn when moved to another monitor, instead of being a picture the system scales up and blurs
+- The window takes the size limits from the monitor it is on, not from the primary one, and asks again when it is moved to another monitor (the monitors differ in resolution and in display scale)
+- Debug: `--ui-scale=N` (0.5 to 4) draws the interface N times larger, to see what a display with that scale shows without changing the settings of Windows
 - The Device info table lets the name of a metric wrap to a second line instead of keeping a minimum width of 120 px: in Chinese the name of the metric was cut by the value next to it. The left and the right block of the page share the width 47/53 (was 45/55) so the results table keeps its air in Russian
 - The device configuration button shows the whole name in its tooltip
 - Layout tests (`Category("Ui")`): the real main window, the measurement and settings pages and every dialog are drawn at the smallest window size in English, Russian and Chinese with the longest data and audited for cut, overlapping and covered texts, texts that run out of their area and dialogs taller than a screen. The tests export before/after pictures when `SCT_UI_SHOTS` names a folder
@@ -17,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The simulated analyzer of the Debug build takes `--channel-name=NAME` to try a channel name of any length
 
 ### Fixed
+- The maximized window covered the taskbar and went 10 pixels beyond the monitor on every side, so the title buttons were partly off the screen: it takes the work area of its monitor now (a window without a frame, answered to the system in `WM_GETMINMAXINFO`), and returns to its size when restored
 - The message dialog (the confirmation of saving lists every remark of the specification) was as tall as its text, up to 1450 px, and pushed its buttons off the screen: it is 900 px at most now, the message scrolls and the buttons stay in view
 - The Results table is shown whole in every language at the smallest window: the Tries column takes the width of its longest text (the header in Russian and Chinese, `99/3` for a point measured many times) instead of a fixed 50 px, and the cell margins are tighter, so the column no longer runs under the scroll bar of the list in Russian
 - The user-defined channel name on the analyzer card is no longer cut off with an ellipsis: the card has three lines now (the model, the channel with its name in the small type of the serial number, the probe serial number), and the channel line fits the longest name in every language. The analyzers store the name in up to 10 characters (CA-SDK2: `ChannelID` is 10 characters at most); a longer text is trimmed with an ellipsis and stays in the tooltip

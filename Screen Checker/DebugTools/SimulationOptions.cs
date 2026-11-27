@@ -26,7 +26,7 @@ namespace ScreenChecker.DebugTools
 
     /// <summary>
     /// Options of the simulated color analyzer, read from the command line of a Debug build:
-    /// <c>--simulate[=ca410|ca310] [--scenario=ok|retry|fail|reject|uniformity] [--probe-sn=NUMBER] [--channel-name=NAME]</c>.
+    /// <c>--simulate[=ca410|ca310] [--scenario=ok|retry|fail|reject|uniformity] [--probe-sn=NUMBER] [--channel-name=NAME] [--ui-scale=N]</c>.
     /// </summary>
     /// <param name="Model">Analyzer family the simulator reports.</param>
     /// <param name="Scenario">Values the simulator measures.</param>
@@ -55,6 +55,14 @@ namespace ScreenChecker.DebugTools
             string probe = Value(list, ProbeFlag) ?? "12345678";
             return new SimulationOptions(model, scenario, probe, Value(list, ChannelNameFlag) ?? "Simulated");
             }
+
+        /// <summary>
+        /// Reads <c>--ui-scale=N</c>: how much larger the interface is drawn, to see what a display with a larger scale shows.
+        /// </summary>
+        /// <param name="args">Command line arguments of the application.</param>
+        /// <returns>The scale from 0.5 to 4 (below 1 the interface is drawn smaller), 1 when the flag is absent or not a number in that range.</returns>
+        public static double ParseUiScale(IEnumerable<string> args) =>
+            double.TryParse(Value(args.ToList(), "--ui-scale="), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double scale) && scale is >= 0.5 and <= 4 ? scale : 1;
 
         private static string? Value(List<string> args, string flag) =>
             args.FirstOrDefault(a => a.StartsWith(flag, StringComparison.OrdinalIgnoreCase))?[flag.Length..];

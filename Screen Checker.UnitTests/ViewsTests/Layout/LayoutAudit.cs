@@ -68,14 +68,13 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
 
                 double width = block.TextWrapping == TextWrapping.NoWrap ? text.WidthIncludingTrailingWhitespace : text.Width;
                 double height = double.IsNaN(block.LineHeight) ? text.Height : text.Height * (block.LineHeight / (block.FontSize * block.FontFamily.LineSpacing));
-                var origin = block.TranslatePoint(new Point(block.Padding.Left, block.Padding.Top), root);
                 double shift = block.TextAlignment switch
                     {
                     TextAlignment.Center => (slotWidth - width) / 2,
                     TextAlignment.Right => slotWidth - width,
                     _ => 0
                     };
-                var rect = new Rect(origin.X + shift, origin.Y, width, height);
+                var rect = block.TransformToAncestor(root).TransformBounds(new Rect(block.Padding.Left + shift, block.Padding.Top, width, height));
                 if (IsScrolledOut(block, rect, root)) continue;
                 items.Add(new TextItem(block, block.Text, rect, width, height, slotWidth, slotHeight));
                 }
@@ -92,8 +91,7 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
                 {
                 if (parent is ScrollViewer scroll)
                     {
-                    var origin = scroll.TranslatePoint(new Point(0, 0), root);
-                    var viewport = new Rect(origin, new Size(scroll.ViewportWidth, scroll.ViewportHeight));
+                    var viewport = scroll.TransformToAncestor(root).TransformBounds(new Rect(0, 0, scroll.ViewportWidth, scroll.ViewportHeight));
                     bool scrollsDown = scroll.VerticalScrollBarVisibility != ScrollBarVisibility.Disabled;
                     bool scrollsAcross = scroll.HorizontalScrollBarVisibility != ScrollBarVisibility.Disabled;
                     if (scrollsDown && (rect.Top < viewport.Top - Tolerance || rect.Bottom > viewport.Bottom + Tolerance)) return true;
@@ -129,12 +127,12 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
                 {
                 if (parent is FrameworkElement element && element is not ScrollContentPresenter && element.ActualWidth > 0 && element.ActualHeight > 0 && element.IsVisible)
                     {
-                    var origin = element.TranslatePoint(new Point(0, 0), root);
-                    var bounds = new Rect(origin, new Size(element.ActualWidth, element.ActualHeight));
+                    var toRoot = element.TransformToAncestor(root);
+                    var bounds = toRoot.TransformBounds(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
                     bool scrollsAcross = false, scrollsDown = false;
                     if (element is ScrollViewer scroll)
                         {
-                        bounds = new Rect(origin, new Size(scroll.ViewportWidth, scroll.ViewportHeight));
+                        bounds = toRoot.TransformBounds(new Rect(0, 0, scroll.ViewportWidth, scroll.ViewportHeight));
                         scrollsAcross = scroll.HorizontalScrollBarVisibility != ScrollBarVisibility.Disabled;
                         scrollsDown = scroll.VerticalScrollBarVisibility != ScrollBarVisibility.Disabled;
                         }
@@ -155,7 +153,7 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
         /// <summary>No other element may lie over a text: the hit test at the left end, the middle and the right end must reach the text or the elements around it.</summary>
         private static void CheckCovered(TextItem item, FrameworkElement root, List<string> problems)
             {
-            double y = item.Rect.Top + (Math.Min(item.Rect.Height, item.SlotHeight) / 2);
+            double y = item.Rect.Top + (item.Rect.Height / 2);
             foreach (double x in new[] { item.Rect.Left + 1, item.Rect.Left + (item.Rect.Width / 2), item.Rect.Right - 1 })
                 {
                 if (x < 0 || y < 0 || x > root.ActualWidth || y > root.ActualHeight) continue;

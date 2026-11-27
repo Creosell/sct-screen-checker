@@ -10,6 +10,7 @@
 	<PlatformTarget>x64</PlatformTarget>
 	<CASDK2Dir Condition="'$(CASDK2Dir)' == ''">C:\Program Files (x86)\KONICA MINOLTA\CA-S40\CA-SDK2\x64\lib</CASDK2Dir>
 	  <ApplicationIcon>Images\AppIcon.ico</ApplicationIcon>
+	  <ApplicationManifest>app.manifest</ApplicationManifest>
 	  <AssemblyVersion>1.4.5</AssemblyVersion>
 	  <FileVersion>1.4.5</FileVersion>
   

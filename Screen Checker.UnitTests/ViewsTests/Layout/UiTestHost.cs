@@ -147,6 +147,22 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
             Thread.CurrentThread.CurrentUICulture = cultureInfo;
             Thread.CurrentThread.CurrentCulture = cultureInfo;
 
+            // The first load of the resources in a process does not resolve the implicit button style that the shared styles are based on
+            // (the action buttons come out as the plain white buttons of WPF); the second one does, as it does for the application, which
+            // loads them once but before any of its windows. So the first load is a warm-up whose result is thrown away.
+            if (!_resourcesWarmedUp)
+                {
+                BuildResources(culture);
+                _resourcesWarmedUp = true;
+                }
+            Application.Current.Resources = BuildResources(culture);
+            }
+
+        private static bool _resourcesWarmedUp;
+
+        /// <summary>The resources of the application in a language, put together like <c>App.xaml</c> and the language switch do.</summary>
+        private static ResourceDictionary BuildResources(string culture)
+            {
             const string root = "pack://application:,,,/Screen Checker;component/Resources/";
             var resources = new ResourceDictionary();
             resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(root + "StringResources.xaml") });
@@ -160,7 +176,7 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
                 resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri(root + "Typography.zh-Hans.xaml") });
             resources.Add(new DataTemplateKey(typeof(MeasurementViewModel)), new DataTemplate(typeof(MeasurementViewModel)) { VisualTree = new FrameworkElementFactory(typeof(MeasurementView)) });
             resources.Add(new DataTemplateKey(typeof(SettingsViewModel)), new DataTemplate(typeof(SettingsViewModel)) { VisualTree = new FrameworkElementFactory(typeof(SettingsView)) });
-            Application.Current.Resources = resources;
+            return resources;
             }
 
         /// <summary>Builds the view model of the measurement page with every dependency replaced by a mock, as the view model tests do.</summary>
@@ -244,7 +260,7 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
         /// Shows the real main window (title bar, navigation, the page) at the smallest size the application allows. The pages come from
         /// the given view models like the service provider of the application hands them out.
         /// </summary>
-        protected static MainWindow ShowMainWindow(PageFixture page, SettingsViewModel settings)
+        protected static MainWindow ShowMainWindow(PageFixture page, SettingsViewModel settings, bool sizeFromScreen = false)
             {
             var services = new ServiceCollection();
             services.AddSingleton(page.ViewModel);
@@ -252,13 +268,17 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
             var window = new MainWindow
                 {
                 DataContext = new MainWindowViewModel(services.BuildServiceProvider()),
-                Width = MinWindowWidth,
-                Height = MinWindowHeight,
                 ShowInTaskbar = false,
                 WindowStartupLocation = WindowStartupLocation.Manual,
                 Left = -20000,
                 Top = -20000
                 };
+            // The window takes the size it gives itself for the screen (a work area set in UiMetrics) or the smallest size the application allows
+            if (!sizeFromScreen)
+                {
+                window.Width = MinWindowWidth;
+                window.Height = MinWindowHeight;
+                }
             window.Show();
             Flush(window);
             return window;
@@ -299,7 +319,9 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
             page.Analyzer.SetupGet(s => s.Model).Returns(ColorAnalyzerModel.CA410);
             page.Analyzer.SetupGet(s => s.ChannelName).Returns(channelName);
             page.Registry.Setup(r => r.GetLastChannel(probeSerial)).Returns((int?)null);
+            page.ViewModel.IsDeviceConnected = true;
             ((RelayCommand)page.ViewModel.ZeroCalibrationCommand).ExecuteAsync(null).GetAwaiter().GetResult();
+            page.ViewModel.IsDeviceCalibrated = true;
             }
 
         /// <summary>

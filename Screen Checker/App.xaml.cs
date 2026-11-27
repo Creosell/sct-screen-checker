@@ -137,6 +137,7 @@ namespace ScreenChecker
             DebugTrace.Start();
             UiEventTracer.Install();
             _simulation = SimulationOptions.Parse(e.Args);
+            UiMetrics.UiScale = SimulationOptions.ParseUiScale(e.Args);
             if (_simulation is not null)
                 DebugTrace.Write("app", $"Simulated color analyzer: {_simulation}");
             DebugTrace.Write("app", $"Screen Checker {typeof(App).Assembly.GetName().Version}, {Environment.OSVersion}, {Environment.ProcessorCount} cores, base directory {AppContext.BaseDirectory}");

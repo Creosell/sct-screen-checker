@@ -134,151 +134,154 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
-            <RowDefinition Height="100*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-
-        <Grid
-            Grid.Row="0"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            Background="Black"
-            PreviewMouseDown="Grid_PreviewMouseDown">
+    <!--  The page keeps the design size of the smallest window; on a screen with less room (a large display scale) it is shrunk in proportion  -->
+    <view:MinimumSizeViewbox MinContentWidth="1100" MinContentHeight="600">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="100*" />
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Image
-                Grid.Column="0"
-                Width="20"
-                Height="20"
-                Margin="5"
-                Source="/Images/AppIcon.ico" />
-
-            <TextBlock
-                Grid.Column="1"
-                Margin="5,0,0,0"
-                VerticalAlignment="Center"
-                FontSize="{DynamicResource FontSizeBodyLarge}"
-                Foreground="White"
-                Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}" />
-
-            <StackPanel
-                Grid.Column="2"
-                HorizontalAlignment="Right"
-                Orientation="Horizontal">
-                <Image
-                    x:Name="MinimizeImage"
-                    Width="20"
-                    Height="20"
-                    Margin="5,5,0,5"
-                    Cursor="Hand"
-                    PreviewMouseLeftButtonDown="MinimizeImage_PreviewMouseLeftButtonDown"
-                    Source="/Images/WindowsHeaderButtons/window-minimize.png"
-                    ToolTip="{DynamicResource WindowMinimize}" />
-
-                <Image
-                    x:Name="MaximizeRestoreImage"
-                    Width="20"
-                    Height="20"
-                    Margin="5,5,0,5"
-                    Cursor="Hand"
-                    PreviewMouseLeftButtonDown="MaximizeRestoreImage_PreviewMouseLeftButtonDown"
-                    Source="/Images/WindowsHeaderButtons/window-maximize.png"
-                    ToolTip="{DynamicResource WindowMaximize}" />
-
-                <Image
-                    x:Name="CloseImage"
-                    Width="20"
-                    Height="20"
-                    Margin="5,5,5,5"
-                    Cursor="Hand"
-                    PreviewMouseLeftButtonDown="CloseImage_PreviewMouseLeftButtonDown"
-                    Source="/Images/WindowsHeaderButtons/close-thick.png"
-                    ToolTip="{DynamicResource WindowClose}" />
-            </StackPanel>
-        </Grid>
-
-        <Border
-            Grid.Row="1"
-            Grid.Column="0"
-            MinWidth="150"
-            Background="{DynamicResource AppNavBackground}"
-            BorderBrush="{DynamicResource AppPanelBorder}"
-            BorderThickness="0,0,0,0">
             <Grid
-                MinWidth="160"
-                MinHeight="150"
-                Margin="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Background="Black"
+                PreviewMouseDown="Grid_PreviewMouseDown">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                <RadioButton
-                    Grid.Row="0"
-                    MinHeight="50"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    Command="{Binding NavigateCommand}"
-                    CommandParameter="Measurement"
-                    IsChecked="True"
-                    Style="{StaticResource NavigationButtonStyle}">
-                    <RadioButton.Content>
-                        <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
-                            <Image
-                                Width="30"
-                                Height="30"
-                                Source="/Images/ButtonsIcons/MeasurementViewIcon.png"
-                                Stretch="Fill" />
-                            <TextBlock
-                                Margin="5,0,0,0"
-                                VerticalAlignment="Center"
-                                Text="{DynamicResource MeasurementTitle}" />
-                        </StackPanel>
-                    </RadioButton.Content>
-                </RadioButton>
+                <Image
+                    Grid.Column="0"
+                    Width="20"
+                    Height="20"
+                    Margin="5"
+                    Source="/Images/AppIcon.ico" />
 
-                <RadioButton
-                    Grid.Row="1"
-                    MinHeight="50"
-                    Padding="0"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Stretch"
-                    Command="{Binding NavigateCommand}"
-                    CommandParameter="Settings"
-                    Style="{StaticResource NavigationButtonStyle}">
-                    <RadioButton.Content>
-                        <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
-                            <Image
-                                Width="30"
-                                Height="30"
-                                Source="/Images/ButtonsIcons/SettingsViewIcon.png"
-                                Stretch="Fill" />
-                            <TextBlock
-                                Margin="5,0,0,0"
-                                VerticalAlignment="Center"
-                                Text="{DynamicResource SettingsTitle}" />
-                        </StackPanel>
-                    </RadioButton.Content>
-                </RadioButton>
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    FontSize="{DynamicResource FontSizeBodyLarge}"
+                    Foreground="White"
+                    Text="{Binding Title, RelativeSource={RelativeSource AncestorType=Window}}" />
+
+                <StackPanel
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Image
+                        x:Name="MinimizeImage"
+                        Width="20"
+                        Height="20"
+                        Margin="5,5,0,5"
+                        Cursor="Hand"
+                        PreviewMouseLeftButtonDown="MinimizeImage_PreviewMouseLeftButtonDown"
+                        Source="/Images/WindowsHeaderButtons/window-minimize.png"
+                        ToolTip="{DynamicResource WindowMinimize}" />
+
+                    <Image
+                        x:Name="MaximizeRestoreImage"
+                        Width="20"
+                        Height="20"
+                        Margin="5,5,0,5"
+                        Cursor="Hand"
+                        PreviewMouseLeftButtonDown="MaximizeRestoreImage_PreviewMouseLeftButtonDown"
+                        Source="/Images/WindowsHeaderButtons/window-maximize.png"
+                        ToolTip="{DynamicResource WindowMaximize}" />
+
+                    <Image
+                        x:Name="CloseImage"
+                        Width="20"
+                        Height="20"
+                        Margin="5,5,5,5"
+                        Cursor="Hand"
+                        PreviewMouseLeftButtonDown="CloseImage_PreviewMouseLeftButtonDown"
+                        Source="/Images/WindowsHeaderButtons/close-thick.png"
+                        ToolTip="{DynamicResource WindowClose}" />
+                </StackPanel>
             </Grid>
-        </Border>
 
-        <!--  Both pages are created once and switched by visibility: re-creating a page (the DataTemplate of a ContentControl) took 100-350 ms per switch  -->
-        <Grid Grid.Row="1" Grid.Column="1">
-            <ContentControl Content="{Binding MeasurementPage}" Visibility="{Binding IsMeasurementPageVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
-            <ContentControl Content="{Binding SettingsPage}" Visibility="{Binding IsSettingsPageVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <Border
+                Grid.Row="1"
+                Grid.Column="0"
+                MinWidth="150"
+                Background="{DynamicResource AppNavBackground}"
+                BorderBrush="{DynamicResource AppPanelBorder}"
+                BorderThickness="0,0,0,0">
+                <Grid
+                    MinWidth="160"
+                    MinHeight="150"
+                    Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <RadioButton
+                        Grid.Row="0"
+                        MinHeight="50"
+                        Padding="0"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Measurement"
+                        IsChecked="True"
+                        Style="{StaticResource NavigationButtonStyle}">
+                        <RadioButton.Content>
+                            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                                <Image
+                                    Width="30"
+                                    Height="30"
+                                    Source="/Images/ButtonsIcons/MeasurementViewIcon.png"
+                                    Stretch="Fill" />
+                                <TextBlock
+                                    Margin="5,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{DynamicResource MeasurementTitle}" />
+                            </StackPanel>
+                        </RadioButton.Content>
+                    </RadioButton>
+
+                    <RadioButton
+                        Grid.Row="1"
+                        MinHeight="50"
+                        Padding="0"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Stretch"
+                        Command="{Binding NavigateCommand}"
+                        CommandParameter="Settings"
+                        Style="{StaticResource NavigationButtonStyle}">
+                        <RadioButton.Content>
+                            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                                <Image
+                                    Width="30"
+                                    Height="30"
+                                    Source="/Images/ButtonsIcons/SettingsViewIcon.png"
+                                    Stretch="Fill" />
+                                <TextBlock
+                                    Margin="5,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{DynamicResource SettingsTitle}" />
+                            </StackPanel>
+                        </RadioButton.Content>
+                    </RadioButton>
+                </Grid>
+            </Border>
+
+            <!--  Both pages are created once and switched by visibility: re-creating a page (the DataTemplate of a ContentControl) took 100-350 ms per switch  -->
+            <Grid Grid.Row="1" Grid.Column="1">
+                <ContentControl Content="{Binding MeasurementPage}" Visibility="{Binding IsMeasurementPageVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <ContentControl Content="{Binding SettingsPage}" Visibility="{Binding IsSettingsPageVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
         </Grid>
-    </Grid>
+    </view:MinimumSizeViewbox>
 </Window>
