@@ -22,6 +22,10 @@ namespace ScreenChecker.Views
 
             _deviceCard = new DeviceCardTransition(DeviceCard, DeviceCardContent);
 
+            // The header of the Results table is as wide as the rows, so a scroll bar does not shift its columns. The scroll viewer is the
+            // source itself: an ElementName binding does not find it from the header, which is not inside the grid of the list
+            ResultsHeader.SetBinding(WidthProperty, new System.Windows.Data.Binding(nameof(ScrollViewer.ViewportWidth)) { Source = ResultsScroll });
+
             //this.PreviewMouseDown += UserControl_PreviewMouseDown;
             //this.PreviewKeyDown += UserControl_PreviewKeyDown;
 

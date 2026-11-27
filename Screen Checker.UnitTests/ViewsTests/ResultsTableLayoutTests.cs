@@ -53,6 +53,48 @@ namespace ScreenChecker.UnitTests.ViewsTests
                 });
             }
 
+        [TestCase("", TestName = "ResultsTable_HeaderColumns_MatchTheRows_InTheMainWindow_English")]
+        [TestCase("ru", TestName = "ResultsTable_HeaderColumns_MatchTheRows_InTheMainWindow_Russian")]
+        [TestCase("zh-Hans", TestName = "ResultsTable_HeaderColumns_MatchTheRows_InTheMainWindow_Chinese")]
+        public void ResultsTable_HeaderColumns_MatchTheRows_InTheMainWindow(string culture)
+            {
+            Ui(() =>
+                {
+                UseLanguage(culture);
+                using var page = CreatePage();
+                var settings = CreateSettings(page.Analyzer);
+                FillResultsWithLongestValues(page.ViewModel);
+                var problems = new List<string>();
+
+                foreach (var room in new[] { new Size(1100, 600), new Size(1536, 912) })
+                    {
+                    UiMetrics.WorkAreaOverride = room;
+                    var window = ShowMainWindow(page, settings, sizeFromScreen: true);
+                    try
+                        {
+                        Pump(100);
+                        Flush(window);
+                        var tables = Descendants<Grid>((FrameworkElement)window.Content).Where(g => g.ColumnDefinitions.Count == 7).ToList();
+                        var headerGrid = tables.First();
+                        var rowGrid = tables.Skip(1).First();
+                        for (int c = 0; c < 7; c++)
+                            {
+                            double header = headerGrid.ColumnDefinitions[c].ActualWidth, row = rowGrid.ColumnDefinitions[c].ActualWidth;
+                            if (Math.Abs(header - row) > 1)
+                                problems.Add($"[{room.Width:F0}x{room.Height:F0}] column {c}: the header gives {header:F1} px, the rows {row:F1} px");
+                            }
+                        }
+                    finally
+                        {
+                        window.Close();
+                        UiMetrics.WorkAreaOverride = null;
+                        }
+                    }
+
+                Assert.That(problems, Is.Empty, $"[{LanguageName(culture)}]{Environment.NewLine}{string.Join(Environment.NewLine, problems)}");
+                });
+            }
+
         /// <summary>Shows the page at a window size and checks every row of the table.</summary>
         private static void CheckTable(PageFixture page, CultureInfo cultureInfo, double widthFactor, double heightFactor, List<string> problems)
             {

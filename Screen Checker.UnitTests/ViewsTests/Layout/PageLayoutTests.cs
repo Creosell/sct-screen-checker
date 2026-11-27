@@ -21,6 +21,57 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
         /// </summary>
         private const string LongConfiguration = "SDNB-M16iA_GW04_CH19";
 
+        [TestCase("", TestName = "MeasurementPage_ReadsWell_InWideWindows_English")]
+        [TestCase("ru", TestName = "MeasurementPage_ReadsWell_InWideWindows_Russian")]
+        [TestCase("zh-Hans", TestName = "MeasurementPage_ReadsWell_InWideWindows_Chinese")]
+        public void MeasurementPage_ReadsWell_InWideWindows(string culture)
+            {
+            Ui(() =>
+                {
+                UseLanguage(culture);
+                var cultureInfo = CultureOf(culture);
+                string language = LanguageName(culture);
+                var problems = new List<string>();
+                double normalSpeed = MeasurementView.TransitionSpeed;
+                MeasurementView.TransitionSpeed = 100;
+
+                using var page = CreatePage();
+                CalibrateAnalyzer(page, WorstChannelName(culture));
+                page.ViewModel.SelectedDeviceConfiguration = LongConfiguration;
+                page.ViewModel.SerialNumber = "12345678901234567890";
+                FillResultsWithLongestValues(page.ViewModel);
+                page.ViewModel.Spec.Show(WorstSpecEvaluation(), measuredPoints: 14, totalPoints: 14);
+
+                try
+                    {
+                    // Windows stretched over larger screens (the work area of a 4K display at 100% is 3.5 times the smallest window)
+                    foreach (double widthFactor in new[] { 1.5, 2, 3, 4 })
+                        {
+                        var view = new MeasurementView { DataContext = page.ViewModel };
+                        var window = ShowPage(view, widthFactor, heightFactor: 2);
+                        try
+                            {
+                            Flush(window);
+                            Pump(80);
+                            string state = $"window {widthFactor}x wide";
+                            Shot(view, state);
+                            problems.AddRange(LayoutAudit.Run(view, cultureInfo, $"[{language}/{state}]"));
+                            }
+                        finally
+                            {
+                            window.Close();
+                            }
+                        }
+                    }
+                finally
+                    {
+                    MeasurementView.TransitionSpeed = normalSpeed;
+                    }
+
+                Assert.That(problems, Is.Empty, Environment.NewLine + string.Join(Environment.NewLine, problems));
+                });
+            }
+
         [TestCase("", TestName = "MeasurementPage_ReadsWell_InEveryState_English")]
         [TestCase("ru", TestName = "MeasurementPage_ReadsWell_InEveryState_Russian")]
         [TestCase("zh-Hans", TestName = "MeasurementPage_ReadsWell_InEveryState_Chinese")]
