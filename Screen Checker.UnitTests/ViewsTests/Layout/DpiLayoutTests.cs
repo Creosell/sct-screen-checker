@@ -17,9 +17,6 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
     [Category("Ui")]
     public class DpiLayoutTests : UiTestHost
         {
-        /// <summary>The display scales of Windows (125%, 150%, 175%, ...) and the largest one it offers, 400%.</summary>
-        private static readonly double[] Scales = [1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0, 4.0];
-
         /// <summary>The interface sizes of the settings the operator can choose.</summary>
         private static IEnumerable<SettingsViewModel.InterfaceScaleOption> InterfaceSizes => SettingsViewModel.AvailableInterfaceScales;
 
@@ -41,7 +38,7 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
         /// </summary>
         private static List<Screen> ScreensOfThisComputer() =>
             Displays.Connected()
-                .SelectMany(display => Scales.SelectMany(scale => InterfaceSizes.Select(size => new Screen($"{display.Name} at {scale * 100:F0}%, interface {size.DisplayName}", AreaOf(display, scale), size))))
+                .SelectMany(display => DisplayScales.SelectMany(scale => InterfaceSizes.Select(size => new Screen($"{display.Name} at {scale * 100:F0}%, interface {size.DisplayName}", AreaOf(display, scale), size))))
                 .ToList();
 
         /// <summary>Puts a room into a class of rooms that differ by less than a quarter in width and in height.</summary>
@@ -174,7 +171,7 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
             Assert.That(displays, Is.Not.Empty);
             Assert.That(InterfaceSizes.Count(), Is.GreaterThan(1), "the settings offer sizes besides the one of the system");
             foreach (var display in displays)
-                foreach (double scale in Scales)
+                foreach (double scale in DisplayScales)
                     foreach (var size in InterfaceSizes)
                         Assert.That(screens.Any(screen => screen.Area == AreaOf(display, scale) && screen.InterfaceSize == size), $"{display.Name} at {scale * 100:F0}%, interface {size.DisplayName} is not tried");
             }

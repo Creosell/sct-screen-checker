@@ -1271,10 +1271,10 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="ResultName" />
-                                <ColumnDefinition Width="*" MinWidth="42" MaxWidth="120" />
-                                <ColumnDefinition Width="*" MinWidth="42" MaxWidth="120" />
-                                <ColumnDefinition Width="*" MinWidth="48" MaxWidth="120" />
-                                <ColumnDefinition Width="*" MinWidth="45" MaxWidth="120" />
+                                <ColumnDefinition Width="*" MinWidth="40" MaxWidth="120" />
+                                <ColumnDefinition Width="*" MinWidth="40" MaxWidth="120" />
+                                <ColumnDefinition Width="*" MinWidth="47" MaxWidth="120" />
+                                <ColumnDefinition Width="*" MinWidth="44" MaxWidth="120" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="ResultTries" />
                             </Grid.ColumnDefinitions>
                             <Ellipse
@@ -1288,28 +1288,28 @@
                                 Text="{DynamicResource ResultsColumnPoint}" />
                             <TextBlock
                                 Grid.Column="2"
-                                Margin="0,0,6,0"
+                                Margin="0,0,3,0"
                                 FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="x"
                                 TextAlignment="Center" />
                             <TextBlock
                                 Grid.Column="3"
-                                Margin="0,0,6,0"
+                                Margin="0,0,3,0"
                                 FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="y"
                                 TextAlignment="Center" />
                             <TextBlock
                                 Grid.Column="4"
-                                Margin="0,0,6,0"
+                                Margin="0,0,3,0"
                                 FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="Lv"
                                 TextAlignment="Center" />
                             <TextBlock
                                 Grid.Column="5"
-                                Margin="0,0,6,0"
+                                Margin="0,0,3,0"
                                 FontSize="{DynamicResource FontSizeCaption}"
                                 Foreground="{DynamicResource AppTextSecondary}"
                                 Text="T"
@@ -1350,10 +1350,10 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="Auto" SharedSizeGroup="ResultName" />
-                                                    <ColumnDefinition Width="*" MinWidth="42" MaxWidth="120" />
-                                                    <ColumnDefinition Width="*" MinWidth="42" MaxWidth="120" />
-                                                    <ColumnDefinition Width="*" MinWidth="48" MaxWidth="120" />
-                                                    <ColumnDefinition Width="*" MinWidth="45" MaxWidth="120" />
+                                                    <ColumnDefinition Width="*" MinWidth="40" MaxWidth="120" />
+                                                    <ColumnDefinition Width="*" MinWidth="40" MaxWidth="120" />
+                                                    <ColumnDefinition Width="*" MinWidth="47" MaxWidth="120" />
+                                                    <ColumnDefinition Width="*" MinWidth="44" MaxWidth="120" />
                                                     <ColumnDefinition Width="Auto" SharedSizeGroup="ResultTries" />
                                                 </Grid.ColumnDefinitions>
                                                 <Ellipse Style="{StaticResource ResultDotStyle}" />
@@ -1365,28 +1365,28 @@
                                                     Text="{Binding Name}" />
                                                 <TextBlock
                                                     Grid.Column="2"
-                                                    Margin="0,0,6,0"
+                                                    Margin="0,0,3,0"
                                                     VerticalAlignment="Center"
                                                     FontSize="13"
                                                     Text="{Binding X}"
                                                     TextAlignment="Center" />
                                                 <TextBlock
                                                     Grid.Column="3"
-                                                    Margin="0,0,6,0"
+                                                    Margin="0,0,3,0"
                                                     VerticalAlignment="Center"
                                                     FontSize="13"
                                                     Text="{Binding Y}"
                                                     TextAlignment="Center" />
                                                 <TextBlock
                                                     Grid.Column="4"
-                                                    Margin="0,0,6,0"
+                                                    Margin="0,0,3,0"
                                                     VerticalAlignment="Center"
                                                     FontSize="13"
                                                     Text="{Binding Lv}"
                                                     TextAlignment="Center" />
                                                 <TextBlock
                                                     Grid.Column="5"
-                                                    Margin="0,0,6,0"
+                                                    Margin="0,0,3,0"
                                                     VerticalAlignment="Center"
                                                     FontSize="13"
                                                     Text="{Binding T}"

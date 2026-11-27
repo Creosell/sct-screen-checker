@@ -24,6 +24,16 @@ namespace ScreenChecker.UnitTests.ViewsTests
         /// <summary>Tolerance of the text measurement in device-independent pixels.</summary>
         private const double Tolerance = 0.5;
 
+        /// <summary>Number of columns of the table.</summary>
+        private const int ColumnCount = 7;
+
+        /// <summary>
+        /// Room in device-independent pixels a text keeps to the edge of the list. A layout that rounds the size of a column to whole
+        /// device pixels sets it at most one pixel wider, so a row of <see cref="ColumnCount"/> columns can grow by that many pixels;
+        /// a text that touches the edge of the list has no room for that and runs under the scroll bar.
+        /// </summary>
+        private const double RoundingAllowance = ColumnCount;
+
         /// <summary>Resource key of the header of the first column, a text of the language.</summary>
         private const string PointHeaderKey = "ResultsColumnPoint";
 
@@ -186,8 +196,8 @@ namespace ScreenChecker.UnitTests.ViewsTests
                 {
                 if (cell.Needed > cell.Width + Tolerance)
                     problems.Add($"{where}, {cell.Column}: \"{cell.Text}\" needs {cell.Needed:F1} px but its cell gives {cell.Width:F1} px (cut)");
-                if (cell.Left < listLeft - Tolerance || cell.Left + cell.Needed > listRight + Tolerance)
-                    problems.Add($"{where}, {cell.Column}: \"{cell.Text}\" runs out of the list ({cell.Left:F1}..{cell.Left + cell.Needed:F1} px, the list is {listLeft:F1}..{listRight:F1} px)");
+                if (cell.Left < listLeft - Tolerance || cell.Left + cell.Needed + RoundingAllowance > listRight + Tolerance)
+                    problems.Add($"{where}, {cell.Column}: \"{cell.Text}\" runs out of the list or leaves less than {RoundingAllowance:F0} px to its edge ({cell.Left:F1}..{cell.Left + cell.Needed:F1} px, the list is {listLeft:F1}..{listRight:F1} px)");
                 }
 
             var ordered = cells.OrderBy(c => c.Left).ToList();

@@ -222,6 +222,9 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
             return new PageFixture(viewModel, analyzer, registry, statuses.Object);
             }
 
+        /// <summary>The display scales of Windows (125%, 150%, 175%, ...) and the largest one it offers, 400%.</summary>
+        protected static readonly double[] DisplayScales = [1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0, 4.0];
+
         /// <summary>
         /// Shows a page in an off-screen window of the smallest size the application allows: the main window less its title bar
         /// and navigation column.
