@@ -1,6 +1,7 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:MaterialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:behaviors="clr-namespace:ScreenChecker.Views.Behaviors"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!--
@@ -8,6 +9,14 @@
         thickness and color in every state (only the hover recolors it), and a button of an action is a rounded Material button.
         Pages take these styles instead of drawing the controls on their own.
     -->
+
+    <!--  A tooltip and a context menu are windows of their own: they follow the interface size of the settings by themselves  -->
+    <Style BasedOn="{StaticResource {x:Type ToolTip}}" TargetType="ToolTip">
+        <Setter Property="behaviors:UiScaled.Enabled" Value="True" />
+    </Style>
+    <Style BasedOn="{StaticResource {x:Type ContextMenu}}" TargetType="ContextMenu">
+        <Setter Property="behaviors:UiScaled.Enabled" Value="True" />
+    </Style>
 
     <!--  The text of a label: the primary text color of the theme, so a page does not set it label by label  -->
     <Style BasedOn="{StaticResource {x:Type Label}}" TargetType="Label">
@@ -330,6 +339,7 @@
                             PlacementTarget="{Binding ElementName=Line}"
                             PopupAnimation="Fade">
                             <Border
+                                behaviors:UiScaled.Enabled="True"
                                 MinWidth="{Binding ActualWidth, ElementName=Line}"
                                 MaxHeight="{TemplateBinding MaxDropDownHeight}"
                                 Margin="0,0,8,8"

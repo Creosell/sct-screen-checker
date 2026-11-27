@@ -28,6 +28,7 @@
     <system:String x:Key="BottomCenterPoint">8. Нижняя центр.</system:String>
     <system:String x:Key="BottomRightPoint">9. Нижняя правая</system:String>
     <system:String x:Key="ThemeLabel">Тема</system:String>
+    <system:String x:Key="InterfaceSizeLabel">Размер интерфейса</system:String>
     <system:String x:Key="LanguageMenu">Language / 语言 / Язык</system:String>
     <system:String x:Key="RedPoint">R. Красная</system:String>
     <system:String x:Key="GreenPoint">G. Зелёная</system:String>
@@ -58,7 +59,7 @@
 
     <system:String x:Key="ResultsTab">Результаты</system:String>
     <system:String x:Key="LogTab">Журнал</system:String>
-    <system:String x:Key="ResultsColumnTries">Поп.</system:String>
+    <system:String x:Key="ResultsColumnTries">Попытки</system:String>
     <system:String x:Key="ResultsColumnPoint">Точка</system:String>
 
     <!--  Device info panel  -->
@@ -77,6 +78,7 @@
     <!--  Window buttons, units  -->
     <system:String x:Key="WindowMinimize">Свернуть</system:String>
     <system:String x:Key="WindowMaximize">Развернуть</system:String>
+    <system:String x:Key="WindowRestore">Восстановить</system:String>
     <system:String x:Key="WindowClose">Закрыть</system:String>
     <system:String x:Key="UnitHz">Гц</system:String>
     <system:String x:Key="UnitMs">мс</system:String>

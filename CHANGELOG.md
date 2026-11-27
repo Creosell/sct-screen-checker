@@ -7,13 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.4.5] - 2026-11-26
+## [1.5.0] - 2026-11-27
+
+### Added
+- Interface size in Settings: "As in system" (the default, also when the settings file has no value) or 125%, 150%, 175%, 200% on top of the display scale of Windows. The whole interface (the window, the pages and the dialogs) is drawn larger at once, without a restart, and the choice is stored in `appsettings.json` (`interfaceScale`; a missing or unsupported value is the size of the system). A window that would not fit the screen at the chosen size is shrunk in proportion by `MinimumSizeViewbox`. The layout tests audit every size of the list on every connected display at every display scale, in all languages
+
+- The maximize button of the title bar shows the restore icon (two squares) and the tooltip "Restore" while the window is maximized, and the maximize icon otherwise
+
+### Fixed
+- Drop-down lists, context menus (the list of device configurations) and tooltips are drawn at the interface size of the settings: they are windows of their own and did not take the scale of the window
+- Save in Settings reset the stored theme to dark (the file was rewritten without it); it keeps the theme and the interface size now
 
 ### Changed
+- The Results table uses the width of its tab: the x, y, Lv and T columns share the free room (at least 42, 42, 48 and 45 px, at most 120 px each, so the values stay close enough to be read along a row) instead of staying 45 px wide in a wide window; the header is as wide as the list, so a scroll bar does not shift it. The Russian header "Поп." is spelled out as "Попытки". The layout test checks the table at five window widths and two heights in every language
 - The window keeps within the screen at any display scale: its smallest size and its starting size are the design size 1100x600 but never more than the work area, and the page is shrunk in proportion (`MinimumSizeViewbox`, never enlarged) when the room is less than the design size. A full HD display at 200% leaves 960x520, at 300% 640x347: the window used to be larger than the screen and part of the page was out of reach, now the whole page is on the screen, drawn at 87% and 58% of the layout
 - The application is Per-Monitor DPI aware (v2, `app.manifest`): it is drawn at the display scale of the monitor it is on and redrawn when moved to another monitor, instead of being a picture the system scales up and blurs
 - The window takes the size limits from the monitor it is on, not from the primary one, and asks again when it is moved to another monitor (the monitors differ in resolution and in display scale)
-- Debug: `--ui-scale=N` (0.5 to 4) draws the interface N times larger, to see what a display with that scale shows without changing the settings of Windows
+- Debug: `--ui-scale=N` (0.5 to 4) draws the interface N times larger than the setting says, to see what a display with that scale shows without changing the settings of Windows
 - The Device info table lets the name of a metric wrap to a second line instead of keeping a minimum width of 120 px: in Chinese the name of the metric was cut by the value next to it. The left and the right block of the page share the width 47/53 (was 45/55) so the results table keeps its air in Russian
 - The device configuration button shows the whole name in its tooltip
 - Layout tests (`Category("Ui")`): the real main window, the measurement and settings pages and every dialog are drawn at the smallest window size in English, Russian and Chinese with the longest data and audited for cut, overlapping and covered texts, texts that run out of their area and dialogs taller than a screen. The tests export before/after pictures when `SCT_UI_SHOTS` names a folder

@@ -45,6 +45,24 @@ namespace ScreenChecker.Models
         public double? IntegrationTime { get; set; }
 
         /// <summary>
+        /// Gets or sets how much larger than the system makes it the interface is drawn (1.25 is 125%); null follows the system.
+        /// </summary>
+        [JsonPropertyName("interfaceScale")]
+        public double? InterfaceScale { get; set; }
+
+        /// <summary>
+        /// Gets the interface scale to apply: the stored one when it is within the supported range, 1 (as the system) otherwise.
+        /// </summary>
+        [JsonIgnore]
+        public double EffectiveInterfaceScale => InterfaceScale is >= MinInterfaceScale and <= MaxInterfaceScale ? InterfaceScale.Value : 1;
+
+        /// <summary>The smallest interface scale a settings file may hold.</summary>
+        public const double MinInterfaceScale = 1;
+
+        /// <summary>The largest interface scale a settings file may hold.</summary>
+        public const double MaxInterfaceScale = 2;
+
+        /// <summary>
         /// Builds the synchronization setting (mode with the parameter it needs) from the stored values.
         /// </summary>
         public SyncSetting ToSyncSetting() => SyncMode switch

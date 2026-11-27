@@ -29,7 +29,7 @@ namespace ScreenChecker.Views
             {
             InitializeComponent();
             Title = caption;
-            MaxHeight = Math.Min(UiMetrics.WorkArea.Height - 40, MaxDialogHeight);
+            UiMetrics.ScaleDialog(this, MaxWidth, Math.Min(UiMetrics.WorkArea.Height - 40, MaxDialogHeight));
             ShowMessage(message);
 
             if (buttons == MessageBoxButton.YesNo)

@@ -92,6 +92,21 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition SharedSizeGroup="SettingsLabel" />
                     </Grid.ColumnDefinitions>
+                    <Label Padding="5,0,15,0" Content="{DynamicResource InterfaceSizeLabel}" />
+                </Grid>
+                <ComboBox
+                    Style="{StaticResource UnderlinedComboBoxStyle}"
+                    DisplayMemberPath="DisplayName"
+                    DropDownClosed="ComboBox_DropDownClosed"
+                    ItemsSource="{x:Static vm:SettingsViewModel.AvailableInterfaceScales}"
+                    SelectedItem="{Binding SelectedInterfaceScale}" />
+            </StackPanel>
+
+            <StackPanel Margin="0,5" Orientation="Horizontal">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="SettingsLabel" />
+                    </Grid.ColumnDefinitions>
                     <Label Padding="5,0,15,0" Content="{DynamicResource ColorAnalyzerChannel}" />
                 </Grid>
                 <TextBox

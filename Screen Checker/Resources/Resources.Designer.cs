@@ -1629,6 +1629,15 @@ namespace ScreenChecker.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to As in system.
+        /// </summary>
+        public static string InterfaceSizeSystem {
+            get {
+                return ResourceManager.GetString("InterfaceSizeSystem", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to System (Windows).
         /// </summary>
         public static string ThemeSystem {

@@ -11,8 +11,8 @@
 	<CASDK2Dir Condition="'$(CASDK2Dir)' == ''">C:\Program Files (x86)\KONICA MINOLTA\CA-S40\CA-SDK2\x64\lib</CASDK2Dir>
 	  <ApplicationIcon>Images\AppIcon.ico</ApplicationIcon>
 	  <ApplicationManifest>app.manifest</ApplicationManifest>
-	  <AssemblyVersion>1.4.5</AssemblyVersion>
-	  <FileVersion>1.4.5</FileVersion>
+	  <AssemblyVersion>1.5.0</AssemblyVersion>
+	  <FileVersion>1.5.0</FileVersion>
   
   </PropertyGroup>
 
@@ -37,6 +37,7 @@
 	<None Remove="Images\WindowsHeaderButtons\close-thick.png" />
 	<None Remove="Images\WindowsHeaderButtons\window-maximize.png" />
 	<None Remove="Images\WindowsHeaderButtons\window-minimize.png" />
+	<None Remove="Images\WindowsHeaderButtons\window-restore.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -72,6 +73,7 @@
 	<Resource Include="Images\WindowsHeaderButtons\close-thick.png" />
 	<Resource Include="Images\WindowsHeaderButtons\window-maximize.png" />
 	<Resource Include="Images\WindowsHeaderButtons\window-minimize.png" />
+	<Resource Include="Images\WindowsHeaderButtons\window-restore.png" />
 	<Resource Include="Resources\StringResources.xaml">
 	  <Generator>MSBuild:Compile</Generator>
 	</Resource>

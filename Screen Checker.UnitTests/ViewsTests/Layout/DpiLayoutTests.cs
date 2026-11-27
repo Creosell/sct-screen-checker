@@ -20,24 +20,36 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
         /// <summary>The display scales of Windows (125%, 150%, 175%, ...) and the largest one it offers, 400%.</summary>
         private static readonly double[] Scales = [1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0, 4.0];
 
-        /// <summary>A display at a display scale: the room the window has in pixels of the layout.</summary>
-        private sealed record Screen(string Name, Size Area);
+        /// <summary>The interface sizes of the settings the operator can choose.</summary>
+        private static IEnumerable<SettingsViewModel.InterfaceScaleOption> InterfaceSizes => SettingsViewModel.AvailableInterfaceScales;
+
+        /// <summary>
+        /// A display at a display scale and an interface size of the settings: the work area the window has in pixels of the system and the
+        /// room the layout has in it (the interface drawn larger is laid out in less room).
+        /// </summary>
+        private sealed record Screen(string Name, Size Area, SettingsViewModel.InterfaceScaleOption InterfaceSize)
+            {
+            public double InterfaceScale => InterfaceSize.Factor;
+
+            public Size Room => new(Math.Round(Area.Width / InterfaceScale), Math.Round(Area.Height / InterfaceScale));
+            }
 
         private static Size AreaOf(DisplayInfo display, double scale) => new(Math.Round(display.WorkWidth / scale), Math.Round(display.WorkHeight / scale));
 
         /// <summary>
-        /// The screens to try: every connected display at every scale, the same room once (a display at 125% and another at 150% that leave the
-        /// same room are the same screen for the layout).
+        /// The screens to try: every connected display at every display scale with every interface size of the settings.
         /// </summary>
         private static List<Screen> ScreensOfThisComputer() =>
             Displays.Connected()
-                .SelectMany(display => Scales.Select(scale => new Screen($"{display.Name} at {scale * 100:F0}%", AreaOf(display, scale))))
-                .GroupBy(screen => screen.Area)
-                .Select(group => group.First())
+                .SelectMany(display => Scales.SelectMany(scale => InterfaceSizes.Select(size => new Screen($"{display.Name} at {scale * 100:F0}%, interface {size.DisplayName}", AreaOf(display, scale), size))))
                 .ToList();
 
-        /// <summary>The room the window starts with on a screen: the design size, or the screen when that is less.</summary>
-        private static Size StartingSize(Size area) => new(Math.Min(MinWindowWidth, area.Width), Math.Min(MinWindowHeight, area.Height));
+        /// <summary>Puts a room into a class of rooms that differ by less than a quarter in width and in height.</summary>
+        private static (long, long) RoomClass(Size room) =>
+            ((long)Math.Round(Math.Log(room.Width) / Math.Log(1.25)), (long)Math.Round(Math.Log(room.Height) / Math.Log(1.25)));
+
+        /// <summary>The room the layout has when the window starts on a screen: the design size, or the room when that is less.</summary>
+        private static Size StartingSize(Size room) => new(Math.Min(MinWindowWidth, room.Width), Math.Min(MinWindowHeight, room.Height));
 
         [TestCase("", TestName = "MainWindow_FitsEveryDisplayAtEveryScale_AndReadsWell_English")]
         [TestCase("ru", TestName = "MainWindow_FitsEveryDisplayAtEveryScale_AndReadsWell_Russian")]
@@ -64,22 +76,24 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
                 settings.SyncMode = SyncMode.Manual;
                 settings.IntegrationTime = "4000.0";
 
-                var starting = new HashSet<Size>();
-                var maximized = new HashSet<Size>();
+                var starting = new HashSet<(bool, double)>();
+                var maximized = new HashSet<(long, long)>();
                 MainWindow? stretched = null;
                 try
                     {
                     foreach (var screen in ScreensOfThisComputer())
                         {
                         UiMetrics.WorkAreaOverride = screen.Area;
+                        settings.SelectedInterfaceScale = screen.InterfaceSize;
 
-                        // The window as it starts: the same layout on every screen that leaves the design size, so once
-                        if (starting.Add(StartingSize(screen.Area)))
+                        // The window as it starts: the layout has the design size on every screen, shrunk when the room is less, so once for
+                        // an interface size and once for a room that is less than the design size
+                        if (starting.Add((StartingSize(screen.Room) != new Size(MinWindowWidth, MinWindowHeight), screen.InterfaceScale)))
                             CheckStartingWindow(screen, page, settings, cultureInfo, language, problems);
 
                         // The window maximized: the page stretched over the whole work area of the screen. One window is resized to every
-                        // work area, as a window maximized on another monitor is
-                        if (screen.Area != StartingSize(screen.Area) && maximized.Add(screen.Area))
+                        // work area, as a window maximized on another monitor is; rooms that differ by less than a quarter are laid out once
+                        if (screen.Room != StartingSize(screen.Room) && maximized.Add(RoomClass(screen.Room)))
                             {
                             stretched ??= ShowMainWindow(page, settings, sizeFromScreen: true);
                             CheckMaximizedWindow(stretched, screen, cultureInfo, language, problems);
@@ -89,6 +103,7 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
                 finally
                     {
                     stretched?.Close();
+                    settings.SelectedInterfaceScale = SettingsViewModel.AvailableInterfaceScales[0];
                     UiMetrics.WorkAreaOverride = null;
                     MeasurementView.TransitionSpeed = normalSpeed;
                     }
@@ -106,7 +121,7 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
                 string where = $"{language}, {screen.Name} ({screen.Area.Width:F0}x{screen.Area.Height:F0}), starting size";
                 Pump(25);
                 Flush(window);
-                var root = CheckFit(window, screen.Area, where, problems);
+                var root = CheckFit(window, screen, where, problems);
 
                 problems.AddRange(LayoutAudit.Run(root, culture, $"[{where}, measurement page]"));
                 Shot(root, $"{where} measurement page");
@@ -130,35 +145,38 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
             window.Width = screen.Area.Width;
             window.Height = screen.Area.Height;
             Flush(window);
-            var root = CheckFit(window, screen.Area, where, problems);
+            var root = CheckFit(window, screen, where, problems);
 
             problems.AddRange(LayoutAudit.Run(root, culture, $"[{where}, measurement page]"));
             Shot(root, $"{where} measurement page");
             }
 
         /// <summary>Checks that the window is within the screen and that the page is shrunk as much as the room asks.</summary>
-        private static MinimumSizeViewbox CheckFit(MainWindow window, Size area, string where, List<string> problems)
+        private static MinimumSizeViewbox CheckFit(MainWindow window, Screen screen, string where, List<string> problems)
             {
+            var area = screen.Area;
             if (window.ActualWidth > area.Width + 1 || window.ActualHeight > area.Height + 1)
                 problems.Add($"[{where}]: the window is {window.ActualWidth:F0}x{window.ActualHeight:F0}, the screen gives {area.Width:F0}x{area.Height:F0}");
 
             var root = (MinimumSizeViewbox)window.Content;
-            double expected = Math.Min(1, Math.Min(window.ActualWidth / MinWindowWidth, window.ActualHeight / MinWindowHeight));
+            double expected = Math.Min(1, Math.Min(window.ActualWidth / screen.InterfaceScale / MinWindowWidth, window.ActualHeight / screen.InterfaceScale / MinWindowHeight));
             if (Math.Abs(root.Scale - expected) > 0.01)
                 problems.Add($"[{where}]: the page is shrunk by {root.Scale:F2}, the room asks for {expected:F2}");
             return root;
             }
 
         [Test]
-        public void ScreensOfThisComputer_CoverEveryConnectedDisplayAtEveryScale()
+        public void ScreensOfThisComputer_CoverEveryConnectedDisplayAtEveryScaleAndInterfaceSize()
             {
             var displays = Displays.Connected();
             var screens = ScreensOfThisComputer();
 
             Assert.That(displays, Is.Not.Empty);
+            Assert.That(InterfaceSizes.Count(), Is.GreaterThan(1), "the settings offer sizes besides the one of the system");
             foreach (var display in displays)
                 foreach (double scale in Scales)
-                    Assert.That(screens.Any(screen => screen.Area == AreaOf(display, scale)), $"{display.Name} at {scale * 100:F0}% is not tried");
+                    foreach (var size in InterfaceSizes)
+                        Assert.That(screens.Any(screen => screen.Area == AreaOf(display, scale) && screen.InterfaceSize == size), $"{display.Name} at {scale * 100:F0}%, interface {size.DisplayName} is not tried");
             }
 
         [Test]

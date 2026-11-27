@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Media;
 
 namespace ScreenChecker
     {
@@ -15,11 +16,61 @@ namespace ScreenChecker
         /// </summary>
         internal static Size? WorkAreaOverride { get; set; }
 
+        private static double _uiScale = 1;
+
         /// <summary>
-        /// Gets or sets how much larger than the system makes it the interface is drawn (1: as the system does). Only the Debug build sets it
-        /// (<c>--ui-scale=2</c>), to see what a display with a scale of 200% shows without changing the settings of Windows.
+        /// Occurs when <see cref="UiScale"/> changes; the windows draw their content at the new size.
         /// </summary>
-        internal static double UiScale { get; set; } = 1;
+        internal static event Action? UiScaleChanged;
+
+        /// <summary>
+        /// Gets or sets how much larger than the system makes it the interface is drawn (1: as the system does). It is the interface size
+        /// of the settings; the Debug build can also set it (<c>--ui-scale=2</c>), to see what a display with a scale of 200% shows
+        /// without changing the settings of Windows.
+        /// </summary>
+        internal static double UiScale
+            {
+            get => _uiScale;
+            set
+                {
+                if (_uiScale == value) return;
+                _uiScale = value;
+                UiScaleChanged?.Invoke();
+                }
+            }
+
+        /// <summary>
+        /// Draws the content of a window <see cref="UiScale"/> times larger and keeps doing so while the scale changes; the content
+        /// is laid out in less room, so the window takes the same share of the screen.
+        /// </summary>
+        /// <param name="window">The window whose content is scaled.</param>
+        internal static void ScaleContentOf(Window window)
+            {
+            void Apply()
+                {
+                if (window.Content is FrameworkElement content)
+                    content.LayoutTransform = _uiScale == 1 ? Transform.Identity : new ScaleTransform(_uiScale, _uiScale);
+                }
+
+            Apply();
+            UiScaleChanged += Apply;
+            window.Closed += (_, _) => UiScaleChanged -= Apply;
+            }
+
+        /// <summary>
+        /// Scales a dialog: its content is drawn <see cref="UiScale"/> times larger and the largest size it may take grows with it, but
+        /// stays within the work area. A dialog is short-lived, so the scale is read once.
+        /// </summary>
+        /// <param name="dialog">The dialog to scale.</param>
+        /// <param name="maxWidth">The largest width at scale 1.</param>
+        /// <param name="maxHeight">The largest height at scale 1.</param>
+        internal static void ScaleDialog(Window dialog, double maxWidth, double maxHeight)
+            {
+            if (dialog.Content is FrameworkElement content && _uiScale != 1)
+                content.LayoutTransform = new ScaleTransform(_uiScale, _uiScale);
+            dialog.MaxWidth = Math.Min(maxWidth * _uiScale, WorkArea.Width - 40);
+            dialog.MaxHeight = Math.Min(maxHeight * _uiScale, WorkArea.Height - 40);
+            }
 
         /// <summary>
         /// Gets the work area of the screen in device-independent pixels of the system (what a window may take on the screen).

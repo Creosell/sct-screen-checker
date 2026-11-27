@@ -197,6 +197,7 @@
                         PopupAnimation="None"
                         VerticalOffset="-6">
                         <Border
+                            behaviors:UiScaled.Enabled="True"
                             Background="{DynamicResource MaterialDesignPaper}"
                             BorderBrush="{DynamicResource AppControlBorder}"
                             BorderThickness="1">
@@ -1261,14 +1262,19 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <Grid Grid.Row="0" Margin="6,0,6,2">
+                        <Border
+                            Grid.Row="0"
+                            Width="{Binding ViewportWidth, ElementName=ResultsScroll}"
+                            Padding="6,0,6,2"
+                            HorizontalAlignment="Left">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="ResultName" />
-                                <ColumnDefinition Width="45" />
-                                <ColumnDefinition Width="45" />
-                                <ColumnDefinition Width="45" />
-                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" MinWidth="42" MaxWidth="120" />
+                                <ColumnDefinition Width="*" MinWidth="42" MaxWidth="120" />
+                                <ColumnDefinition Width="*" MinWidth="48" MaxWidth="120" />
+                                <ColumnDefinition Width="*" MinWidth="45" MaxWidth="120" />
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="ResultTries" />
                             </Grid.ColumnDefinitions>
                             <Ellipse
@@ -1316,6 +1322,7 @@
                                 Text="{DynamicResource ResultsColumnTries}"
                                 TextAlignment="Center" />
                         </Grid>
+                        </Border>
                         <Grid Grid.Row="1">
                         <ScrollViewer
                             x:Name="ResultsScroll"
@@ -1343,10 +1350,10 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="Auto" SharedSizeGroup="ResultName" />
-                                                    <ColumnDefinition Width="45" />
-                                                    <ColumnDefinition Width="45" />
-                                                    <ColumnDefinition Width="45" />
-                                                    <ColumnDefinition Width="50" />
+                                                    <ColumnDefinition Width="*" MinWidth="42" MaxWidth="120" />
+                                                    <ColumnDefinition Width="*" MinWidth="42" MaxWidth="120" />
+                                                    <ColumnDefinition Width="*" MinWidth="48" MaxWidth="120" />
+                                                    <ColumnDefinition Width="*" MinWidth="45" MaxWidth="120" />
                                                     <ColumnDefinition Width="Auto" SharedSizeGroup="ResultTries" />
                                                 </Grid.ColumnDefinitions>
                                                 <Ellipse Style="{StaticResource ResultDotStyle}" />

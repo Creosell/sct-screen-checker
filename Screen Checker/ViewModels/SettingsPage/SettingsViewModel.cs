@@ -169,6 +169,67 @@ namespace ScreenChecker.ViewModels.SettingsPage
                 }
             }
 
+        /// <summary>
+        /// An interface size offered in the Settings list.
+        /// </summary>
+        public class InterfaceScaleOption : BaseViewModel
+            {
+            /// <summary>
+            /// Initializes the option.
+            /// </summary>
+            /// <param name="scale">How much larger than the system makes it the interface is drawn; null follows the system.</param>
+            public InterfaceScaleOption(double? scale) => Scale = scale;
+
+            /// <summary>Gets the scale (1.25 is 125%); null follows the system.</summary>
+            public double? Scale { get; }
+
+            /// <summary>Gets the scale the layout is drawn with: 1 for the option that follows the system.</summary>
+            public double Factor => Scale ?? 1;
+
+            /// <summary>
+            /// Gets the name in the language of the interface.
+            /// </summary>
+            public string DisplayName => Scale is double scale
+                ? string.Format(CultureInfo.CurrentCulture, "{0:P0}", scale)
+                : Resources.Resources.ResourceManager.GetString("InterfaceSizeSystem") ?? "As in system";
+
+            /// <summary>
+            /// Raises the change of the name after the language of the interface changed.
+            /// </summary>
+            public void Refresh() => OnPropertyChanged(nameof(DisplayName));
+            }
+
+        /// <summary>
+        /// Gets the interface sizes the operator can choose from: the one that follows the system first, then the larger ones.
+        /// </summary>
+        public static IReadOnlyList<InterfaceScaleOption> AvailableInterfaceScales { get; } =
+            [
+            new InterfaceScaleOption(null),
+            new InterfaceScaleOption(1.25),
+            new InterfaceScaleOption(1.5),
+            new InterfaceScaleOption(1.75),
+            new InterfaceScaleOption(2.0)
+            ];
+
+        private InterfaceScaleOption _selectedInterfaceScale = AvailableInterfaceScales[0];
+
+        /// <summary>
+        /// Gets or sets the chosen interface size. A choice is applied and stored at once, like the language and the theme; Save and
+        /// Reset do not touch it.
+        /// </summary>
+        public InterfaceScaleOption SelectedInterfaceScale
+            {
+            get => _selectedInterfaceScale;
+            set
+                {
+                if (value != null && SetProperty(ref _selectedInterfaceScale, value))
+                    {
+                    UiMetrics.UiScale = value.Factor;
+                    _settingsService.UpdateInterfaceScale(value.Scale);
+                    }
+                }
+            }
+
         public class LanguageOption
             {
             public string DisplayName { get; set; }
@@ -252,6 +313,7 @@ namespace ScreenChecker.ViewModels.SettingsPage
             {
             Debug.WriteLine("SettingsViewModel: Получено событие LanguageChanged.");
             foreach (var option in AvailableThemes) option.Refresh();
+            foreach (var option in AvailableInterfaceScales) option.Refresh();
             OnPropertyChanged(nameof(SyncFrequencyHint));
             OnPropertyChanged(nameof(IntegrationTimeHint));
             }
@@ -293,6 +355,8 @@ namespace ScreenChecker.ViewModels.SettingsPage
                 _languageCultureCode = currentSettings.LanguageCultureCode;
                 _selectedTheme = AvailableThemes.First(option => option.Mode == currentSettings.Theme);
                 OnPropertyChanged(nameof(SelectedTheme));
+                _selectedInterfaceScale = AvailableInterfaceScales.FirstOrDefault(option => option.Factor == currentSettings.EffectiveInterfaceScale) ?? AvailableInterfaceScales[0];
+                OnPropertyChanged(nameof(SelectedInterfaceScale));
                 SelectedLanguage = AvailableLanguages.FirstOrDefault(lang => lang.CultureCode == _languageCultureCode);
                 if (SelectedLanguage == null)
                     {
@@ -341,6 +405,8 @@ namespace ScreenChecker.ViewModels.SettingsPage
             AppSettings settingsToSave = new()
                 {
                 LanguageCultureCode = LanguageCultureCode,
+                Theme = saved.Theme,
+                InterfaceScale = saved.InterfaceScale,
                 MeasurementSpeed = MeasurementSpeed,
                 SyncMode = SyncMode,
                 SyncFrequency = IsSyncFrequencyVisible

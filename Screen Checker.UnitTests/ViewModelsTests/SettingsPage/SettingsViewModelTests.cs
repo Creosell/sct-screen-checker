@@ -52,6 +52,82 @@ namespace ScreenChecker.UnitTests.ViewModelsTests.SettingsPage
             _mockThemeService.Verify(t => t.SetMode(It.IsAny<ThemeMode>()), Times.Never);
             }
 
+        [TearDown]
+        public void ResetInterfaceScale() => UiMetrics.UiScale = 1;
+
+        [Test]
+        public void SelectedInterfaceScale_IsTheSystemOne_WhenTheSettingsAreEmpty()
+            {
+            Assert.That(_viewModel.SelectedInterfaceScale.Scale, Is.Null);
+            Assert.That(_viewModel.SelectedInterfaceScale.Factor, Is.EqualTo(1));
+            Assert.That(SettingsViewModel.AvailableInterfaceScales[0].Scale, Is.Null, "the size of the system is the first one offered");
+            Assert.That(SettingsViewModel.AvailableInterfaceScales[0].DisplayName, Is.Not.Empty);
+            }
+
+        [TestCase(1.25)]
+        [TestCase(1.5)]
+        [TestCase(1.75)]
+        [TestCase(2.0)]
+        public void SelectedInterfaceScale_StartsWithTheStoredScale_WithoutStoringItAgain(double stored)
+            {
+            _mockSettingsService.Setup(s => s.LoadSettings()).Returns(new AppSettings { InterfaceScale = stored });
+            using var viewModel = new SettingsViewModel(_mockSettingsService.Object, _mockDialogService.Object, _mockColorMeasurementService.Object, _mockLocalizationService.Object, _mockThemeService.Object);
+
+            Assert.That(viewModel.SelectedInterfaceScale.Scale, Is.EqualTo(stored));
+            _mockSettingsService.Verify(s => s.UpdateInterfaceScale(It.IsAny<double?>()), Times.Never);
+            }
+
+        [TestCase(0.2)]
+        [TestCase(1.3)]
+        [TestCase(7.0)]
+        public void SelectedInterfaceScale_FallsBackToTheSystemOne_WhenTheStoredScaleIsNotOffered(double stored)
+            {
+            _mockSettingsService.Setup(s => s.LoadSettings()).Returns(new AppSettings { InterfaceScale = stored });
+            using var viewModel = new SettingsViewModel(_mockSettingsService.Object, _mockDialogService.Object, _mockColorMeasurementService.Object, _mockLocalizationService.Object, _mockThemeService.Object);
+
+            Assert.That(viewModel.SelectedInterfaceScale.Scale, Is.Null);
+            }
+
+        [Test]
+        public void SelectedInterfaceScale_ChoiceIsAppliedAndStoredAtOnce()
+            {
+            var option = SettingsViewModel.AvailableInterfaceScales.First(o => o.Scale == 1.5);
+
+            _viewModel.SelectedInterfaceScale = option;
+
+            Assert.That(UiMetrics.UiScale, Is.EqualTo(1.5));
+            _mockSettingsService.Verify(s => s.UpdateInterfaceScale(1.5), Times.Once);
+
+            _viewModel.SelectedInterfaceScale = SettingsViewModel.AvailableInterfaceScales[0];
+
+            Assert.That(UiMetrics.UiScale, Is.EqualTo(1));
+            _mockSettingsService.Verify(s => s.UpdateInterfaceScale(null), Times.Once);
+            }
+
+        [Test]
+        public void Save_KeepsTheThemeAndTheInterfaceScaleOfTheFile()
+            {
+            _mockSettingsService.Setup(s => s.LoadSettings()).Returns(new AppSettings { Theme = ThemeMode.Light, InterfaceScale = 1.75 });
+            AppSettings? written = null;
+            _mockSettingsService.Setup(s => s.SaveSettings(It.IsAny<AppSettings>())).Callback<AppSettings>(settings => written = settings);
+            using var viewModel = new SettingsViewModel(_mockSettingsService.Object, _mockDialogService.Object, _mockColorMeasurementService.Object, _mockLocalizationService.Object, _mockThemeService.Object);
+
+            viewModel.SaveSettingsCommand.Execute(null);
+
+            Assert.That(written, Is.Not.Null);
+            Assert.That(written!.Theme, Is.EqualTo(ThemeMode.Light));
+            Assert.That(written.InterfaceScale, Is.EqualTo(1.75));
+            }
+
+        [TestCase(null, 1.0)]
+        [TestCase(1.5, 1.5)]
+        [TestCase(0.5, 1.0)]
+        [TestCase(3.0, 1.0)]
+        public void EffectiveInterfaceScale_IsTheStoredOneWithinTheRange_AndTheSystemOneOtherwise(double? stored, double expected)
+            {
+            Assert.That(new AppSettings { InterfaceScale = stored }.EffectiveInterfaceScale, Is.EqualTo(expected));
+            }
+
         [Test]
         public void ThemeNames_AreRefreshedWhenTheLanguageChanges()
             {

@@ -692,6 +692,9 @@
   <data name="ThemeSystem" xml:space="preserve">
     <value>跟随系统</value>
   </data>
+  <data name="InterfaceSizeSystem" xml:space="preserve">
+    <value>与系统一致</value>
+  </data>
   <data name="SaveSpecQuestion" xml:space="preserve">
     <value>仍要保存结果吗？</value>
   </data>

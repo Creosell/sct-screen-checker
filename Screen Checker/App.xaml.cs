@@ -137,7 +137,6 @@ namespace ScreenChecker
             DebugTrace.Start();
             UiEventTracer.Install();
             _simulation = SimulationOptions.Parse(e.Args);
-            UiMetrics.UiScale = SimulationOptions.ParseUiScale(e.Args);
             if (_simulation is not null)
                 DebugTrace.Write("app", $"Simulated color analyzer: {_simulation}");
             DebugTrace.Write("app", $"Screen Checker {typeof(App).Assembly.GetName().Version}, {Environment.OSVersion}, {Environment.ProcessorCount} cores, base directory {AppContext.BaseDirectory}");
@@ -150,6 +149,11 @@ namespace ScreenChecker
             var colorMeasurementService = _serviceProvider.GetRequiredService<IColorMeasurementService>();
 
             AppSettings appSettings = settingsService.LoadSettings();
+            UiMetrics.UiScale = appSettings.EffectiveInterfaceScale;
+#if DEBUG
+            if (SimulationOptions.ParseUiScale(e.Args) is double simulatedScale and not 1)
+                UiMetrics.UiScale = simulatedScale;
+#endif
 
             _serviceProvider.GetRequiredService<IThemeService>().Initialize();
 

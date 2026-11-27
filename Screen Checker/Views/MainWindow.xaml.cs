@@ -23,6 +23,10 @@ namespace ScreenChecker.Views
             _designMinWidth = MinWidth;
             _designMinHeight = MinHeight;
             FitToScreen();
+            ShowMaximizeOrRestore();
+            UiMetrics.ScaleContentOf(this);
+            UiMetrics.UiScaleChanged += UpdateMinimumSize;
+            Closed += (_, _) => UiMetrics.UiScaleChanged -= UpdateMinimumSize;
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             Title = $"Screen Checker {version?.Major}.{version?.Minor}.{version?.Build}";
         }
@@ -33,6 +37,26 @@ namespace ScreenChecker.Views
             base.OnSourceInitialized(e);
             (PresentationSource.FromVisual(this) as HwndSource)?.AddHook(WindowProc);
             FitToScreen();
+        }
+
+        /// <inheritdoc />
+        protected override void OnStateChanged(EventArgs e)
+        {
+            base.OnStateChanged(e);
+            ShowMaximizeOrRestore();
+        }
+
+        /// <summary>
+        /// Shows the button of the title bar as the action it does now: restore the window when it is maximized, maximize it otherwise.
+        /// </summary>
+        private void ShowMaximizeOrRestore()
+        {
+            bool maximized = WindowState == WindowState.Maximized;
+            string file = maximized ? "window-restore.png" : "window-maximize.png";
+            string assembly = Uri.EscapeDataString(typeof(MainWindow).Assembly.GetName().Name!);
+            MaximizeRestoreImage.Source = new System.Windows.Media.Imaging.BitmapImage(
+                new Uri($"pack://application:,,,/{assembly};component/Images/WindowsHeaderButtons/{file}", UriKind.Absolute));
+            MaximizeRestoreImage.SetResourceReference(ToolTipProperty, maximized ? "WindowRestore" : "WindowMaximize");
         }
 
         /// <inheritdoc />
@@ -86,13 +110,6 @@ namespace ScreenChecker.Views
             var area = UiMetrics.WorkAreaOf(new WindowInteropHelper(this).Handle);
             Width = Math.Min(Math.Max(Width, MinWidth), area.Width);
             Height = Math.Min(Math.Max(Height, MinHeight), area.Height);
-
-#if DEBUG
-            // A larger interface for a look at what a display with a larger scale shows: the window takes the same share of the screen,
-            // its content is laid out in less room and drawn larger
-            if (UiMetrics.UiScale != 1 && Content is FrameworkElement content)
-                content.LayoutTransform = new ScaleTransform(UiMetrics.UiScale, UiMetrics.UiScale);
-#endif
         }
 
         /// <summary>

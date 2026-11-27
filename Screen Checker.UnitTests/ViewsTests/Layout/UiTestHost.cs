@@ -226,9 +226,12 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
         /// Shows a page in an off-screen window of the smallest size the application allows: the main window less its title bar
         /// and navigation column.
         /// </summary>
-        protected static Window ShowPage(FrameworkElement page)
+        /// <param name="page">The page to show.</param>
+        /// <param name="widthFactor">How many times wider than the smallest size the window is (a window stretched over a larger screen).</param>
+        /// <param name="heightFactor">How many times taller than the smallest size the window is.</param>
+        protected static Window ShowPage(FrameworkElement page, double widthFactor = 1, double heightFactor = 1)
             {
-            var host = new Grid { Width = MinWindowWidth - SidebarWidth, Height = MinWindowHeight - TitleBarHeight };
+            var host = new Grid { Width = (MinWindowWidth - SidebarWidth) * widthFactor, Height = (MinWindowHeight - TitleBarHeight) * heightFactor };
             host.Children.Add(page);
             var window = new Window
                 {

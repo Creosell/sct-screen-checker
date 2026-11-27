@@ -135,6 +135,17 @@ namespace ScreenChecker.Services
             SaveSettings(settings);
             }
 
+        /// <summary>
+        /// Writes only the interface scale to the settings file.
+        /// </summary>
+        /// <param name="scale">The chosen scale; null follows the system.</param>
+        public void UpdateInterfaceScale(double? scale)
+            {
+            var settings = LoadSettings();
+            settings.InterfaceScale = scale;
+            SaveSettings(settings);
+            }
+
         public void UpdateLanguage(string cultureCode)
             {
             var settings = LoadSettings();

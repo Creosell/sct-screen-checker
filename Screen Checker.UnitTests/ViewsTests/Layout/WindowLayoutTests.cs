@@ -26,6 +26,41 @@ namespace ScreenChecker.UnitTests.ViewsTests.Layout
             return null;
             }
 
+        [TestCase("", "Maximize", "Restore")]
+        [TestCase("ru", "Развернуть", "Восстановить")]
+        [TestCase("zh-Hans", "最大化", "向下还原")]
+        public void MaximizeButton_ShowsRestore_WhileTheWindowIsMaximized(string culture, string maximizeTip, string restoreTip)
+            {
+            Ui(() =>
+                {
+                UseLanguage(culture);
+                using var page = CreatePage();
+                var window = ShowMainWindow(page, CreateSettings(page.Analyzer));
+                try
+                    {
+                    var button = (System.Windows.Controls.Image?)window.FindName("MaximizeRestoreImage");
+                    Assert.That(button, Is.Not.Null, "the maximize button is not found");
+                    string Icon() => ((System.Windows.Media.Imaging.BitmapImage)button!.Source).UriSource.OriginalString;
+
+                    Assert.That(Icon(), Does.EndWith("window-maximize.png"));
+
+                    window.WindowState = WindowState.Maximized;
+                    Flush(window);
+                    Assert.That(Icon(), Does.EndWith("window-restore.png"), "a maximized window offers to restore");
+                    Assert.That(button.ToolTip, Is.EqualTo(restoreTip));
+
+                    window.WindowState = WindowState.Normal;
+                    Flush(window);
+                    Assert.That(Icon(), Does.EndWith("window-maximize.png"), "a restored window offers to maximize");
+                    Assert.That(button.ToolTip, Is.EqualTo(maximizeTip));
+                    }
+                finally
+                    {
+                    window.Close();
+                    }
+                });
+            }
+
         [TestCase("", TestName = "MainWindow_ReadsWell_OnEveryPage_English")]
         [TestCase("ru", TestName = "MainWindow_ReadsWell_OnEveryPage_Russian")]
         [TestCase("zh-Hans", TestName = "MainWindow_ReadsWell_OnEveryPage_Chinese")]

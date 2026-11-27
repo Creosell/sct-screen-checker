@@ -66,6 +66,9 @@
     <system:String x:Key="ThemeLabel">
         Theme
     </system:String>
+    <system:String x:Key="InterfaceSizeLabel">
+        Interface size
+    </system:String>
     <system:String x:Key="LanguageMenu">
         Language / 语言
     </system:String>
@@ -149,6 +152,7 @@
     <!--  Window buttons, units  -->
     <system:String x:Key="WindowMinimize">Minimize</system:String>
     <system:String x:Key="WindowMaximize">Maximize</system:String>
+    <system:String x:Key="WindowRestore">Restore</system:String>
     <system:String x:Key="WindowClose">Close</system:String>
     <system:String x:Key="UnitHz">Hz</system:String>
     <system:String x:Key="UnitMs">ms</system:String>

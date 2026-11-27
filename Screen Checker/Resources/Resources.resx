@@ -692,6 +692,9 @@ Close the application anyway?</value>
   <data name="ThemeSystem" xml:space="preserve">
     <value>System (Windows)</value>
   </data>
+  <data name="InterfaceSizeSystem" xml:space="preserve">
+    <value>As in system</value>
+  </data>
   <data name="SaveSpecQuestion" xml:space="preserve">
     <value>Save the results anyway?</value>
   </data>

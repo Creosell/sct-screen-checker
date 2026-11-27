@@ -43,44 +43,57 @@ namespace ScreenChecker.UnitTests.ViewsTests
 
                 using var page = CreatePage();
                 FillResultsWithLongestValues(page.ViewModel);
-                var view = new MeasurementView { DataContext = page.ViewModel };
-                var window = ShowPage(view);
-                try
-                    {
-                    var scroll = (ScrollViewer)view.FindName("ResultsScroll");
-                    Assert.That(scroll, Is.Not.Null, "the scroll of the Results table is not found");
-                    var items = (ItemsControl)scroll.Content;
-                    Assert.That(items.Items.Count, Is.EqualTo(page.ViewModel.Results.Count));
-                    var root = (UIElement)window.Content;
 
-                    var header = FindHeaderCells(view, root, cultureInfo);
-                    CheckRowTexts("header", header, scroll, root, problems);
-
-                    for (int i = 0; i < items.Items.Count; i++)
-                        {
-                        var row = (MeasurementResultRow)items.Items[i];
-                        var container = (FrameworkElement)items.ItemContainerGenerator.ContainerFromIndex(i);
-                        container.BringIntoView();
-                        window.UpdateLayout();
-
-                        var cells = FindRowCells(container, root, cultureInfo);
-                        string name = $"row \"{row.Name}\"";
-                        CheckRowTexts(name, cells, scroll, root, problems);
-                        CheckUnderHeader(name, header, cells, problems);
-                        CheckNotCovered(name, cells, container, root, problems);
-                        }
-
-                    scroll.ScrollToEnd();
-                    Flush(window);
-                    Shot(view, "results scrolled to the end");
-                    }
-                finally
-                    {
-                    window.Close();
-                    }
+                // The smallest window and windows stretched over larger screens, short ones (the list scrolls, a scroll bar takes room) and tall ones
+                foreach (double widthFactor in new[] { 1, 1.25, 1.5, 2, 3 })
+                    foreach (double heightFactor in new[] { 1, 2 })
+                        CheckTable(page, cultureInfo, widthFactor, heightFactor, problems);
 
                 Assert.That(problems, Is.Empty, $"[{LanguageName(culture)}]{Environment.NewLine}{string.Join(Environment.NewLine, problems)}");
                 });
+            }
+
+        /// <summary>Shows the page at a window size and checks every row of the table.</summary>
+        private static void CheckTable(PageFixture page, CultureInfo cultureInfo, double widthFactor, double heightFactor, List<string> problems)
+            {
+            var view = new MeasurementView { DataContext = page.ViewModel };
+            var window = ShowPage(view, widthFactor, heightFactor);
+            var found = new List<string>();
+            try
+                {
+                var scroll = (ScrollViewer)view.FindName("ResultsScroll");
+                Assert.That(scroll, Is.Not.Null, "the scroll of the Results table is not found");
+                var items = (ItemsControl)scroll.Content;
+                Assert.That(items.Items.Count, Is.EqualTo(page.ViewModel.Results.Count));
+                var root = (UIElement)window.Content;
+
+                var header = FindHeaderCells(view, root, cultureInfo);
+                CheckRowTexts("header", header, scroll, root, found);
+
+                for (int i = 0; i < items.Items.Count; i++)
+                    {
+                    var row = (MeasurementResultRow)items.Items[i];
+                    var container = (FrameworkElement)items.ItemContainerGenerator.ContainerFromIndex(i);
+                    container.BringIntoView();
+                    window.UpdateLayout();
+
+                    var cells = FindRowCells(container, root, cultureInfo);
+                    string name = $"row \"{row.Name}\"";
+                    CheckRowTexts(name, cells, scroll, root, found);
+                    CheckUnderHeader(name, header, cells, found);
+                    CheckNotCovered(name, cells, container, root, found);
+                    }
+
+                scroll.ScrollToEnd();
+                Flush(window);
+                Shot(view, $"results scrolled to the end, window {widthFactor}x{heightFactor}");
+                }
+            finally
+                {
+                window.Close();
+                }
+
+            problems.AddRange(found.Select(problem => $"[window {widthFactor}x wide, {heightFactor}x tall] {problem}"));
             }
 
         /// <summary>Finds the texts of the header of the table: the grid that holds the localized name of the first column.</summary>

@@ -53,7 +53,7 @@ namespace ScreenChecker.UnitTests.ModelsTests
             // Act
             string jsonString = JsonSerializer.Serialize(settings);
             // Ожидаем JSON, который соответствует атрибутам JsonPropertyName
-            string expectedJson = "{\"languageCultureCode\":\"zh-Hans\",\"measurementSpeed\":\"Auto\",\"syncMode\":\"Universal\",\"theme\":\"Dark\",\"syncFrequency\":null,\"integrationTime\":null}";
+            string expectedJson = "{\"languageCultureCode\":\"zh-Hans\",\"measurementSpeed\":\"Auto\",\"syncMode\":\"Universal\",\"theme\":\"Dark\",\"syncFrequency\":null,\"integrationTime\":null,\"interfaceScale\":null}";
 
             // Assert
             // Сравниваем JSON, игнорируя возможные различия в форматировании (пробелы, переносы строк)

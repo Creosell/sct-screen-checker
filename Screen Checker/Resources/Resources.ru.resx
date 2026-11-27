@@ -692,6 +692,9 @@
   <data name="ThemeSystem" xml:space="preserve">
     <value>Системная</value>
   </data>
+  <data name="InterfaceSizeSystem" xml:space="preserve">
+    <value>Как в системе</value>
+  </data>
   <data name="SaveSpecQuestion" xml:space="preserve">
     <value>Всё равно сохранить?</value>
   </data>

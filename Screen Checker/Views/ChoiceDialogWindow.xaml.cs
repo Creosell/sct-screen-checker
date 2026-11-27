@@ -23,6 +23,7 @@ namespace ScreenChecker.Views
             {
             InitializeComponent();
             Title = caption;
+            UiMetrics.ScaleDialog(this, MaxWidth, MaxHeight);
             MessageText.Text = message;
             FirstButton.Content = firstOption;
             SecondButton.Content = secondOption;

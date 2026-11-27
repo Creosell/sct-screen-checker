@@ -35,5 +35,11 @@ namespace ScreenChecker.Interfaces
         /// </summary>
         /// <param name="mode">The chosen theme mode.</param>
         void UpdateTheme(ThemeMode mode);
+
+        /// <summary>
+        /// Writes only the interface scale to the settings file.
+        /// </summary>
+        /// <param name="scale">The chosen scale; null follows the system.</param>
+        void UpdateInterfaceScale(double? scale);
         }
     }
